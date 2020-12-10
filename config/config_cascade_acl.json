@@ -1,0 +1,41 @@
+{"dremio_cloner": [
+	{"command": "cascade-acl"},
+	{"target": [
+		{"endpoint": "http://localhost:9047/"},
+	 	{"username": "<DREMIO-ADMIN-USER>"},
+	 	{"password": "<OPTIONAL_PASSWORD>"},
+	  	{"verify_ssl": "True"}]
+	},
+	{"options": [
+
+	  	{"dry_run": "True"},
+
+		{"logging.level": "logging.DEBUG"},
+		{"logging.format": "%(levelname)s:%(asctime)s:%(message)s"},
+		{"logging.filename": "<OPTIONAL_LOG_FILE_NAME>"},
+	    {"logging.verbose": "False"},
+
+	  	{"max_errors": "9999"},
+	  	{"http_timeout": "10"},
+
+		{"space.filter": "*"},
+	  	{"space.exclude.filter": ""},
+	  	{"space.cascade-acl-origin.override-object": ""},
+		{"space.folder.filter": "*"},
+	  	{"space.folder.exclude.filter": ""},
+	  	{"space.folder.cascade-acl-origin.filter": ""},
+
+		{"source.filter": "*"},
+	  	{"source.exclude.filter": ""},
+	  	{"source.cascade-acl-origin.override-object": ""},
+	  	{"source.folder.filter": "*"},
+	  	{"source.folder.exclude.filter": ""},
+
+		{"pds.filter": "*"},
+	  	{"pds.exclude.filter": ""},
+	    {"pds.list.useapi": "False"},
+
+		{"vds.filter": "*"},
+	  	{"vds.exclude.filter": ""} ]
+	} ]
+}

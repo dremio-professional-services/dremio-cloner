@@ -1,0 +1,67 @@
+{"dremio_cloner": [
+  {"command":"put"},
+  {"target": [
+	{"endpoint": "http://localhost:9047/"},
+	{"username": "<DREMIO-ADMIN-USER>"},
+	{"password": "<OPTIONAL_PASSWORD>"}]
+  },
+  {"source": [
+	{"filename":"<SOURCE_JSON_FILE_NAME>"}]
+  },
+  {"options": [
+
+	{"dry_run":"False"},
+
+	{"logging.level":"logging.ERROR"},
+	{"logging.format":"%(levelname)s:%(asctime)s:%(message)s"},
+	{"logging.filename":"<OPTIONAL_LOG_FILE_NAME>"},
+	{"logging.verbose": "False"},
+
+	{"max_errors":"9999"},
+	{"http_timeout":"10"},
+	{"source.retry_timedout":"false"},
+
+	{"space.process_mode":"skip"},
+	{"folder.process_mode":"skip"},
+	{"source.process_mode":"update_only"},
+	{"pds.process_mode":"promote"},
+	{"vds.process_mode":"skip"},
+	{"reflection.process_mode": "create_overwrite"},
+	{"pds.reflection_refresh_mode": "refresh"},
+	{"wlm.queue.process_mode": "skip"},
+	{"wlm.rule.process_mode": "skip"},
+	{"wiki.process_mode": "skip"},
+	{"tag.process_mode": "skip"},
+	{"home.process_mode": "skip"},
+	{"vote.process_mode": "skip"},
+
+	{"space.ignore_missing_acl_user":"True"},
+	{"space.ignore_missing_acl_group":"True"},
+	{"folder.ignore_missing_acl_user":"True"},
+	{"folder.ignore_missing_acl_group":"True"},
+	{"source.ignore_missing_acl_user":"True"},
+	{"source.ignore_missing_acl_group":"True"},
+	{"pds.ignore_missing_acl_user":"True"},
+	{"pds.ignore_missing_acl_group":"True"},
+	{"vds.ignore_missing_acl_user":"True"},
+	{"vds.ignore_missing_acl_group":"True"},
+
+	{"space.filter": "*"},
+	{"space.exclude.filter": ""},
+	{"space.folder.filter":"*"},
+	{"space.folder.exclude.filter":""},
+
+	{"source.filter":"*"},
+	{"source.exclude.filter":""},
+	{"source.folder.filter":"*"},
+	{"source.folder.exclude.filter":""},
+
+	{"pds.filter":"*"},
+	{"pds.exclude.filter":""},
+	{"pds.list.useapi":"False"},
+
+	{"vds.filter":"*"},
+	{"vds.exclude.filter":""},
+	{"vds.max_hierarchy_depth":"10"}]
+  }]
+}

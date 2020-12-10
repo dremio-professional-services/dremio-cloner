@@ -1,0 +1,28 @@
+{"dremio_cloner": [
+  {"command":"delete-beta"},
+  {"target": [
+	{"endpoint": "http://localhost:9047/"},
+	{"username": "<DREMIO-ADMIN-USER>"},
+	{"password": "<OPTIONAL_PASSWORD>"},
+	{"verify_ssl": "True"},
+	{"is_community_edition": "False"},
+	{"graph_api_support": "True"}]
+  },
+  {"options": [
+	{"logging.level":"logging.DEBUG"},
+	{"logging.format":"%(levelname)s:%(asctime)s:%(message)s"},
+	{"logging.filename":"<OPTIONAL_LOG_FILE_NAME>"},
+	{"logging.verbose": "False"},
+
+	{"max_errors":"9999"},
+	{"http_timeout":"10"},
+
+	{"dry_run":"True"},
+
+	{"vds.process_mode": "delete"},
+	{"vds.delete_list": ["<FULLY_QUALIFIED_VDS_NAME>","<FULLY_QUALIFIED_VDS_NAME>"]},
+
+	{"folder.process_mode": "delete"},
+	{"folder.delete_list": ["<FULLY_QUALIFIED_FOLDER_NAME>","<FULLY_QUALIFIED_FOLDER_NAME>"]}
+  ]}
+]}

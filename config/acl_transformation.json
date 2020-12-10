@@ -1,0 +1,16 @@
+{"acl-transformation":
+[
+  { "source": {"group":"<GROUP_1>"},
+	"target": {"user":"<USER_1>"}
+  },
+  { "source": {"user":"<USER_2>"},
+	"target": {"group":"<GROUP_2>"}
+  },
+  { "source": {"user":"<USER_3>"},
+	"target": {"user":"<USER_4>"}
+  },
+  { "source": {"group":"<GROUP_3>"},
+	"target": {"group":"<GROUP_4>"}
+  }
+]
+}

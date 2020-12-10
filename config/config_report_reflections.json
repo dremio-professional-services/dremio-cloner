@@ -1,0 +1,28 @@
+{"dremio_cloner": [
+	{"command":"report-reflections"},
+
+	{"source": [
+	    {"endpoint": "http://localhost:9047/"},
+	    {"username": "<DREMIO-ADMIN-USER>"},
+	    {"password": "<OPTIONAL_PASSWORD>"},
+	  	{"verify_ssl": "True"}]
+	},
+
+	{"target": [
+		{"filename":"<TARGET_REPORT_FILE_NAME>"}]
+	},
+
+	{"options": [
+
+		{"logging.level":"logging.DEBUG"},
+		{"logging.format":"%(levelname)s:%(asctime)s:%(message)s"},
+		{"logging.filename":"<OPTIONAL_LOG_FILE_NAME>"},
+   	    {"logging.verbose": "False"},
+
+		{"max_errors":"9999"},
+		{"http_timeout":"10"},
+
+		{"report.csv.delimiter":"\t"},
+		{"report.csv.newline":"\n"}]
+	}]
+}

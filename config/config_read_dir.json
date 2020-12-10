@@ -1,0 +1,57 @@
+{"dremio_cloner": [
+  {"command":"get"},
+  {"source": [
+	{"endpoint": "http://localhost:9047/"},
+	{"username": "<DREMIO-ADMIN-USER>"},
+	{"password": "<OPTIONAL_PASSWORD>"},
+	{"verify_ssl": "True"},
+	{"is_community_edition": "False"},
+	{"graph_api_support": "True"}]
+  },
+  {"target": [
+	{"directory":"<TARGET_DIRECTORY_PATH>"},
+	{"overwrite": "False"}]
+  },
+  {"options": [
+	{"logging.level":"logging.DEBUG"},
+	{"logging.format":"%(levelname)s:%(asctime)s:%(message)s"},
+	{"logging.filename":"<OPTIONAL_LOG_FILE_NAME>"},
+	{"logging.verbose": "False"},
+
+	{"max_errors":"9999"},
+	{"http_timeout":"10"},
+
+	{"user.process_mode":"process"},
+	{"group.process_mode":"process"},
+	{"space.process_mode":"process"},
+	{"source.process_mode":"process"},
+	{"reflection.process_mode": "process"},
+	{"wlm.queue.process_mode": "process"},
+	{"wlm.rule.process_mode": "process"},
+	{"wiki.process_mode": "process"},
+	{"tag.process_mode": "process"},
+	{"home.process_mode": "process"},
+	{"vote.process_mode": "process"},
+	{"folder.process_mode": "process"},
+	{"vds.process_mode": "process"},
+	{"pds.process_mode": "process"},
+
+	{"space.filter": "*"},
+	{"space.exclude.filter": ""},
+	{"space.folder.filter":"*"},
+	{"space.folder.exclude.filter":""},
+
+	{"source.filter":"*"},
+	{"source.exclude.filter":""},
+	{"source.folder.filter":"*"},
+	{"source.folder.exclude.filter":""},
+
+	{"pds.filter":"*"},
+	{"pds.exclude.filter":""},
+	{"pds.list.useapi":"False"},
+
+	{"vds.filter":"*"},
+	{"vds.exclude.filter":""},
+	{"vds.dependencies.process_mode":"get"}]
+  }]
+}
