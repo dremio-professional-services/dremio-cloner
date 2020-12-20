@@ -1,16 +1,22 @@
 {"acl-transformation":
 [
   { "source": {"group":"<GROUP_1>"},
-	"target": {"user":"<USER_1>"}
+	"target": {"user":"<USER_1>"},
+    "permission-mapping": [{"READ": "READ"}, {"WRITE": "WRITE"}]
   },
   { "source": {"user":"<USER_2>"},
-	"target": {"group":"<GROUP_2>"}
+	"target": {"group":"<GROUP_2>"},
+    "permission-mapping": [{"READ": "WRITE"}, {"WRITE": "WRITE"}]
   },
   { "source": {"user":"<USER_3>"},
-	"target": {"user":"<USER_4>"}
+	"target": {"user":"<USER_3>"},
+    "permission-mapping": [{"READ": "READ"}, {"WRITE": "READ"}]
   },
-  { "source": {"group":"<GROUP_3>"},
+  { "source": {"group":"<GROUP_4>"},
 	"target": {"group":"<GROUP_4>"}
+  },
+  { "source": {"group":"<GROUP_5>"},
+    "target": "REMOVE"
   }
 ]
 }
