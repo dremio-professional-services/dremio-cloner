@@ -467,9 +467,9 @@ class DremioWriter:
 						else:
 							self._logger.error("_process_acl: Source User " + user_def['id'] + " not found in the target Dremio Environment. ACL Entry cannot be processed as per ignore_missing_acl_user configuration. " + self._utils.get_entity_desc(entity))
 					elif "user" in new_acl_principal:
-						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions']})
+						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
 					elif "group" in new_acl_principal:
-						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions']})
+						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
 			if 'groups' in acl:
 				# Note, taking a copy of the list for proper removal of items
 				for group_def in acl['groups'][:]:
@@ -483,9 +483,9 @@ class DremioWriter:
 							# Flag is not set - return error status
 							self._logger.error("_process_acl: Source Group " + group_def['id'] + " not found in the target Dremio Environment. ACL Entry cannot be processed as per ignore_missing_acl_group configuration. " + self._utils.get_entity_desc(entity))
 					elif "user" in new_acl_principal:
-						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions']})
+						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
 					elif "group" in new_acl_principal:
-						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions']})
+						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
 			entity['accessControlList'] = transformed_acl
 		return True
 
