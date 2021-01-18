@@ -113,6 +113,11 @@ class DremioWriter:
 		else:
 			for wiki in self._d.wikis:
 				self._write_wiki(wiki, self._config.wiki_process_mode)
+		if self._config.tag_process_mode == 'skip':
+			self._logger.info("write_dremio_environment: Skipping tag processing due to configuration tag.process_mode=skip.")
+		else:
+			for tags in self._d.tags:
+				self._write_tags(tags, self._config.tag_process_mode)
 
 	def _write_space(self, entity, process_mode, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 		if self._filter.match_space_filter(entity):
@@ -758,5 +763,48 @@ class DremioWriter:
 			updated_wiki = self._dremio_env.update_wiki(existing_wiki_entity['id'], existing_wiki, self._config.dry_run)
 			if updated_wiki is None:
 				self._logger.error("_write_wiki: Error updating " + str(wiki))
+				return False
+		return True
+
+
+	def _write_tags(self, tags, process_mode):
+		self._logger.debug("_write_tag: processing tags: " + str(tags))
+		new_tags = tags['tags']
+		tags_path = tags['path']
+		# Check if the tags already exist
+		existing_tags_entity = self._find_existing_dataset_by_path(self._utils.normalize_path(tags_path))
+		if existing_tags_entity is None:
+			self._logger.error("_write_tags: Unable to resolve tag's dataset for " + str(tags))
+			return None
+		existing_tags = self._dremio_env.get_catalog_tags(existing_tags_entity['id'])
+		if existing_tags is None:  # Need to create new entity
+			if process_mode == 'update_only':
+				self._logger.info("_write_tags: Skipping tags creation due to configuration tag_process_mode. " + str(tags))
+				return None
+			if self._config.dry_run:
+				self._logger.warn("_write_tags: Dry Run, NOT Creating tags: " + str(tags))
+				return None
+			new_tags = {"tags":new_tags}
+			new_tags = self._dremio_env.update_tag(existing_tags_entity['id'], new_tags, self._config.dry_run)
+			if new_tags is None:
+				self._logger.error("_write_tags: could not create " + str(tags))
+				return None
+		else:  # Tags already exists in the target environment
+			if process_mode == 'create_only':
+				self._logger.info("_write_tags: Found existing tags and tag_process_mode is set to create_only. Skipping " + str(tags))
+				return None
+			# make sure there are changes to update as it will invalidate existing tags data
+			if new_tags == existing_tags['tags']:
+				# Nothing to do
+				self._logger.debug("_write_tags: No pending changes. Skipping " + str(tags))
+				return None
+			if self._config.dry_run:
+				self._logger.warn("tags: Dry Run, NOT Updating " + str(tags))
+				return False
+			self._logger.debug("_write_tags: Overwriting " + str(tags))
+			existing_tags['tags'] = new_tags
+			updated_tags = self._dremio_env.update_tag(existing_tags_entity['id'], existing_tags, self._config.dry_run)
+			if updated_tags is None:
+				self._logger.error("_write_tags: Error updating " + str(tags))
 				return False
 		return True
