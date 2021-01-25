@@ -146,7 +146,7 @@ class DremioClonerConfig():
 
 	def __init__(self, config_file_name):
 		# Read configuration file
-		f = open(config_file_name, "r")
+		f = open(config_file_name, "r", encoding="utf-8")
 		self.cloner_conf_json = json.load(f)['dremio_cloner']
 		f.close()
 		for element in self.cloner_conf_json:

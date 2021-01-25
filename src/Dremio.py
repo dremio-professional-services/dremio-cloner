@@ -70,6 +70,7 @@ class Dremio:
 	def _authenticate(self):
 		headers = {"Content-Type": "application/json"}
 		payload = '{"userName": "' + self._username + '","password": "' + self._password + '"}'
+		payload = payload.encode(encoding='utf-8')
 		response = requests.request("POST", self._endpoint + self._login_url, data=payload, headers=headers, timeout=self._api_timeout, verify=self._verify_ssl)
 		if response.status_code != 200:
 			logging.critical("Authentication Error " + str(response.status_code))
@@ -145,6 +146,7 @@ class Dremio:
 		schema_filter = ''
 		for source in sources:
 			schema_filter = schema_filter + " or TABLE_SCHEMA like '" + source['name'] + ".%'"
+			schema_filter = schema_filter + " or TABLE_SCHEMA like '" + source['name'] + ".%'   or TABLE_SCHEMA = '" + source['name'] + "' "
 		sql = sql + ' and ( ' + schema_filter[4:] + ' ) '
 
 		if source_folder_filter is not None and source_folder_filter != "*":
