@@ -178,7 +178,7 @@ class DremioClonerConfig():
 			elif 'directory' in item:
 				self.target_directory = item['directory']
 			elif 'overwrite' in item:
-				self.target_file_or_dir_overwrite = item['overwrite']
+				self.target_file_or_dir_overwrite = self._bool(item, 'overwrite')
 			elif 'verify_ssl' in item:
 				self.target_verify_ssl = self._bool(item, 'verify_ssl')
 			elif 'is_community_edition' in item:
@@ -380,7 +380,7 @@ class DremioClonerConfig():
 		if (self.command == self.CMD_GET and self.target_filename is not None and not self.target_file_or_dir_overwrite and os.path.isfile(self.target_filename)):
 			self._logger.fatal("File " + str(self.target_filename) + " already exists. Cannot overwrite.")
 		if (self.command == self.CMD_GET and self.target_directory is not None and not self.target_file_or_dir_overwrite and os.path.isdir(self.target_directory)):
-			self._logger.fatal("File " + str(self.target_directory) + " Directory exists. Cannot overwrite.")
+			self._logger.fatal("Directory " + str(self.target_directory) + " already exists. Cannot overwrite.")
 		if (self.command == self.CMD_REPORT_ACL and os.path.isfile(self.target_filename)):
 			self._logger.fatal("File " + str(self.target_filename) + " already exists. Cannot overwrite.")
 
