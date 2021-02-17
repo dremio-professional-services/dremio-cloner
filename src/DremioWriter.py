@@ -532,7 +532,9 @@ class DremioWriter:
 		for user in self._target_dremio_users:
 			if user['id'] == userid:
 				transformed_principal = self._find_acl_transformation_by_username(user['name'], permissions)
-				if "error" in transformed_principal:
+				if transformed_principal is None:
+					return {"user": user['id']}
+				elif "error" in transformed_principal:
 					# Something went wrong
 					self._logger.error("_find_matching_principal_for_userid: error " + transformed_principal['error'])
 					return None
