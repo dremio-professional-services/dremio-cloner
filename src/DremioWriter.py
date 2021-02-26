@@ -593,6 +593,19 @@ class DremioWriter:
 					return None
 				else:
 					return transformed_principal
+		# If the group name is already in the target list (i.e. the mapping already happened
+		# but the write_entity failed because parent objects were not yet created) then take group name straight from target
+		for group in self._target_dremio_groups:
+			if group['id'] == groupid:
+				transformed_principal = self._find_acl_transformation_by_groupname(group['name'], permissions)
+				if transformed_principal is None:
+					return {"user": group['id']}
+				elif "error" in transformed_principal:
+					# Something went wrong
+					self._logger.error("_find_matching_principal_for_userid: error " + transformed_principal['error'])
+					return None
+				else:
+					return transformed_principal
 		return None
 
 
@@ -613,6 +626,19 @@ class DremioWriter:
 							return {"group":target_group['id'],"permissions":new_permissions}
 				# The transformation is defined for this group, however, the target principal is not in the target Dremio Environment
 				return {"error": "group_transformation_found_but_target_principle_is_not_in_target_dremio_environment"}
+		# If the group name is already in the target list (i.e. the mapping already happened
+		# but the write_entity failed because parent objects were not yet created) then take group name straight from target
+		for item in self._config.acl_transformation:
+			if 'user' in item['target'] and item['target']['user'] == groupname:
+				for target_user in self._target_dremio_users:
+					if target_user['name'] == groupname:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"user": target_user['id'], "permissions": new_permissions}
+			if 'group' in item['target'] and item['target']['group'] == groupname:
+				for target_group in self._target_dremio_groups:
+					if target_group['name'] == item['target']['group']:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"group": target_group['id'], "permissions": new_permissions}
 		return None
 
 	def _read_entity_definition(self, entity):
