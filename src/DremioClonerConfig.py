@@ -14,7 +14,7 @@
 # limitations under the License.
 ########
 
-import logging
+import logging, sys
 import json
 import os
 import fnmatch, re
@@ -146,7 +146,13 @@ class DremioClonerConfig():
 
 	def __init__(self, config_file_name):
 		# Read configuration file
-		f = open(config_file_name, "r", encoding="utf-8")
+		if sys.version_info.major > 2:
+			f_open = lambda filename: open(filename, "r",encoding='utf-8')
+		else:
+			f_open = lambda filename: open(filename, "r")
+
+		f = f_open(config_file_name)
+
 		self.cloner_conf_json = json.load(f)['dremio_cloner']
 		f.close()
 		for element in self.cloner_conf_json:
