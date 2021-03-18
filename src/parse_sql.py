@@ -1,56 +1,48 @@
-#!/usr/bin/env python
-# 
-# Copyright (C) 2009-2020 the sqlparse authors and contributors
-# <see AUTHORS file>
-#
-# This example is part of python-sqlparse and is released under
-# the BSD License: https://opensource.org/licenses/BSD-3-Clause
-#
-# This example illustrates how to extract table names from nested
-# SELECT statements.
-#
-# See:
-# https://groups.google.com/forum/#!forum/sqlparse/browse_thread/thread/b0bd9a022e9d4895
+import re
 
-import sqlparse
-from sqlparse.sql import IdentifierList, Identifier
-from sqlparse.tokens import Keyword, DML
 
-def is_subselect(parsed):
-    if not parsed.is_group:
-        return False
-    for item in parsed.tokens:
-        if item.ttype is DML and item.value.upper() == 'SELECT':
-            return True
-    return False
+# Based on https://grisha.org/blog/2016/11/14/table-names-from-sql/
+def tables_in_query(sql_str):
 
-def extract_from_part(parsed):
-    from_seen = False
-    for item in parsed.tokens:
-        if from_seen:
-            if is_subselect(item):
-                # yield from extract_from_part(item)
-                with extract_from_part(item) as a:
-                	yield a
-            elif item.ttype is Keyword:
-                return
-            else:
-                yield item
-        elif item.ttype is Keyword and item.value.upper() == 'FROM':
-            from_seen = True
+	# remove the /* */ comments
+	q = re.sub(r"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", "", sql_str)
 
-def extract_table_identifiers(token_stream):
-    for item in token_stream:
-        if isinstance(item, IdentifierList):
-            for identifier in item.get_identifiers():
-                yield identifier.get_name()
-        elif isinstance(item, Identifier):
-            yield item.get_name()
-        # It's a bug to check for Keyword here, but in the example
-        # above some tables names are identified as keywords...
-        elif item.ttype is Keyword:
-            yield item.value
+	# remove whole line -- and # comments
+	lines = [line for line in q.splitlines() if not re.match("^\s*(--|#)", line)]
 
-def tables_in_query(sql):
-    stream = extract_from_part(sqlparse.parse(sql)[0])
-    return list(extract_table_identifiers(stream))
+	# remove trailing -- and # comments
+	q = " ".join([re.split("--|#", line)[0] for line in lines])
+
+	# split on blanks, parens and semicolons 
+	# Added ',' to support list of tables in FROM clause
+	tokens = re.split(r"[\s)(,;]+", q)
+
+	# scan the tokens. if we see a FROM or JOIN, we set the get_next
+	# flag, and grab the next one (unless it's SELECT).
+
+	result = list()
+	get_next = False
+	for tok in tokens:
+		if get_next:
+			if tok.lower() not in ["", "select"]:
+				# Added support for recovering quoted names with spaces
+				if tok[0:1] == '"' and tok[-1:] != '"':
+					quoted = sql_str[sql_str.find(tok) + 1:]
+					quoted = quoted[:quoted.find('"')]
+					result.append(normalize_path(quoted))
+				else:
+					result.append(normalize_path(tok))
+			get_next = False
+		get_next = tok.lower() in ["from", "join"]
+
+	return result
+
+def normalize_path(token):
+	# [S3."asd"."ss.txt"] -> S3/asd/ss.txt
+	p = """"([^"]*)"|'([^']*)'|[\.]+"""
+	path_list = re.split(p, token)
+	path = ""
+	for item in path_list:
+		if item != None and item != '':
+			path = path + re.sub('"', '', item) + "/"
+	return path[:-1]
