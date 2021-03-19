@@ -178,7 +178,7 @@ class DremioWriter:
 					self._logger.error("_retrieve_users_groups: Unable to resolve ACL_TRANSFORMATION group in target Dremio environment: " + str(item['target']['group']))
 
 	def _write_vds_hierarchy(self):
-		for level in range(0, self._hierarchy_depth):
+		for level in range(0, self._hierarchy_depth + 1): # fix 20210319: need +1 here to ensure every element in the vds hierarchy gets processed
 			for item in self._vds_hierarchy:
 				if item[0] == level:
 					vds = item[1]
