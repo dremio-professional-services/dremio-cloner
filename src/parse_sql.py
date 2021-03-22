@@ -30,7 +30,9 @@ def traverse(v, prefix=''):
             traverse(v2, p2)
     else:
         # print('{} = {}'.format(prefix, repr(v)))
-        if prefix.endswith("['from']['value']") or prefix.endswith("['from']"):
+        if (prefix.endswith("['from']['value']") 
+            or prefix.endswith("['from']") 
+            or prefix.endswith(" join']['value']")):
             # print(repr(v))
             tablist.append(repr(v).replace("'","").replace(".","/"))
 
