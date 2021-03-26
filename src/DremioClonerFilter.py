@@ -187,7 +187,7 @@ class DremioClonerFilter():
 		else:
 			self._logger.fatal("_match_path: Unexpected Entity Type " + str(entity))
 		if 'path' not in entity:
-			return root_exclusion_re is None or root_exclusion_re.match(entity['name'])
+			return root_exclusion_re is None or root_exclusion_re.match(entity['name']) is None
 		else:
 			path = entity['path']
 			# Match root object (Space of Source)
