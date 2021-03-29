@@ -96,7 +96,7 @@ class DremioClonerFilter():
 		return False
 
 	def match_pds_filter(self, pds, loginfo = True):
-		if self._match_path(self._config._source_filter_re, self._config._source_exclude_filter_re, self._config._source_folder_filter_re, self._config._source_folder_exclude_filter_re, self._config._pds_filter_re, self._config.pds_exclude_filter, pds):
+		if self._match_path(self._config._source_filter_re, self._config._source_exclude_filter_re, self._config._source_folder_filter_re, self._config._source_folder_exclude_filter_re, self._config._pds_filter_re, self._config._pds_exclude_filter_re, pds):
 			return True
 		if loginfo:
 			self._logger.debug("match_pds_filter: skipping PDS " + pds['path'][-1] if 'path' in pds else pds['name'] + " as per job configuration")
