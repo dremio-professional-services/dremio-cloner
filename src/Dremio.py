@@ -38,6 +38,8 @@ class Dremio:
 	_user_by_name_url = "api/v3/user/by-name/"
 	_group_url = "api/v3/group/"
 	_group_by_name_url = "api/v3/group/by-name/"
+	_role_url = "api/v3/role/"
+	_role_by_name_url = "api/v3/role/by-name/"
 	_post_sql_url = "api/v3/sql"
 	_get_job_url = "api/v3/job/"
 	_graph_url_postfix = "graph"
@@ -110,6 +112,12 @@ class Dremio:
 
 	def get_group_by_name(self, groupname):
 		return self._api_get_json(self._group_by_name_url + groupname, source="get_group_by_name")
+
+	def get_role(self, role_id):
+		return self._api_get_json(self._role_url + role_id, source="get_role")
+
+	def get_role_by_name(self, rolename):
+		return self._api_get_json(self._role_by_name_url + rolename, source="get_role_by_name")
 
 	def get_catalog_tags(self, entity_id):
 		return self._api_get_json(self._catalog_url + entity_id + "/collaboration/tag", source="get_catalog_tags", report_error=False)

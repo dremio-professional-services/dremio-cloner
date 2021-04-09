@@ -32,6 +32,7 @@ class DremioData():
 	votes = []
 	referenced_users = []
 	referenced_groups = []
+	referenced_roles = []
 	files = []
 	vds_parents = []
 	dremio_get_config = []

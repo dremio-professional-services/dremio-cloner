@@ -73,6 +73,8 @@ class DremioReader:
 			for pds in pds_list:
 				if self._filter.match_pds_filter(pds):
 					self._d.pds_list.append(pds)
+					self._read_acl(pds)
+					self._read_wiki(pds)
 
 	# Read Dremio catalog from source environment recursively going to containers and their children objects 
 	def _read_catalog(self):
@@ -299,6 +301,13 @@ class DremioReader:
 					if group_entity is not None:
 						if group_entity not in self._d.referenced_groups:
 							self._d.referenced_groups.append(group_entity)
+
+			if 'roles' in acl:
+				for role in acl['roles']:
+					role_entity = self._dremio_env.get_role(role['id'])
+					if role_entity is not None:
+						if role_entity not in self._d.referenced_roles:
+							self._d.referenced_roles.append(role_entity)
 
 	def _process_vds_dependencies(self):
 		if self._config.vds_dependencies_process_mode == 'get':

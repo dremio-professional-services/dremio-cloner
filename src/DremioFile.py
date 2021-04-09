@@ -96,6 +96,8 @@ class DremioFile():
 		if self._config.group_process_mode == 'process':
 			f.write(',')
 			json.dump({'referenced_groups':dremio_data.referenced_groups}, f)
+			f.write(',')
+			json.dump({'referenced_roles': dremio_data.referenced_roles}, f)
 		if self._config.wlm_queue_process_mode == 'process':
 			f.write(',')
 			json.dump({'queues':dremio_data.queues}, f)
@@ -147,6 +149,8 @@ class DremioFile():
 				dremio_data.referenced_users = item['referenced_users']
 			elif ('referenced_groups' in item):
 				dremio_data.referenced_groups = item['referenced_groups']
+			elif ('referenced_roles' in item):
+				dremio_data.referenced_roles = item['referenced_roles']
 			elif ('queues' in item):
 				dremio_data.queues = item['queues']
 			elif ('rules' in item):
@@ -185,6 +189,7 @@ class DremioFile():
 				os.makedirs(os.path.join(target_directory, 'referenced_users'))
 			if self._config.group_process_mode == 'process':
 				os.makedirs(os.path.join(target_directory, 'referenced_groups'))
+				os.makedirs(os.path.join(target_directory, 'referenced_roles'))
 			if self._config.wlm_queue_process_mode == 'process':
 				os.makedirs(os.path.join(target_directory, 'queues'))
 			if self._config.wlm_rule_process_mode == 'process':
@@ -247,6 +252,8 @@ class DremioFile():
 			if self._config.group_process_mode == 'process':
 				for group in dremio_data.referenced_groups:
 					self._write_object_json_file(os.path.join(target_directory, "referenced_groups"), group)
+				for role in dremio_data.referenced_roles:
+					self._write_object_json_file(os.path.join(target_directory, "referenced_roles"), role)
 			if self._config.wlm_queue_process_mode == 'process':
 				for queue in dremio_data.queues:
 					self._write_object_json_file(os.path.join(target_directory, "queues"), queue)
@@ -281,6 +288,7 @@ class DremioFile():
 			self._collect_directory(os.path.join(source_directory, 'reflections'), None, None, dremio_data.reflections)
 			self._collect_directory(os.path.join(source_directory, 'referenced_users'), None, None, dremio_data.referenced_users)
 			self._collect_directory(os.path.join(source_directory, 'referenced_groups'), None, None, dremio_data.referenced_groups)
+			self._collect_directory(os.path.join(source_directory, 'referenced_roles'), None, None, dremio_data.referenced_roles)
 			self._collect_directory(os.path.join(source_directory, 'queues'), None, None, dremio_data.queues)
 			self._collect_directory(os.path.join(source_directory, 'rules'), None, None, dremio_data.rules)
 			self._collect_directory(os.path.join(source_directory, 'tags'), None, None, dremio_data.tags)
