@@ -42,9 +42,9 @@ def tables_in_query_b(sql_str):
 
 	# remove the /* */ comments
 	q = re.sub(r"/\*[^*]*\*+(?:[^*/][^*]*\*+)*/", "", sql_str)
-	q = re.sub("trim\(.*?\)",'trim()',sql, flags=re.DOTALL|re.I)
-	q = re.sub("right\(.*?\)",'trim()',sql, flags=re.DOTALL|re.I)
-	q = re.sub("ltrim\(.*?\)",'trim()',sql, flags=re.DOTALL|re.I)
+	q = re.sub("trim\(.*?\)",'trim()',sql_str, flags=re.DOTALL|re.I)
+	q = re.sub("right\(.*?\)",'trim()',sql_str, flags=re.DOTALL|re.I)
+	q = re.sub("ltrim\(.*?\)",'trim()',sql_str, flags=re.DOTALL|re.I)
 	# remove whole line -- and # comments
 	lines = [line for line in q.splitlines() if not re.match("^\s*(--|#)", line)]
 
