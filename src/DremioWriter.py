@@ -46,9 +46,10 @@ class DremioWriter:
 	_hierarchy_depth = 0
 	_unresolved_vds = []
 
-	# Referenced Users and Groups in the target environment
+	# Referenced Users, Groups and Roles in the target environment
 	_target_dremio_users = []
 	_target_dremio_groups = []
+	_target_dremio_roles = []
 
 	# Resolved Datasets for Reflections
 	_existing_reflections = list()
@@ -67,8 +68,8 @@ class DremioWriter:
 
 	def write_dremio_environment(self):
 		self._retrieve_users_groups()
-		if self._config.acl_transformation != {} and self._d.referenced_users == [] and self._d.referenced_groups == []:
-			self._logger.warn("ACL Transformation has been defined while Referenced Users and Referenced Groups are not present in the Source Dremio Data.")
+		if self._config.acl_transformation != {} and self._d.referenced_users == [] and self._d.referenced_groups == [] and self._d.referenced_roles == []:
+			self._logger.warn("ACL Transformation has been defined while Referenced Users and Referenced Groups/Roles are not present in the Source Dremio Data.")
 
 		if self._config.reflection_process_mode != 'skip':
 			self._existing_reflections = self._dremio_env.list_reflections()['data']
@@ -160,7 +161,13 @@ class DremioWriter:
 				self._target_dremio_groups.append(target_group)
 			else:
 				self._logger.error("_retrieve_users_groups: Unable to resolve group in target Dremio environment: " + str(group['name']))
-		# Retrieve acl transformation target users and groups
+		for role in self._d.referenced_roles:
+			target_role = self._dremio_env.get_role_by_name(role['name'])
+			if target_role is not None:
+				self._target_dremio_roles.append(target_role)
+			else:
+				self._logger.error("_retrieve_users_groups: Unable to resolve role in target Dremio environment: " + str(role['name']))
+		# Retrieve acl transformation target users and groups/roles
 		for item in self._config.acl_transformation:
 			if 'user' in item['target']:
 				user = self._dremio_env.get_user_by_name(item['target']['user'])
@@ -176,6 +183,13 @@ class DremioWriter:
 					self._target_dremio_groups.append(group)
 				else:
 					self._logger.error("_retrieve_users_groups: Unable to resolve ACL_TRANSFORMATION group in target Dremio environment: " + str(item['target']['group']))
+			if 'role' in item['target']:
+				role = self._dremio_env.get_role_by_name(item['target']['role'])
+				if role is not None:
+					# dont worry about dups
+					self._target_dremio_roles.append(role)
+				else:
+					self._logger.error("_retrieve_users_groups: Unable to resolve ACL_TRANSFORMATION role in target Dremio environment: " + str(item['target']['role']))
 
 	def _write_vds_hierarchy(self):
 		for level in range(0, self._hierarchy_depth + 1): # fix 20210319: need +1 here to ensure every element in the vds hierarchy gets processed
@@ -457,7 +471,7 @@ class DremioWriter:
 		transformed_acl = {"users": [], "groups": []}
 		if 'version' in entity:
 			acl.pop('version')
-		if acl == {} or ('users' not in acl and 'groups' not in acl):
+		if acl == {} or ('users' not in acl and 'groups' not in acl and 'roles' not in acl):
 			pass
 		else:
 			if 'users' in acl:
@@ -475,6 +489,10 @@ class DremioWriter:
 						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
 					elif "group" in new_acl_principal:
 						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
+					elif "role" in new_acl_principal:
+						if 'roles' not in transformed_acl:
+							transformed_acl['roles'] = []
+						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
 			if 'groups' in acl:
 				# Note, taking a copy of the list for proper removal of items
 				for group_def in acl['groups'][:]:
@@ -491,6 +509,30 @@ class DremioWriter:
 						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
 					elif "group" in new_acl_principal:
 						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
+					elif "role" in new_acl_principal:
+						if 'roles' not in transformed_acl:
+							transformed_acl['roles'] = []
+						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
+			if 'roles' in acl:
+				# Note, taking a copy of the list for proper removal of items
+				for role_def in acl['roles'][:]:
+					new_acl_principal = self._find_matching_principal_for_roleid(role_def['id'], role_def['permissions'])
+					if new_acl_principal == "REMOVE":
+						self._logger.info("_process_acl: Source Role " + role_def['id'] + " is removed from ACL definition. " + self._utils.get_entity_desc(entity))
+					elif new_acl_principal is None:
+						if ignore_missing_acl_group_flag:
+							self._logger.warn("_process_acl: Source Role " + role_def['id'] + " not found in the target Dremio Environment. Role is removed from ACL definition as per ignore_missing_acl_group configuration. " + self._utils.get_entity_desc(entity))
+						else:
+							# Flag is not set - return error status
+							self._logger.error("_process_acl: Source Role " + role_def['id'] + " not found in the target Dremio Environment. ACL Entry cannot be processed as per ignore_missing_acl_group configuration. " + self._utils.get_entity_desc(entity))
+					elif "user" in new_acl_principal:
+						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else role_def['permissions']})
+					elif "group" in new_acl_principal:
+						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else role_def['permissions']})
+					elif "role" in new_acl_principal:
+						if 'roles' not in transformed_acl:
+							transformed_acl['roles'] = []
+						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else role_def['permissions']})
 			entity['accessControlList'] = transformed_acl
 		return True
 
@@ -499,13 +541,15 @@ class DremioWriter:
 		if 'permission-mapping' not in acl_mapping:
 			return source_permissions
 		permissions_mapping = acl_mapping['permission-mapping']
-		# READ is required for WRITE, so READ is always present in the list of permissions
-		permissions = ["READ"]
+		permissions = []
 		for permission in source_permissions:
 			for mapping in permissions_mapping:
 				# add only once
 				if permission in mapping and mapping[permission] not in permissions:
 					permissions.append(mapping[permission])
+		# Pre-RBAC rule: If WRITE is in the list but not READ, then add READ
+		if "WRITE" in permissions and "READ" not in permissions:
+			permissions.append("READ")
 		return permissions
 
 	def _find_matching_principal_for_userid(self, userid, permissions):
@@ -557,6 +601,11 @@ class DremioWriter:
 						if target_group['name'] == item['target']['group']:
 							new_permissions = self._transform_permissions(permissions, item)
 							return {"group":target_group['id'],"permissions":new_permissions}
+				elif "role" in item['target']:
+					for target_role in self._target_dremio_roles:
+						if target_role['name'] == item['target']['role']:
+							new_permissions = self._transform_permissions(permissions, item)
+							return {"role":target_role['id'],"permissions":new_permissions}
 				# The transformation is defined for this user, however, the target principal is not in the target Dremio Environment
 				return {"error": "user_transformation_found_but_target_principle_is_not_in_target_dremio_environment"}
 		# If the username is already in the target list (i.e. the mapping already happened
@@ -572,6 +621,11 @@ class DremioWriter:
 					if target_group['name'] == item['target']['group']:
 						new_permissions = self._transform_permissions(permissions, item)
 						return {"group": target_group['id'], "permissions": new_permissions}
+			if 'role' in item['target'] and item['target']['role'] == username:
+				for target_role in self._target_dremio_roles:
+					if target_role['name'] == item['target']['role']:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"role": target_role['id'], "permissions": new_permissions}
 		return None
 
 	def _find_matching_principal_for_groupid(self, groupid, permissions):
@@ -599,15 +653,50 @@ class DremioWriter:
 			if group['id'] == groupid:
 				transformed_principal = self._find_acl_transformation_by_groupname(group['name'], permissions)
 				if transformed_principal is None:
-					return {"user": group['id']}
+					return {"group": group['id']}
 				elif "error" in transformed_principal:
 					# Something went wrong
-					self._logger.error("_find_matching_principal_for_userid: error " + transformed_principal['error'])
+					self._logger.error("_find_matching_principal_for_groupid: error " + transformed_principal['error'])
 					return None
 				else:
 					return transformed_principal
 		return None
 
+	def _find_matching_principal_for_roleid(self, roleid, permissions):
+		self._logger.debug("_find_matching_roleid: processing: " + str(roleid))
+		for role in self._d.referenced_roles:
+			if role['id'] == roleid:
+				self._logger.debug("_find_matching_roleid: roleid " + str(roleid) + " has role name " + role['name'])
+				transformed_principal = self._find_acl_transformation_by_rolename(role['name'], permissions)
+				if transformed_principal == "REMOVE":
+					self._logger.info("_find_matching_principal_for_roleid: Source Role " + role['name'] + " [" + role['id'] + "] is mapped as NONE.")
+					return "REMOVE"
+				# If no transformation is defined for this role
+				elif transformed_principal is None:
+					for target_role in self._target_dremio_roles:
+						if target_role['name'] == role['name']:
+							return {"role":target_role['id']}
+				elif "error" in transformed_principal:
+					# Something went wrong
+					self._logger.error("_find_matching_principal_for_roleid: error " + transformed_principal['error'])
+					return None
+				else:
+					return transformed_principal
+		# If the role name is already in the target list (i.e. the mapping already happened
+		# but the write_entity failed because parent objects were not yet created) then take role name straight from target
+		for role in self._target_dremio_roles:
+			if role['id'] == roleid:
+				self._logger.debug("_find_matching_roleid: roleid " + str(roleid) + " has role name " + role['name'])
+				transformed_principal = self._find_acl_transformation_by_rolename(role['name'], permissions)
+				if transformed_principal is None:
+					return {"role": role['id']}
+				elif "error" in transformed_principal:
+					# Something went wrong
+					self._logger.error("_find_matching_principal_for_roleid: error " + transformed_principal['error'])
+					return None
+				else:
+					return transformed_principal
+		return None
 
 	def _find_acl_transformation_by_groupname(self, groupname, permissions):
 		for item in self._config.acl_transformation:
@@ -624,6 +713,11 @@ class DremioWriter:
 						if target_group['name'] == item['target']['group']:
 							new_permissions = self._transform_permissions(permissions, item)
 							return {"group":target_group['id'],"permissions":new_permissions}
+				elif "role" in item['target']:
+					for target_role in self._target_dremio_roles:
+						if target_role['name'] == item['target']['role']:
+							new_permissions = self._transform_permissions(permissions, item)
+							return {"role":target_role['id'],"permissions":new_permissions}
 				# The transformation is defined for this group, however, the target principal is not in the target Dremio Environment
 				return {"error": "group_transformation_found_but_target_principle_is_not_in_target_dremio_environment"}
 		# If the group name is already in the target list (i.e. the mapping already happened
@@ -639,6 +733,53 @@ class DremioWriter:
 					if target_group['name'] == item['target']['group']:
 						new_permissions = self._transform_permissions(permissions, item)
 						return {"group": target_group['id'], "permissions": new_permissions}
+			if 'role' in item['target'] and item['target']['role'] == groupname:
+				for target_role in self._target_dremio_roles:
+					if target_role['name'] == item['target']['role']:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"role": target_role['id'], "permissions": new_permissions}
+		return None
+
+	def _find_acl_transformation_by_rolename(self, rolename, permissions):
+		for item in self._config.acl_transformation:
+			if 'role' in item['source'] and item['source']['role'] == rolename:
+				if "REMOVE" in item['target']:
+					return "REMOVE"
+				elif "user" in item['target']:
+					for target_user in self._target_dremio_users:
+						if target_user['name'] == item['target']['user']:
+							new_permissions = self._transform_permissions(permissions, item)
+							return {"user":target_user['id'],"permissions":new_permissions}
+				elif "group" in item['target']:
+					for target_group in self._target_dremio_groups:
+						if target_group['name'] == item['target']['group']:
+							new_permissions = self._transform_permissions(permissions, item)
+							return {"group":target_group['id'],"permissions":new_permissions}
+				elif "role" in item['target']:
+					for target_role in self._target_dremio_roles:
+						if target_role['name'] == item['target']['role']:
+							new_permissions = self._transform_permissions(permissions, item)
+							return {"role":target_role['id'],"permissions":new_permissions}
+				# The transformation is defined for this group, however, the target principal is not in the target Dremio Environment
+				return {"error": "role_transformation_found_but_target_principle_is_not_in_target_dremio_environment"}
+		# If the role name is already in the target list (i.e. the mapping already happened
+		# but the write_entity failed because parent objects were not yet created) then take role name straight from target
+		for item in self._config.acl_transformation:
+			if 'user' in item['target'] and item['target']['user'] == rolename:
+				for target_user in self._target_dremio_users:
+					if target_user['name'] == rolename:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"user": target_user['id'], "permissions": new_permissions}
+			if 'group' in item['target'] and item['target']['group'] == rolename:
+				for target_group in self._target_dremio_groups:
+					if target_group['name'] == item['target']['group']:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"group": target_group['id'], "permissions": new_permissions}
+			if 'role' in item['target'] and item['target']['role'] == rolename:
+				for target_role in self._target_dremio_roles:
+					if target_role['name'] == item['target']['role']:
+						new_permissions = self._transform_permissions(permissions, item)
+						return {"role": target_role['id'], "permissions": new_permissions}
 		return None
 
 	def _read_entity_definition(self, entity):

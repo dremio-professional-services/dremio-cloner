@@ -228,6 +228,7 @@ The command is configured with a JSON file with configuration attributes listed 
   - &quot;username&quot;
   - &quot;password&quot;
   - &quot;verify\_ssl&quot;
+  - &quot;is\_rbac\_version&quot;
 - &quot;target&quot;: defines an output filename with
   - &quot;filename&quot;
 - &quot;options&quot;:
@@ -309,6 +310,7 @@ Note, that this command does not provide any option for Scope definition. Please
 | verify\_ssl | If set to False, Dremio Cloner will not validate SSL certificate of the Dremio Environment. Default is True. |
 | is\_community\_edition | Set it to True if reading Dremio CE. Writing to Dremio CE is not supported. |
 | graph\_api\_support | Dremio Graph API is only available in EE starting version 4.0.0. Default value is False. |
+| is\_rbac\_version | Set it to True if the version of Dremio EE supports the RBAC privileges model. Default value is False. |
 
 ### _Target_ or _source_ section, when defined with a file name
 

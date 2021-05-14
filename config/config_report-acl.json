@@ -4,7 +4,8 @@
 	    {"endpoint": "http://localhost:9047/"},
 	    {"username": "<DREMIO-ADMIN-USER>"},
 	    {"password": "<OPTIONAL_PASSWORD>"},
-	    {"verify_ssl": "False"}]
+	    {"verify_ssl": "False"},
+		{"is_rbac_version": "False"}]
 	},
 	{"target": [
 		{"filename":"<TARGET_REPORT_FILE_NAME>"}]

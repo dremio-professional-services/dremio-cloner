@@ -48,6 +48,7 @@ class DremioClonerConfig():
 	source_directory = None
 	source_ce = False
 	source_graph_support = False
+	source_rbac = False
 	target_ce = False
 	job_sql = None
 	# Source Dremio Environment definition
@@ -212,6 +213,8 @@ class DremioClonerConfig():
 				self.source_graph_support = self._bool(item, 'graph_api_support')
 			elif 'job-sql' in item:
 				self.job_sql = self._str(item, 'job-sql')
+			elif 'is_rbac_version' in item:
+				self.source_rbac = self._bool(item, 'is_rbac_version')
 
 	def _process_options(self, json_conf):
 		for item in json_conf['options']:
@@ -389,6 +392,10 @@ class DremioClonerConfig():
 			self._logger.fatal("Directory " + str(self.target_directory) + " already exists. Cannot overwrite.")
 		if (self.command == self.CMD_REPORT_ACL and os.path.isfile(self.target_filename)):
 			self._logger.fatal("File " + str(self.target_filename) + " already exists. Cannot overwrite.")
+		if self.command == self.CMD_REPORT_ACL:
+			# make sure sources and PDSs get processed
+			self.source_process_mode = "process"
+			self.pds_process_mode = "process"
 
 	def _bool(self, conf, param_name):
 		if (param_name in conf):
