@@ -387,6 +387,10 @@ class DremioWriter:
 			reflection.pop("totalSizeBytes")
 		if 'status' in reflection:
 			reflection.pop("status")
+		if 'canView' in reflection:
+			reflection.pop("canView")
+		if 'canAlter' in reflection:
+			reflection.pop("canAlter")
 		reflection_path = reflection['path']
 		# Write Reflection
 		reflection.pop("path")
