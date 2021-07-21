@@ -402,21 +402,33 @@ class DremioReader:
 	def _read_queues(self):
 		self._logger.debug("read_queues: started")
 		if self._config.wlm_queue_process_mode == 'process' and not self._config.source_ce:
-			self._d.queues = self._dremio_env.list_queues()['data']
+			list_queues = self._dremio_env.list_queues()
+			if list_queues and 'data' in list_queues:
+				self._d.queues = list_queues['data']
+			else:
+				self._d.queues = []
 		else:
 			self._logger.debug("_read_queues: skipping as per job configuration")
 
 	def _read_rules(self):
 		self._logger.debug("read_rules: started")
 		if self._config.wlm_rule_process_mode == 'process' and not self._config.source_ce:
-			self._d.rules = self._dremio_env.list_rules()['rules']
+			list_rules = self._dremio_env.list_rules()
+			if list_rules and 'rules' in list_rules:
+				self._d.rules = list_rules['rules']
+			else:
+				self._d.rules = []
 		else:
 			self._logger.debug("read_rules: skipping as per job configuration")
 
 	def _read_votes(self):
 		self._logger.debug("read_votes: started")
 		if self._config.vote_process_mode == 'process' and not self._config.source_ce:
-			self._d.votes = self._dremio_env.list_votes()['data']
+			list_votes = self._dremio_env.list_votes()
+			if list_votes and 'data' in list_votes:
+				self._d.votes = list_votes['data']
+			else:
+				self._d.votes = []
 		else:
 			self._logger.debug("read_votes: skipping as per job configuration")
 

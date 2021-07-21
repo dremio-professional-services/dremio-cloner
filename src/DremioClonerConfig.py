@@ -49,9 +49,13 @@ class DremioClonerConfig():
 	source_ce = False
 	source_graph_support = False
 	source_rbac = False
-	target_ce = False
+	source_dremio_cloud = False
+	source_dremio_cloud_org_id = None
+	source_dremio_cloud_project_id = None
+
 	job_sql = None
-	# Source Dremio Environment definition
+	# Target Dremio Environment definition
+	target_ce = False
 	target_endpoint = None
 	target_verify_ssl = True
 	target_username = None
@@ -60,6 +64,9 @@ class DremioClonerConfig():
 	target_directory = None
 	target_file_or_dir_overwrite = False
 	target_type = None
+	target_dremio_cloud = False
+	target_dremio_cloud_org_id = None
+	target_dremio_cloud_project_id = None
 	container_filename = "___container.json"
 	dremio_conf_filename = "___dremio_cloner_conf.json"
 	# Options
@@ -192,6 +199,12 @@ class DremioClonerConfig():
 				self.target_ce = self._bool(item, 'is_community_edition')
 			elif 'target.type' in item:
 				self.target_type = self._str(item, 'target.type')
+			elif 'is_dremio_cloud' in item:
+				self.target_dremio_cloud = self._bool(item, 'is_dremio_cloud')
+			elif 'dremio_cloud_org_id' in item:
+				self.target_dremio_cloud_org_id = item['dremio_cloud_org_id']
+			elif 'dremio_cloud_project_id' in item:
+				self.target_dremio_cloud_project_id = item['dremio_cloud_project_id']
 
 	def _process_source(self, json_conf):
 		for item in json_conf['source']:
@@ -215,6 +228,12 @@ class DremioClonerConfig():
 				self.job_sql = self._str(item, 'job-sql')
 			elif 'is_rbac_version' in item:
 				self.source_rbac = self._bool(item, 'is_rbac_version')
+			elif 'is_dremio_cloud' in item:
+				self.source_dremio_cloud = self._bool(item, 'is_dremio_cloud')
+			elif 'dremio_cloud_org_id' in item:
+				self.source_dremio_cloud_org_id = item['dremio_cloud_org_id']
+			elif 'dremio_cloud_project_id' in item:
+				self.source_dremio_cloud_project_id = item['dremio_cloud_project_id']
 
 	def _process_options(self, json_conf):
 		for item in json_conf['options']:

@@ -16,6 +16,7 @@
 
 
 from Dremio import Dremio
+from DremioCloud import DremioCloud
 from DremioData import DremioData
 from DremioFile import DremioFile
 from DremioReader import DremioReader
@@ -67,7 +68,12 @@ Make sure the config file is correct. """)
 
 def get_dremio_environment(config):
 	logging.info("Executing command 'get'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
+	# Added a DremioCloud class for interacting directly with Dremio Cloud without upsetting the DremioWriter and DremioReader code
+	if config.source_dremio_cloud:
+		dremio = DremioCloud(config.source_endpoint, config.source_username, config.source_password, config.source_dremio_cloud_org_id, config.source_dremio_cloud_project_id,
+						   config.http_timeout,	verify_ssl=config.source_verify_ssl)
+	else:
+		dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
 	reader = DremioReader(dremio, config)
 	dremio_data = reader.read_dremio_environment()
 	file = DremioFile(config)
@@ -80,7 +86,12 @@ def put_dremio_environment(config):
 	logging.info("Executing command 'put'.")
 	file = DremioFile(config)
 	dremio_data = file.read_dremio_environment()
-	dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, config.http_timeout, verify_ssl=config.target_verify_ssl)
+	#Added a DremioCloud class for interacting directly with Dremio Cloud without upsetting the DremioWriter and DremioReader code
+	if config.target_dremio_cloud:
+		dremio = DremioCloud(config.target_endpoint, config.target_username, config.target_password, config.target_dremio_cloud_org_id, config.target_dremio_cloud_project_id,
+						   config.http_timeout,	verify_ssl=config.target_verify_ssl)
+	else:
+		dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, config.http_timeout, verify_ssl=config.target_verify_ssl)
 	writer = DremioWriter(dremio, dremio_data, config)
 	writer.write_dremio_environment()
 	logging.info("Command 'put' finished with " + str(writer.get_errors_count()) + " error(s).")
