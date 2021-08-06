@@ -30,6 +30,7 @@ class Dremio:
 	_catalog_url = 'api/v3/catalog/'
 	_catalog_url_by_path = 'api/v3/catalog/by-path/'
 	_login_url = 'apiv2/login'
+	_eula_url = 'apiv2/eula/accept'
 	_reflections_url = "api/v3/reflection/"
 	_wlm_queue_url = "api/v3/wlm/queue/"
 	_wlm_rule_url = "api/v3/wlm/rule"
@@ -57,7 +58,7 @@ class Dremio:
 	# Misc
 	_timed_out_sources = []
 
-	def __init__(self, endpoint, username, password, api_timeout=10, retry_timedout_source=False, verify_ssl=True):
+	def __init__(self, endpoint, username, password, accept_eula, api_timeout=10, retry_timedout_source=False, verify_ssl=True):
 		if not verify_ssl:
 			logging.warn("Unverified HTTPS requests will be made as per configuration.")
 			requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -67,7 +68,17 @@ class Dremio:
 		self._retry_timedout_source = retry_timedout_source
 		self._username = username
 		self._password = password
+		if accept_eula:
+			self._accept_eula()
 		self._authenticate()
+
+	def _accept_eula(self):
+		headers = {"Content-Type": "application/json"}
+		response = requests.request("POST", self._endpoint + self._eula_url, headers=headers,
+									timeout=self._api_timeout, verify=self._verify_ssl)
+		if response.status_code != 204 and response.status_code != 200:
+			logging.critical("EULA Accept Error " + str(response.status_code))
+			raise RuntimeError("EULA Accept error.")
 
 	def _authenticate(self):
 		headers = {"Content-Type": "application/json"}

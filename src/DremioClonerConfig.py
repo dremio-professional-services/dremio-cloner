@@ -57,6 +57,7 @@ class DremioClonerConfig():
 	# Target Dremio Environment definition
 	target_ce = False
 	target_endpoint = None
+	target_accept_eula = False
 	target_verify_ssl = True
 	target_username = None
 	target_password = None
@@ -183,6 +184,8 @@ class DremioClonerConfig():
 		for item in json_conf['target']:
 			if 'endpoint' in item:
 				self.target_endpoint = item['endpoint']
+			if 'accept_eula' in item:
+				self.target_accept_eula = self._bool(item, 'accept_eula')
 			elif 'username' in item:
 				self.target_username = item['username']
 			elif 'password' in item:

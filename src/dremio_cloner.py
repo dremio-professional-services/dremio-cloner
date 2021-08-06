@@ -91,7 +91,7 @@ def put_dremio_environment(config):
 		dremio = DremioCloud(config.target_endpoint, config.target_username, config.target_password, config.target_dremio_cloud_org_id, config.target_dremio_cloud_project_id,
 						   config.http_timeout,	verify_ssl=config.target_verify_ssl)
 	else:
-		dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, config.http_timeout, verify_ssl=config.target_verify_ssl)
+		dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, config.target_accept_eula, config.http_timeout, verify_ssl=config.target_verify_ssl)
 	writer = DremioWriter(dremio, dremio_data, config)
 	writer.write_dremio_environment()
 	logging.info("Command 'put' finished with " + str(writer.get_errors_count()) + " error(s).")
