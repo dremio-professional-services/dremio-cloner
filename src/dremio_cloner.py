@@ -73,7 +73,7 @@ def get_dremio_environment(config):
 		dremio = DremioCloud(config.source_endpoint, config.source_username, config.source_password, config.source_dremio_cloud_org_id, config.source_dremio_cloud_project_id,
 						   config.http_timeout,	verify_ssl=config.source_verify_ssl)
 	else:
-		dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
+		dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
 	reader = DremioReader(dremio, config)
 	dremio_data = reader.read_dremio_environment()
 	file = DremioFile(config)
