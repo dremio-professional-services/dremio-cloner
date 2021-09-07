@@ -389,7 +389,7 @@ Note, that this command does not provide any option for Scope definition. Please
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| reflection.id\_include\_list | If specified, a list filter that defines what reflection ids will be **included** into processing during &quot;get&quot; command execution. If this option is not specified or the list is empty then GET will include all reflections, which is the default behavior. Example: `{"reflection.id_include_list": ["dc86ab2e-8ebf-4d69-9302-911875a79e74", "ad3444df-7da5-4ea5-9624-b7705f351914"]}` |
+| reflection.id\_include\_list | If specified, a list filter that defines what reflection ids will be **included** into processing during &quot;get&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; command will include all reflections, which is the default behavior. Example: `{"reflection.id_include_list": ["dc86ab2e-8ebf-4d69-9302-911875a79e74", "ad3444df-7da5-4ea5-9624-b7705f351914"]}` |
 
 ### Scope of User and Group processing
 
@@ -409,7 +409,7 @@ Note, that this command does not provide any option for Scope definition. Please
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| space.cascade-acl-origin.override-object | If specified, overrides default behavior for Space hierarchy and an ACL of the object specified in this parameter will be used through **all Spaces all hierarchies** instead of the respective Spaces&#39; ACLs. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"},` which is interpreted as read the ACLs from the object called spacetest/spacetesttest_folder and apply those ACLs to each object under the space called spacetest.|
+| space.cascade-acl-origin.override-object | If specified, overrides default behavior for Space hierarchy and an ACL of the object specified in this parameter will be used through **all Spaces all hierarchies** instead of the respective Spaces&#39; ACLs. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"},` which is interpreted as read the ACLs from the object called spacetest/spacetest_folder and apply those ACLs to each object under the space called spacetest.|
 | source.cascade-acl-origin.override-object | If specified, overrides default behavior for Source hierarchy and an ACL of the object specified in this parameter will be used through **all Source all hierarchies** instead of the respective Sources&#39; ACLs. |
 | space.folder.cascade-acl-origin.filter | If specified, overrides default behavior for Space hierarchy and an ACLs of the Folders selected by this will be used through **its Folder hierarchy** instead of the respective Source&#39;s ACL. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"}, {"space.folder.cascade-acl-origin.filter": "another_folder"},` which can be interpreted as all objects under spacetest will get the ACLs that are defined in spacetest/spacetest_folder, EXCEPT for those in spacetest/another_folder. All objects beneath another_folder (whose full path is spacetest/another_folder in this example) will have their ACLs set to whatever the ACLs are on another_folder.|
 
