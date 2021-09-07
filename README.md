@@ -153,6 +153,7 @@ The command is configured with a JSON file with configuration attributes listed 
   - scope of _Reflection_ processing 
     - &quot;reflection.process\_mode&quot;
     - &quot;pds.reflection\_refresh\_mode&quot;
+    - &quot;reflection.id\_include\_list&quot;
   - scope of processing other objects
     - &quot;user.process\_mode&quot;
     - &quot;group.process\_mode&quot;
@@ -389,7 +390,7 @@ Note, that this command does not provide any option for Scope definition. Please
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| reflection.id\_include\_list | If specified, a list filter that defines what reflection ids will be **included** into processing during &quot;get&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; command will include all reflections, which is the default behavior. Example: `{"reflection.id_include_list": ["dc86ab2e-8ebf-4d69-9302-911875a79e74", "ad3444df-7da5-4ea5-9624-b7705f351914"]}` |
+| reflection.id\_include\_list | If specified, a list filter that defines what reflection ids will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all reflections, which is the default behavior. During &quot;get&quot; command execution this list refers to ids of reflections in the source Dremio environment, which are visible in `sys.reflections`. During &quot;put&quot; command execution this list refers to ids of reflections that were previously exported out of a source Dremio environment and present in the source file(s) being fed into the &quot;put&quot; command. Example: `{"reflection.id_include_list": ["dc86ab2e-8ebf-4d69-9302-911875a79e74", "ad3444df-7da5-4ea5-9624-b7705f351914"]}` |
 
 ### Scope of User and Group processing
 

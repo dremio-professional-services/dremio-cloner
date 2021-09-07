@@ -103,6 +103,12 @@ class DremioWriter:
 			self._logger.info("write_dremio_environment: Skipping reflection processing due to configuration reflection.process_mode=skip.")
 		else:
 			for reflection in self._d.reflections:
+				# if the reflection id include list is not empty, then skip reflection ids that are not in the list
+				if len(self._config.reflection_id_include_list) > 0:
+					if reflection['id'] not in self._config.reflection_id_include_list:
+						self._logger.debug(
+							"write_dremio_environment: skipping reflection id " + reflection['id'] + ", not in include list")
+						continue
 				self._write_reflection(reflection, self._config.reflection_process_mode)
 		if self._config.reflection_refresh_mode != 'refresh':
 			self._logger.info("write_dremio_environment: Skipping reflection refresh due to configuration reflection.refresh_mode=skip.")
@@ -371,7 +377,7 @@ class DremioWriter:
 
 
 	def _write_reflection(self, reflection, process_mode):
-		self._logger.debug("_write_reflection: processing reflection: " + self._utils.get_entity_desc(reflection))
+		self._logger.debug("_write_reflection: processing reflection: " + ((reflection['id'] + " path: ") if 'id' in reflection else (reflection['name'] + " path: ")) + self._utils.get_entity_desc(reflection))
 		# Clean up the definition
 		if 'id' in reflection:
 			reflection.pop("id")
