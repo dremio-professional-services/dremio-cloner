@@ -241,12 +241,17 @@ class DremioReader:
 		if self._config.reflection_process_mode == 'process' and not self._config.source_ce:
 			reflections = self._dremio_env.list_reflections()['data']
 			for reflection in reflections:
+				# if the reflection id include list is not empty, then skip reflection ids that are not in the list
+				if len(self._config.reflection_id_include_list) > 0:
+					if reflection['id'] not in self._config.reflection_id_include_list:
+						self._logger.debug("_read_reflections: ignoring reflection id " + reflection['id'] + ", not in include list")
+						continue
 				reflection_dataset = self._dremio_env.get_catalog_entity_by_id(reflection['datasetId'])
 				if reflection_dataset is None:
 					self._logger.debug("_read_reflections: error processing reflection, cannot get path for dataset: " + reflection['datasetId'])
 					continue
 				reflection_path = reflection_dataset['path']
-				self._logger.debug("_read_reflections: processing reflection " + reflection['datasetId'] + " path: " + str(reflection_path))
+				self._logger.debug("_read_reflections: processing reflection " + reflection['id'] + " path: " + str(reflection_path))
 				reflection["path"] = reflection_path
 				self._d.reflections.append(reflection)
 #				self._read_acl(reflection)

@@ -70,6 +70,7 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot; vds.dependencies.process\_mode&quot;
   - scope of _Reflection_ processing 
     - &quot;reflection.process\_mode&quot;
+	- &quot;reflection.id\_include\_list&quot;
   - scope of _Workload Management_ processing
     - &quot;wlm.queue.process\_mode&quot;
     - &quot;wlm.rule.process\_mode&quot;
@@ -214,9 +215,13 @@ The command is configured with a JSON file with configuration attributes listed 
 Note, if none of _space.cascade-acl-origin.override-object_, _space.folder.cascade-acl-origin.filter_, and _source.cascade-acl-origin.override-object_ specified:
 
 - each Space ACL will be propagated through its hierarchy and applied to Folders and VDSs as per filter configuration
+    - To cascade ACLs for all spaces, specify `{"space.filter": "*"}`
+    - To omit cascading any space ACLs, specify `{"space.filter": ""}`
+    - To cascade ACLs for a specific named space, specify `{"space.filter": "spacename"}` where `spacename` should be replaced with the actual name of the space
 - each Source ACL will be propagated through its hierarchy and applied to PDSs as per filter configuration
-
-
+    - To cascade ACLs for all sources, specify `{"source.filter": "*"}`
+    - To omit cascading any source ACLs, specify `{"source.filter": ""}`
+    - To cascade ACLs for a specific named source, specify `{"source.filter": "sourcename"}` where `sourcename` should be replaced with the actual name of the source
 
 Please see a sample JSON configuration file in the config folder of this repository.
 
@@ -380,6 +385,12 @@ Note, that this command does not provide any option for Scope definition. Please
 | vds.filter | A filter that defines what VDSs will be **included** into processing. &quot;\*&quot; will include all VDSs. Empty field will exclude all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.exclude.filter_. |
 | vds.exclude.filter | A filter that defines what VDSs will be **excluded** into processing. &quot;\*&quot; will exclude all VDSs. Empty field will include all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.filter_. |
 
+### Scope of Dremio Reflection processing
+
+| **Configuration Option** | **Description** |
+| --- | --- |
+| reflection.id\_include\_list | If specified, a list filter that defines what reflection ids will be **included** into processing during &quot;get&quot; command execution. If this option is not specified or the list is empty then GET will include all reflections, which is the default behavior. Example: `{"reflection.id_include_list": ["dc86ab2e-8ebf-4d69-9302-911875a79e74", "ad3444df-7da5-4ea5-9624-b7705f351914"]}` |
+
 ### Scope of User and Group processing
 
 | **Configuration Option** | **Description** |
@@ -398,15 +409,15 @@ Note, that this command does not provide any option for Scope definition. Please
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| space.cascade-acl-origin.override-object | If specified, overrides default behavior for Space hierarchy and an ACL of the object specified in this parameter will be used through **all Spaces all hierarchies** instead of the respective Spaces&#39; ACLs. |
+| space.cascade-acl-origin.override-object | If specified, overrides default behavior for Space hierarchy and an ACL of the object specified in this parameter will be used through **all Spaces all hierarchies** instead of the respective Spaces&#39; ACLs. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"},` which is interpreted as read the ACLs from the object called spacetest/spacetesttest_folder and apply those ACLs to each object under the space called spacetest.|
 | source.cascade-acl-origin.override-object | If specified, overrides default behavior for Source hierarchy and an ACL of the object specified in this parameter will be used through **all Source all hierarchies** instead of the respective Sources&#39; ACLs. |
-| space.folder.cascade-acl-origin.filter | If specified, overrides default behavior for Space hierarchy and an ACLs of the Folders selected by this will be used through **its Folder hierarchy** instead of the respective Source&#39;s ACL. |
+| space.folder.cascade-acl-origin.filter | If specified, overrides default behavior for Space hierarchy and an ACLs of the Folders selected by this will be used through **its Folder hierarchy** instead of the respective Source&#39;s ACL. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"}, {"space.folder.cascade-acl-origin.filter": "another_folder"},` which can be interpreted as all objects under spacetest will get the ACLs that are defined in spacetest/spacetest_folder, EXCEPT for those in spacetest/another_folder. All objects beneath another_folder (whose full path is spacetest/another_folder in this example) will have their ACLs set to whatever the ACLs are on another_folder.|
 
 ### Transformation parameters
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| transformation | If specified, allows for transoformation during &quot;put&quot; command execution. Supported transformation is ACL transofrmation. Transformation rules are specified in a separate json file and the file is referenced in the main comnfiguration file. For example: `{"transformation": {"acl": {"file": "acl_transformation.json"}}}` |
+| transformation | If specified, allows for transformation during &quot;put&quot; command execution. Supported transformation is ACL transofrmation. Transformation rules are specified in a separate json file and the file is referenced in the main comnfiguration file. For example: `{"transformation": {"acl": {"file": "acl_transformation.json"}}}` |
 
 ### Report format parameters
 

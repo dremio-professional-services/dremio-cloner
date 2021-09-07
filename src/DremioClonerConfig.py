@@ -121,6 +121,7 @@ class DremioClonerConfig():
 	vds_max_hierarchy_depth = 100			# The max hierarchy depth to process
 	reflection_process_mode = None			# Flag to process reflection: process, skip, create_only, update_only, create_overwrite
 	reflection_filter_mode = None			# Flag to filter reflection: apply_vds_pds_filter
+	reflection_id_include_list = []			# List of reflection ids to include. Empty list means include all reflections which is the default behaviour
 	reflection_refresh_mode = 'skip' 		# Flag to refresh reflections: refresh, skip
 	wlm_queue_process_mode = 'process'		# Flag to process WLM Queues: process, skip
 	wlm_rule_process_mode = 'process'		# Flag to process WLM Rules: process, skip
@@ -354,6 +355,8 @@ class DremioClonerConfig():
 				self.reflection_filter_mode = self._str(item, 'reflection.filter_mode')
 			elif 'pds.reflection_refresh_mode' in item:
 				self.reflection_refresh_mode = self._str(item, 'pds.reflection_refresh_mode')
+			elif 'reflection.id_include_list' in item:
+				self.reflection_id_include_list = self._array(item, 'reflection.id_include_list')
 			# Report Options
 			elif 'report.csv.delimiter' in item:
 				self.report_csv_delimiter = self._str(item, 'report.csv.delimiter')
