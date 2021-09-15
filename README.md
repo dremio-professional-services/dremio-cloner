@@ -90,7 +90,7 @@ Command &quot;put&quot; selectively updates an existing Dremio Environment from 
 
 Command &quot;put&quot; can also process ACL transformation. For example, it can transform ACLs to use LDAP_GROUP_PROD instead of LDAP_GROUP_DEV.
 
-Command &quot;put&quot; can also process Source transformations. For example it can transform paths and references in objects that to use SOURCE_PROD instead of SOURCE_DEV. 
+Command &quot;put&quot; can also process Source transformations. For example it can transform paths and references in objects to use SOURCE_PROD instead of SOURCE_DEV. 
 **PLEASE NOTE:** Use of the source transformation feature is against best practices. As a best practice it is recommended that sources are named the same in all environments. In addition, for the source transformation to succeed as expected you must ensure that no VDS, PDS, Column or Folder in the system contains the same name (nor will it contain an exact substring match) as the original\source data source name.
 
 The command is configured with a JSON file with configuration attributes listed below. For detailed description of the configuration JSON attributes, see Reference section below in Appendix 1.
