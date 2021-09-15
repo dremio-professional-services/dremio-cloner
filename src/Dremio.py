@@ -359,7 +359,7 @@ class Dremio:
 				logging.critical(source + ": received HTTP Response Code " + str(response.status_code) +
 								 " for : <" + str(url) + ">" + self._get_error_message(response))
 				raise RuntimeError(
-					"Specified user does not have sufficient priviliges to create objects in the target Dremio Environment.")
+					"Specified user does not have sufficient privileges to create objects in the target Dremio Environment.")
 			else:
 				if report_error:
 					logging.error(source + ": received HTTP Response Code " + str(response.status_code) +
@@ -533,6 +533,7 @@ class Dremio:
 
 	def _encode_http_param(self, path):
 		if sys.version_info.major > 2:
-			return urllib.parse.quote_plus(path)
+			# handle spaces in non-promoted source or folder paths (want %20 for Dremio URLs rather than +)
+			return urllib.parse.quote_plus(urllib.parse.quote(path), safe='%')
 		else:
 			return urllib.quote_plus(path)

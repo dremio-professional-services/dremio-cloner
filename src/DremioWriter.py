@@ -96,6 +96,7 @@ class DremioWriter:
 		if self._config.vds_process_mode == 'skip':
 			self._logger.info("write_dremio_environment: Skipping VDS processing due to configuration vds.process_mode=skip.")
 		else:
+			self._map_vds_source()
 			self._order_vds(0)
 			self._write_vds_hierarchy()
 			self._write_remainder_vds()
@@ -137,6 +138,7 @@ class DremioWriter:
 	def _write_source(self, entity, process_mode, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 		if self._filter.match_source_filter(entity):
 			self._logger.debug("_write_source: processing entity: " + self._utils.get_entity_desc(entity))
+			self._map_source(entity)
 			return self._write_entity(entity, process_mode, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag)
 		else:
 			self._logger.debug("_write_source: skipping entity: " + self._utils.get_entity_desc(entity))
@@ -153,6 +155,56 @@ class DremioWriter:
 		else:
 			self._logger.debug("_write_folder: skipping entity: " + self._utils.get_entity_desc(entity))
 			return None
+
+	def _map_source(self, entity):
+		# see if the current source name is being mapped to a different name in source_transformation
+		for map in self._config.source_transformation:
+			if entity['name'] == map['source-source-name']:
+				self._logger.info("_map_source: mapping source name " + entity['name'] + " into " + map['target-source-name'])
+				entity['name'] = map['target-source-name']
+				break
+
+	def _map_pds_source(self, entity):
+		# see if the PDS contains a source name that is being mapped to a different name in source_transformation
+		for map in self._config.source_transformation:
+			if entity['path'][0] == map['source-source-name']:
+				self._logger.info("_map_pds_source: mapping pds source name " + entity['path'][0] + " into " + map['target-source-name'])
+				entity['path'][0] = map['target-source-name']
+				if 'format' in entity and 'fullPath' in entity['format']:
+					entity['format']['fullPath'][0] = map['target-source-name']
+				break
+
+	def _map_vds_source(self):
+		for map in self._config.source_transformation:
+			# see if the VDS definition contains a source name that is mapped to a different name according to the source_transformation
+			for vds in self._d.vds_list:
+				if "sqlContext" in vds and map['source-source-name'] == vds["sqlContext"][0]:
+					vds["sqlContext"][0] = map['target-source-name']
+					self._logger.info("_map_vds_source: updating context for " + self._utils.get_entity_desc(vds) + " with target source name: " + vds["sqlContext"][0])
+				if map['source-source-name'] in vds["sql"]:
+					# If the source-source-name is not quoted in the SQL text then add quotes around target-source-name.
+					# This will avoid any issues with special characters in the target-source-name name
+					if (map['source-source-name'] + ".") in vds["sql"]:
+						vds["sql"] = vds["sql"].replace(map['source-source-name'], '"' + map['target-source-name'] + '"')
+					else:
+						vds["sql"] = vds["sql"].replace(map['source-source-name'], map['target-source-name'])
+					self._logger.info("_map_vds_source: updating sql for " + self._utils.get_entity_desc(vds) + " with target source name: " + map['target-source-name'])
+
+	def _map_wiki_source(self, wiki):
+		# see if the wiki path contains a source name that is being mapped to a different name in source_transformation
+		for map in self._config.source_transformation:
+			if wiki['path'][0] == map['source-source-name']:
+				self._logger.info("_map_wiki_source: mapping wiki source name in path " + wiki['path'][0] + " into " + map['target-source-name'])
+				wiki['path'][0] = map['target-source-name']
+				break
+
+	def _map_reflection_source(self, reflection):
+		# see if the reflection path contains a source name that is being mapped to a different name in source_transformation
+		for map in self._config.source_transformation:
+			if reflection['path'][0] == map['source-source-name']:
+				self._logger.info("_map_reflection_source: mapping reflection source name in path " + reflection['path'][0] + " into " + map['target-source-name'])
+				reflection['path'][0] = map['target-source-name']
+				break
 
 	def _retrieve_users_groups(self):
 		for user in self._d.referenced_users:
@@ -327,6 +379,7 @@ class DremioWriter:
 	def _write_pds(self, entity, process_mode, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 		self._logger.debug("_write_pds: processing entity: " + self._utils.get_entity_desc(entity))
 		if self._filter.match_pds_filter(entity):
+			self._map_pds_source(entity)
 			existing_entity = self._read_entity_definition(entity)
 			if existing_entity is None:
 				self._logger.error("_write_pds: Cannot find existing entity for PDS Entity. Either Folder, File, or PDS must exist prior to promoting or updating PDS. Source PDS: " + self._utils.get_entity_desc(entity))
@@ -377,7 +430,7 @@ class DremioWriter:
 
 
 	def _write_reflection(self, reflection, process_mode):
-		self._logger.debug("_write_reflection: processing reflection: " + ((reflection['id'] + " path: ") if 'id' in reflection else (reflection['name'] + " path: ")) + self._utils.get_entity_desc(reflection))
+		self._logger.debug("_write_reflection: processing reflection: " + ((reflection['id'] + " name: " + reflection['name'] + " path: ") if 'id' in reflection else (reflection['name'] + " path: ")) + self._utils.get_entity_desc(reflection))
 		# Clean up the definition
 		if 'id' in reflection:
 			reflection.pop("id")
@@ -397,6 +450,7 @@ class DremioWriter:
 			reflection.pop("canView")
 		if 'canAlter' in reflection:
 			reflection.pop("canAlter")
+		self._map_reflection_source(reflection)
 		reflection_path = reflection['path']
 		# Write Reflection
 		reflection.pop("path")
@@ -929,6 +983,7 @@ class DremioWriter:
 
 	def _write_wiki(self, wiki, process_mode):
 		self._logger.debug("_write_wiki: processing wiki: " + str(wiki))
+		self._map_wiki_source(wiki)
 		new_wiki_text = wiki['text']
 		wiki_path = wiki['path']
 		# Check if the wiki already exists

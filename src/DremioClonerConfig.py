@@ -129,7 +129,8 @@ class DremioClonerConfig():
 	tag_process_mode ='process'				# Flag to process Tags: process, skip
 	home_process_mode = 'process'			# Flag to process Homes: process, skip
 	vote_process_mode = 'process'			# Flag to process Votes: process, skip
-	acl_transformation = {}					# Contains all ACL tranformation definitions
+	acl_transformation = {}					# Contains all ACL transformation definitions
+	source_transformation = {}  			# Contains all source transformation definitions
 	# Delete VDS List
 	delete_vds = []							# List of VDS to delete from the target environment
 	delete_folders = []						# List of Folders to delete from the target environment
@@ -376,10 +377,16 @@ class DremioClonerConfig():
 			elif 'vote.process_mode' in item:
 				self.vote_process_mode = self._str(item, 'vote.process_mode')
 			elif 'transformation' in item:
-				acl_transformation_filename = self._str(item['transformation']['acl'], 'file')
-				f = open(acl_transformation_filename, "r")
-				self.acl_transformation = json.load(f)['acl-transformation']
-				f.close()
+				if 'acl' in item['transformation']:
+					acl_transformation_filename = self._str(item['transformation']['acl'], 'file')
+					f = open(acl_transformation_filename, "r")
+					self.acl_transformation = json.load(f)['acl-transformation']
+					f.close()
+				if 'source' in item['transformation']:
+					source_transformation_filename = self._str(item['transformation']['source'], 'file')
+					f = open(source_transformation_filename, "r")
+					self.source_transformation = json.load(f)['source-transformation']
+					f.close()
 			elif 'vds.delete_list' in item:
 				self.delete_vds = self._str_array(item, 'vds.delete_list')
 			elif 'folder.delete_list' in item:

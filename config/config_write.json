@@ -23,7 +23,7 @@
 		{"http_timeout":"10"},
 		{"source.retry_timedout":"false"},
 
-		{"space.process_mode":"update"},
+		{"space.process_mode":"create_only"},
 		{"folder.process_mode":"create_overwrite"},
 		{"source.process_mode":"create_overwrite"},
 		{"pds.process_mode":"promote"},
@@ -38,6 +38,7 @@
 		{"wlm.rule.process_mode": "process"},
 
 	  	{"transformation": {"acl": {"file": "acl_transformation.json"}}},
+		{"transformation": {"source": {"file": "source_transformation.json"}}},
 
 	  	{"space.ignore_missing_acl_user":"True"},
 		{"space.ignore_missing_acl_group":"True"},

@@ -1,0 +1,10 @@
+{"source-transformation":
+[
+  { "source-source-name": "<SOURCE DATASOURCE1 NAME>",
+	"target-source-name": "<TARGET DATASOURCE1 NAME>"
+  },
+  { "source-source-name": "<SOURCE DATASOURCE2 NAME>",
+	"target-source-name": "<TARGET DATASOURCE2 NAME>"
+  }
+]
+}

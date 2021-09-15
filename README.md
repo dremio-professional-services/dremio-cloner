@@ -90,6 +90,9 @@ Command &quot;put&quot; selectively updates an existing Dremio Environment from 
 
 Command &quot;put&quot; can also process ACL transformation. For example, it can transform ACLs to use LDAP_GROUP_PROD instead of LDAP_GROUP_DEV.
 
+Command &quot;put&quot; can also process Source transformations. For example it can transform paths and references in objects that to use SOURCE_PROD instead of SOURCE_DEV. 
+**PLEASE NOTE:** Use of the source transformation feature is against best practices. As a best practice it is recommended that sources are named the same in all environments. In addition, for the source transformation to succeed as expected you must ensure that no VDS, PDS, Column or Folder in the system contains the same name (nor will it contain an exact substring match) as the original\source data source name.
+
 The command is configured with a JSON file with configuration attributes listed below. For detailed description of the configuration JSON attributes, see Reference section below in Appendix 1.
 
 - &quot;command&quot;:&quot;put&quot;
@@ -165,9 +168,12 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;transformation&quot;
       - &quot;acl&quot;
         - &quot;file&quot;
+  - source transformation processing 
+    - &quot;transformation&quot;
+      - &quot;source&quot;
+        - &quot;file&quot;
 
-
-Please see a sample JSON configuration file in the config folder if this repository.
+Please see a sample JSON configuration file in the config folder of this repository.
 
 ## Command &quot;cascade-acl&quot;
 
@@ -418,7 +424,7 @@ Note, that this command does not provide any option for Scope definition. Please
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| transformation | If specified, allows for transformation during &quot;put&quot; command execution. Supported transformation is ACL transofrmation. Transformation rules are specified in a separate json file and the file is referenced in the main comnfiguration file. For example: `{"transformation": {"acl": {"file": "acl_transformation.json"}}}` |
+| transformation | If specified, allows for transformation during &quot;put&quot; command execution. Supported transformations are ACL and Source transformation. Transformation rules are specified in a separate json file and the file is referenced in the main comnfiguration file. For example: `{"transformation": {"acl": {"file": "acl_transformation.json"}}}` for ACL transformations and `{"transformation": {"source": {"file": "source_transformation.json"}}}` for Source transformations |
 
 ### Report format parameters
 
