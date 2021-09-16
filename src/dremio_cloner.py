@@ -100,7 +100,7 @@ def put_dremio_environment(config):
 
 def report_acl(config):
 	logging.info("Executing command 'report-acl'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
+	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
 	reader = DremioReader(dremio, config)
 	dremio_data = reader.read_dremio_environment()
 	dremio_report = DremioReportAcl(dremio, dremio_data, config)
@@ -111,7 +111,7 @@ def report_acl(config):
 
 def report_reflections(config):
 	logging.info("Executing command 'report-reflections'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
+	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
 	dremio_report = DremioReportReflections(dremio, config)
 	dremio_report.process_dremio_reflections()
 	print("Done. Please review log file for details.")
@@ -119,7 +119,7 @@ def report_reflections(config):
 
 def cascade_acl(config):
 	logging.info("Executing command 'cascade-acl'.")
-	dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, config.http_timeout, verify_ssl=config.target_verify_ssl)
+	dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, False, config.http_timeout, verify_ssl=config.target_verify_ssl)
 	cascader = DremioCascadeAcl(dremio, config)
 	cascader.cascade_acl()
 	logging.info("Command 'cascade-acl' finished with " + str(cascader.get_errors_count()) + " error(s).")
@@ -128,7 +128,7 @@ def cascade_acl(config):
 
 def describe_job(config):
 	logging.info("Executing command 'describe-job'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, config.http_timeout, verify_ssl=config.source_verify_ssl)
+	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, verify_ssl=config.source_verify_ssl)
 	describer = DremioDescribeJob(dremio, config)
 	if config.target_type == 'sql-dependencies':
 		dremio_data = describer.describe_job_sql_dependencies()
@@ -138,7 +138,7 @@ def describe_job(config):
 
 def delete_objects(config):
 	logging.info("Executing command '" + DremioClonerConfig.CMD_DELETE + "'.")
-	dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, config.http_timeout, verify_ssl=config.target_verify_ssl)
+	dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, False, config.http_timeout, verify_ssl=config.target_verify_ssl)
 	deleter = DremioDelete(dremio, config)
 	deleter.delete()
 	logging.info("Command '" + DremioClonerConfig.CMD_DELETE + "' finished with " + str(deleter.get_errors_count()) + " error(s).")
