@@ -98,7 +98,7 @@ class DremioReportAcl:
 			acl_line_suffix = acl_line_suffix + self._delimeter
 		# Add SQL for VDS
 		if entity_type == 'VDS':
-			acl_line_suffix = acl_line_suffix + str(entity['sql']).replace('\n', ' ') + self._newline
+			acl_line_suffix = acl_line_suffix + str(entity['sql']).replace('\n', ' ').replace('\r', ' ') + self._newline
 		else:
 			acl_line_suffix = acl_line_suffix + self._newline
 
