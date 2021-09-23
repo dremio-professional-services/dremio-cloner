@@ -49,12 +49,15 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;space.process\_mode&quot;
     - &quot;folder.process\_mode&quot;
     - &quot;space.filter&quot;
+	- &quot;space.filter.names&quot;
     - &quot;space.exclude.filter&quot;
     - &quot;space.folder.filter&quot;
     - &quot;space.folder.exclude.filter&quot;
   - scope of _Source_ processing 
     - &quot;source.process\_mode&quot;
     - &quot;source.filter&quot;
+    - &quot;source.filter.names&quot;
+	- &quot;source.filter.types&quot;
     - &quot;source.exclude.filter&quot;
     - &quot;source.folder.filter&quot;
     - &quot;source.folder.exclude.filter&quot;
@@ -133,6 +136,7 @@ The command is configured with a JSON file with configuration attributes listed 
   - scope of _Space_ processing 
     - &quot;space.process\_mode&quot;
     - &quot;space.filter&quot;
+	- &quot;space.filter.names&quot;
     - &quot;space.exclude.filter&quot;
     - &quot;folder.process\_mode&quot;
     - &quot;space.folder.filter&quot;
@@ -140,6 +144,8 @@ The command is configured with a JSON file with configuration attributes listed 
   - scope of _Source_ processing 
     - &quot;source.process\_mode&quot;
     - &quot;source.filter&quot;
+	- &quot;source.filter.names&quot;
+	- &quot;source.filter.types&quot;
     - &quot;source.exclude.filter&quot;
     - &quot;source.folder.filter&quot;
     - &quot;source.folder.exclude.filter&quot;
@@ -364,6 +370,7 @@ Note, that this command does not provide any option for Scope definition. Please
 | **Configuration Option** | **Description** |
 | --- | --- |
 | space.filter | A filter that defines what Spaces will be **included** into processing. &quot;\*&quot; will include all Spaces. Empty field will exclude all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _space.exclude.filter_. |
+| space.filter.names | If specified, a list filter that defines what Spaces will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all spaces specified by _space.filter_, which is the default behavior. Works in logical AND with _space.exclude.filter_. Example: `{"space.filter.names": ["MySpace1", "MySpace2", "MySpace3"]},` |
 | space.exclude.filter | A filter that defines what Spaces will be **excluded** into processing. &quot;\*&quot; will exclude all Spaces. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _space.filter_. |
 | space.folder.filter | A filter that defines what Space Folders will be **included** into processing. &quot;\*&quot; will include all Folders. Empty field will exclude all Folders. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _space.folder_._exclude_._filter_. |
 | space.folder.exclude.filter | A filter that defines what Space Folders will be **excluded** into processing. &quot;\*&quot; will exclude all Folders. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _space.folder_._filter_. |
@@ -373,6 +380,8 @@ Note, that this command does not provide any option for Scope definition. Please
 | **Configuration Option** | **Description** |
 | --- | --- |
 | source.filter | A filter that defines what Sources will be **included** into processing. &quot;\*&quot; will include all Sources. Empty field will exclude all Sources. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.exclude.filter_. |
+| source.filter.names | If specified, a list filter that defines what Sources will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all sources specified by _space.filter_, which is the default behavior. Works in logical AND with _source.exclude.filter_. Example: `{"source.filter.names": ["MySource1", "MySource2", "MySource3"]},` |
+| source.filter.types | If specified, a list filter that defines what Source Types will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all possible source types present based on the other source filters, which is the default behavior. Works in logical AND with the other source filters. Example: `{"source.filter.types": ["S3", "POSTGRES", "NAS"]},` |
 | source.exclude.filter | A filter that defines what Spaces will be **excluded** into processing. &quot;\*&quot; will exclude all Spaces. Empty field will include all Sources. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.filter_. |
 | source.folder.filter | A filter that defines what Source Folders will be **included** into processing. &quot;\*&quot; will include all Folders. Empty field will exclude all Folders. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.exclude.filter_. |
 | source.folder.exclude.filter | A filter that defines what Source Folders will be **excluded** into processing. &quot;\*&quot; will exclude all Folders. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.filter_. |
