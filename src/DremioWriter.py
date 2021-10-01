@@ -74,11 +74,17 @@ class DremioWriter:
 		if self._config.reflection_process_mode != 'skip':
 			self._existing_reflections = self._dremio_env.list_reflections()['data']
 		if self._config.source_process_mode == 'skip':
+			# even though they are being skipped, we still need to map source names in case other objects depend on them
+			for source in self._d.sources:
+				self._map_source(source)
 			self._logger.info("write_dremio_environment: Skipping source processing due to configuration source.process_mode=skip.")
 		else:
 			for source in self._d.sources:
 				self._write_source(source, self._config.source_process_mode, self._config.source_ignore_missing_acl_user, self._config.source_ignore_missing_acl_group)
 		if self._config.pds_process_mode == 'skip':
+			# even though they are being skipped, we still need to map source names that appear in PDSs in case VDSs depend on them
+			for pds in self._d.pds_list:
+				self._map_pds_source(pds)
 			self._logger.info("write_dremio_environment: Skipping source PDS processing due to configuration source.pds.process_mode=skip.")
 		else:
 			for pds in self._d.pds_list:
