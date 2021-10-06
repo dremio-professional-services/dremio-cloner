@@ -1,0 +1,22 @@
+{"acl-transformation":
+[
+  { "source": {"role":"ROLE_1>"},
+	"target": {"user":"<USER_1>"},
+    "permission-mapping": [{"SELECT": "SELECT"}, {"ALTER": "ALTER"}]
+  },
+  { "source": {"user":"<USER_2>"},
+	"target": {"role":"<ROLE_2>"},
+    "permission-mapping": [{"SELECT": "ALTER"}, {"ALTER": "ALTER"}]
+  },
+  { "source": {"user":"<USER_3>"},
+	"target": {"user":"<USER_3>"},
+    "permission-mapping": [{"SELECT": "SELECT"}, {"ALTER": "SELECT"}]
+  },
+  { "source": {"role":"<ROLE_4>"},
+	"target": {"role":"<ROLE_4>"}
+  },
+  { "source": {"role":"<ROLE_5>"},
+    "target": "REMOVE"
+  }
+]
+}
