@@ -53,7 +53,7 @@ class DremioFile():
 		filename = self._config.target_filename
 		if os.path.isfile(filename):
 			os.remove(filename)
-		f = open(filename, "w")
+		f = open(filename, "w", encoding="utf-8")
 		f.write('{ "data": [')
 		json.dump({'dremio_environment': [{'file_version':'0.3'},{'base_url':self._config.source_endpoint},{'timestamp_utc':str(datetime.utcnow())}]}, f)
 		# Remove password if present
@@ -120,7 +120,7 @@ class DremioFile():
 		f.close()
 
 	def read_dremio_environment_from_json_file(self, filename):
-		f = open(filename, "r")
+		f = open(filename, "r", encoding="utf-8")
 		data = json.load(f)['data']
 		f.close()
 		dremio_data = DremioData()
@@ -178,30 +178,30 @@ class DremioFile():
 				rmtree(target_directory)
 			os.makedirs(target_directory)
 			if self._config.home_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'homes'))
+				os.makedirs(os.path.join(target_directory, 'homes').encode(encoding='utf-8', errors='strict'))
 			if self._config.source_process_mode == 'process' or self._config.pds_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'sources'))
+				os.makedirs(os.path.join(target_directory, 'sources').encode(encoding='utf-8', errors='strict'))
 			if self._config.space_process_mode == 'process' or self._config.vds_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'spaces'))
+				os.makedirs(os.path.join(target_directory, 'spaces').encode(encoding='utf-8', errors='strict'))
 			if self._config.reflection_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'reflections'))
+				os.makedirs(os.path.join(target_directory, 'reflections').encode(encoding='utf-8', errors='strict'))
 			if self._config.user_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'referenced_users'))
+				os.makedirs(os.path.join(target_directory, 'referenced_users').encode(encoding='utf-8', errors='strict'))
 			if self._config.group_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'referenced_groups'))
-				os.makedirs(os.path.join(target_directory, 'referenced_roles'))
+				os.makedirs(os.path.join(target_directory, 'referenced_groups').encode(encoding='utf-8', errors='strict'))
+				os.makedirs(os.path.join(target_directory, 'referenced_roles').encode(encoding='utf-8', errors='strict'))
 			if self._config.wlm_queue_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'queues'))
+				os.makedirs(os.path.join(target_directory, 'queues').encode(encoding='utf-8', errors='strict'))
 			if self._config.wlm_rule_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'rules'))
+				os.makedirs(os.path.join(target_directory, 'rules').encode(encoding='utf-8', errors='strict'))
 			if self._config.tag_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'tags'))
+				os.makedirs(os.path.join(target_directory, 'tags').encode(encoding='utf-8', errors='strict'))
 			if self._config.wiki_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'wikis'))
+				os.makedirs(os.path.join(target_directory, 'wikis').encode(encoding='utf-8', errors='strict'))
 			if self._config.vote_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'votes'))
+				os.makedirs(os.path.join(target_directory, 'votes').encode(encoding='utf-8', errors='strict'))
 			if self._config.source_graph_support and self._config.vds_dependencies_process_mode == 'get':
-				os.makedirs(os.path.join(target_directory, 'vds_parents'))
+				os.makedirs(os.path.join(target_directory, 'vds_parents').encode(encoding='utf-8', errors='strict'))
 		except OSError as e:
 			raise Exception("Error processing directory structure. OS Error: " + e.strerror)
 		try:
@@ -213,26 +213,26 @@ class DremioFile():
 						if 'password' in source_item:
 							source_item['password'] = ''
 							break
-			f = open(os.path.join(target_directory, self._config.dremio_conf_filename), "w")
+			f = open(os.path.join(target_directory, self._config.dremio_conf_filename), "w", encoding="utf-8")
 			json.dump({'dremio_get_config':self._config.cloner_conf_json}, f)
 			f.close()
 			# Process all entities
 			if self._config.home_process_mode == 'process':
 				for home in dremio_data.homes:
-					os.makedirs(os.path.join(target_directory, "homes", self._replace_special_characters(home['name'])))
+					os.makedirs(os.path.join(target_directory, "homes", self._replace_special_characters(home['name'])).encode(encoding='utf-8', errors='strict'))
 					self._write_container_json_file(os.path.join(target_directory, "homes"), home)
 			if self._config.space_process_mode == 'process':
 				for space in dremio_data.spaces:
-					os.makedirs(os.path.join(target_directory, "spaces", self._replace_special_characters(space['name'])))
+					os.makedirs(os.path.join(target_directory, "spaces", self._replace_special_characters(space['name'])).encode(encoding='utf-8', errors='strict'))
 					self._write_container_json_file(os.path.join(target_directory, "spaces"), space)
 			if self._config.source_process_mode == 'process':
 				for source in dremio_data.sources:
-					os.makedirs(os.path.join(target_directory, "sources", self._replace_special_characters(source['name'])))
+					os.makedirs(os.path.join(target_directory, "sources", self._replace_special_characters(source['name'])).encode(encoding='utf-8', errors='strict'))
 					self._write_container_json_file(os.path.join(target_directory, "sources"), source)
 			if self._config.folder_process_mode == 'process' or self._config.vds_process_mode == 'process':
 				for folder in dremio_data.folders:
 					# ignore directory exists error, we might have created it prior
-					dirpath = os.path.join(target_directory, "spaces", self._get_fs_path(folder['path']))
+					dirpath = os.path.join(target_directory, "spaces", self._get_fs_path(folder['path'])).encode(encoding='utf-8',errors='strict')
 					if not os.path.isdir(dirpath):
 						os.makedirs(dirpath)
 					if self._config.folder_process_mode == 'process':
@@ -279,7 +279,7 @@ class DremioFile():
 		try:
 			source_directory = self._config.source_directory
 			dremio_data = DremioData()
-			f = open(os.path.join(source_directory, self._config.dremio_conf_filename), "r")
+			f = open(os.path.join(source_directory, self._config.dremio_conf_filename), "r", encoding="utf-8")
 			dremio_data.dremio_get_config = json.load(f)
 			f.close()
 			self._collect_directory(os.path.join(source_directory, 'homes'), dremio_data.homes, dremio_data.folders, dremio_data.homes)
@@ -301,7 +301,7 @@ class DremioFile():
 	def _collect_directory(self, directory, container_list, folder_list, object_list):
 		for (dirpath, dirnames, filenames) in os.walk(directory):
 			for filename in filenames:
-				f = open(os.path.join(dirpath, filename), "r")
+				f = open(os.path.join(dirpath, filename), "r", encoding="utf-8")
 				data = json.load(f)
 				f.close()
 				if self._config.container_filename == filename:
@@ -315,43 +315,43 @@ class DremioFile():
 					object_list.append(data)
 
 	def _write_container_json_file(self, root_dir, container):
-		filepath = os.path.join(root_dir, container['name'], self._config.container_filename)
-		f = open(filepath, "w")
+		filepath = os.path.join(root_dir, container['name'], self._config.container_filename).encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(container, f)
 		f.close()
 
 
 	def _write_wiki_json_file(self, root_dir, wiki):
-		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json")
-		f = open(filepath, "w")
+		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(wiki, f)
 		f.close()
 
 
 	def _write_tag_json_file(self, root_dir, wiki):
-		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json")
-		f = open(filepath, "w")
+		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(wiki, f)
 		f.close()
 
 
 	def _write_object_json_file(self, root_dir, object):
-		filepath = os.path.join(root_dir, object['id'] + ".json")
-		f = open(filepath, "w")
+		filepath = os.path.join(root_dir, object['id'] + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(object, f)
 		f.close()
 
 
 	def _write_vote_json_file(self, root_dir, object):
-		filepath = os.path.join(root_dir, object['datasetId'] + ".json")
-		f = open(filepath, "w")
+		filepath = os.path.join(root_dir, object['datasetId'] + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(object, f)
 		f.close()
 
 
 	def _write_folder_json_file(self, root_dir, folder):
-		filepath = os.path.join(root_dir, self._get_fs_path(folder['path']), self._config.container_filename)
-		f = open(filepath, "w")
+		filepath = os.path.join(root_dir, self._get_fs_path(folder['path']), self._config.container_filename).encode(encoding='utf-8',errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(folder, f)
 		f.close()
 
@@ -361,16 +361,17 @@ class DremioFile():
 		path = entity['path']
 		filepath = root_dir
 		for item in path:
-			if not os.path.isdir(filepath):
+			if not os.path.isdir(filepath.encode(encoding='utf-8', errors='strict')):
 				try:
-					os.makedirs(filepath)
+					os.makedirs(filepath.encode(encoding='utf-8', errors='strict'))
 				except OSError as e:
 					if e.errno != errno.EEXIST:
 						raise "Cannot create directory: " + filepath
 			# Replace special characters with underscore
 			filepath = os.path.join(filepath, self._replace_special_characters(item))
 		# write entity into json file
-		f = open(filepath + ".json", "w")
+		filepath = (filepath  + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
 		json.dump(entity, f)
 		f.close()
 
