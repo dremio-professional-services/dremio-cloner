@@ -209,16 +209,20 @@ class Dremio:
 		for i in range(0, int(num_rows / limit) + 1):
 			logging.info("list_pds: processing batch " + str(i + 1))
 			job_result = self.get_job_result(jobid, limit * i, limit)
-			for row in job_result['rows']:
-				# The schema (path) is denormalized: instead of abc/ab.c/abc it has abc.ab.c.abc, we need to recover it
-				normalized_path = self._normalize_schema(row['TABLE_SCHEMA'])
-				entity = self.get_catalog_entity_by_path(normalized_path + row['TABLE_NAME'])
-				if entity is None:
-					if pds_error_list is not None:
-						pds_error_list.append({"name": row['TABLE_NAME'], "path": normalized_path})
-					logging.error("list_pds: error reading entity for: " + normalized_path + row['TABLE_NAME'] + " The SOURCE is likely not available at the moment. See DEBUG logging for more information.")
-				else:
-					pds_list.append(entity)
+			if job_result != None:
+				for row in job_result['rows']:
+					# The schema (path) is denormalized: instead of abc/ab.c/abc it has abc.ab.c.abc, we need to recover it
+					normalized_path = self._normalize_schema(row['TABLE_SCHEMA'])
+					entity = self.get_catalog_entity_by_path(normalized_path + row['TABLE_NAME'])
+					if entity is None:
+						if pds_error_list is not None:
+							pds_error_list.append({"name": row['TABLE_NAME'], "path": normalized_path})
+						logging.error("list_pds: error reading entity for: " + normalized_path + row['TABLE_NAME'] + " The SOURCE is likely not available at the moment. See DEBUG logging for more information.")
+					else:
+						pds_list.append(entity)
+			else:
+				logging.error("list_pds: error reading job result for jobId: " + jobid)
+
 		return pds_list
 
 	_cached_schemas = {}

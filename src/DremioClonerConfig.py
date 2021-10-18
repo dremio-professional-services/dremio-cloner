@@ -175,7 +175,8 @@ class DremioClonerConfig():
 				self._process_target(element)
 			elif 'options' in element:
 				self._process_options(element)
-		logging.basicConfig(format=self.logging_format, level=self.logging_level, filename=self.logging_filename)
+		handlers = [logging.FileHandler(filename=self.logging_filename, encoding='utf-8', mode='a+')]
+		logging.basicConfig(handlers=handlers, format=self.logging_format, level=self.logging_level)
 		self._logger = DremioClonerLogger(self.max_errors, self.logging_verbose)
 		self._validate_configuration()
 
