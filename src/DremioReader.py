@@ -86,6 +86,10 @@ class DremioReader:
 	# Identify a container and delegate processing 
 	def _process_container(self, container):
 		self._logger.debug("_process_container: " + self._utils.get_entity_desc(container))
+		if "createdAt" in container:
+			container.pop("createdAt")
+		if "tag" in container:
+			container.pop("tag")
 		if container['containerType'] == "HOME":
 			self._read_home(container)
 		elif container['containerType'] == "SPACE":
@@ -103,6 +107,10 @@ class DremioReader:
 			entity = self._get_entity_definition_by_id(container)
 			if entity is not None:
 				self._logger.info("_read_home: " + self._utils.get_entity_desc(entity))
+				if "createdAt" in entity:
+					entity.pop("createdAt")
+				if "tag" in entity:
+					entity.pop("tag")
 				self._d.homes.append(entity)
 				self._read_acl(entity)
 				self._read_wiki(entity)
@@ -120,6 +128,10 @@ class DremioReader:
 			entity = self._get_entity_definition_by_id(container)
 			if entity is not None:
 				self._logger.debug("_read_space: " + self._utils.get_entity_desc(container))
+				if "createdAt" in entity:
+					entity.pop("createdAt")
+				if "tag" in entity:
+					entity.pop("tag")
 				self._d.spaces.append(entity)
 				self._read_acl(entity)
 				self._read_wiki(entity)
@@ -137,6 +149,10 @@ class DremioReader:
 				entity = self._get_entity_definition_by_id(container)
 				if entity is not None:
 					# Re-validate the filter with entity since there is more details in entity
+					if "createdAt" in entity:
+						entity.pop("createdAt")
+					if "tag" in entity:
+						entity.pop("tag")
 					if self._filter.match_source_filter(entity):
 						self._logger.debug("_read_source: " + self._utils.get_entity_desc(entity))
 						self._d.sources.append(entity)
@@ -158,6 +174,10 @@ class DremioReader:
 		if entity is None:
 			self._logger.error("_read_space_folder: error reading entity for folder: " + self._utils.get_entity_desc(folder))
 			return
+		if "createdAt" in entity:
+			entity.pop("createdAt")
+		if "tag" in entity:
+			entity.pop("tag")
 		if self._top_level_hierarchy_context == "HOME" or self._filter.match_space_folder_filter(folder):
 			self._logger.debug("_read_space_folder: " + self._utils.get_entity_desc(folder))
 			self._d.folders.append(entity)
@@ -181,6 +201,10 @@ class DremioReader:
 			self._logger.error("_read_space_children: bad data, skipping entity: " + self._utils.get_entity_desc(parent_entity))
 			return
 		for child in parent_entity['children']:
+			if "createdAt" in child:
+				child.pop("createdAt")
+			if "tag" in child:
+				child.pop("tag")
 			if child['type'] == "DATASET":
 				self._read_dataset(child)
 			elif child['type'] == "FILE":
@@ -196,6 +220,10 @@ class DremioReader:
 			entity = self._get_entity_definition_by_id(folder)
 			if entity is not None:
 				self._logger.debug("_read_source_folder: " + self._utils.get_entity_desc(folder))
+				if "createdAt" in entity:
+					entity.pop("createdAt")
+				if "tag" in entity:
+					entity.pop("tag")
 				self._read_source_children(entity)
 			else:
 				self._logger.error("_read_source_folder: error reading entity for folder: " + self._utils.get_entity_desc(folder))
@@ -206,6 +234,10 @@ class DremioReader:
 			self._logger.error("_read_source_children: bad data, skipping entity: " + self._utils.get_entity_desc(parent_entity))
 			return
 		for child in parent_entity['children']:
+			if "createdAt" in child:
+				child.pop("createdAt")
+			if "tag" in child:
+				child.pop("tag")
 			if child['type'] == "DATASET":
 				self._read_dataset(child)
 			elif child['type'] == "FILE":
@@ -219,6 +251,10 @@ class DremioReader:
 		self._logger.debug("_read_dataset: processing dataset: " + self._utils.get_entity_desc(dataset))
 		entity = self._get_entity_definition_by_id(dataset)
 		if entity is not None:
+			if "createdAt" in entity:
+				entity.pop("createdAt")
+			if "tag" in entity:
+				entity.pop("tag")
 			self._logger.debug("_read_dataset: " + dataset['datasetType'] + " : " + self._utils.get_entity_desc(dataset))
 			if dataset['datasetType'] == "PROMOTED" or dataset['datasetType'] == "DIRECT":
 				self._d.pds_list.append(entity)
@@ -242,6 +278,10 @@ class DremioReader:
 			reflections = self._dremio_env.list_reflections()['data']
 			for reflection in reflections:
 				# if the reflection id include list is not empty, then skip reflection ids that are not in the list
+				if "createdAt" in reflection:
+					reflection.pop("createdAt")
+				if "tag" in reflection:
+					reflection.pop("tag")
 				if len(self._config.reflection_id_include_list) > 0:
 					if reflection['id'] not in self._config.reflection_id_include_list:
 						self._logger.debug("_read_reflections: ignoring reflection id " + reflection['id'] + ", not in include list")
@@ -280,6 +320,10 @@ class DremioReader:
 		if self._config.wiki_process_mode == 'process':
 			wiki = self._dremio_env.get_catalog_wiki(entity['id'])
 			if wiki is not None:
+				if "createdAt" in wiki:
+					wiki.pop("createdAt")
+				if "tag" in wiki:
+					wiki.pop("tag")
 				wiki["entity_id"] = entity['id']
 				if entity['entityType'] == 'space' or entity['entityType'] == 'source' or entity['entityType'] == 'home':
 					wiki['path'] = [entity['name']]
@@ -298,12 +342,20 @@ class DremioReader:
 				for user in acl['users']:
 					user_entity = self._dremio_env.get_user(user['id'])
 					if user_entity is not None:
+						if "createdAt" in user_entity:
+							user_entity.pop("createdAt")
+						if "tag" in user_entity:
+							user_entity.pop("tag")
 						if user_entity not in self._d.referenced_users:
 							self._d.referenced_users.append(user_entity)
 			if 'groups' in acl:
 				for group in acl['groups']:
 					group_entity = self._dremio_env.get_group(group['id'])
 					if group_entity is not None:
+						if "createdAt" in group_entity:
+							group_entity.pop("createdAt")
+						if "tag" in group_entity:
+							group_entity.pop("tag")
 						if group_entity not in self._d.referenced_groups:
 							self._d.referenced_groups.append(group_entity)
 
@@ -311,6 +363,10 @@ class DremioReader:
 				for role in acl['roles']:
 					role_entity = self._dremio_env.get_role(role['id'])
 					if role_entity is not None:
+						if "createdAt" in role_entity:
+							role_entity.pop("createdAt")
+						if "tag" in role_entity:
+							role_entity.pop("tag")
 						if role_entity not in self._d.referenced_roles:
 							self._d.referenced_roles.append(role_entity)
 

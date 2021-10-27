@@ -214,7 +214,7 @@ class DremioFile():
 							source_item['password'] = ''
 							break
 			f = open(os.path.join(target_directory, self._config.dremio_conf_filename), "w", encoding="utf-8")
-			json.dump({'dremio_get_config':self._config.cloner_conf_json}, f)
+			json.dump({'dremio_get_config':self._config.cloner_conf_json}, f, indent=4, sort_keys=True)
 			f.close()
 			# Process all entities
 			if self._config.home_process_mode == 'process':
@@ -317,42 +317,42 @@ class DremioFile():
 	def _write_container_json_file(self, root_dir, container):
 		filepath = os.path.join(root_dir, container['name'], self._config.container_filename).encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(container, f)
+		json.dump(container, f, indent=4, sort_keys=True)
 		f.close()
 
 
 	def _write_wiki_json_file(self, root_dir, wiki):
 		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(wiki, f)
+		json.dump(wiki, f, indent=4, sort_keys=True)
 		f.close()
 
 
 	def _write_tag_json_file(self, root_dir, wiki):
 		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(wiki, f)
+		json.dump(wiki, f, indent=4, sort_keys=True)
 		f.close()
 
 
 	def _write_object_json_file(self, root_dir, object):
 		filepath = os.path.join(root_dir, object['id'] + ".json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(object, f)
+		json.dump(object, f, indent=4, sort_keys=True)
 		f.close()
 
 
 	def _write_vote_json_file(self, root_dir, object):
 		filepath = os.path.join(root_dir, object['datasetId'] + ".json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(object, f)
+		json.dump(object, f, indent=4, sort_keys=True)
 		f.close()
 
 
 	def _write_folder_json_file(self, root_dir, folder):
 		filepath = os.path.join(root_dir, self._get_fs_path(folder['path']), self._config.container_filename).encode(encoding='utf-8',errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(folder, f)
+		json.dump(folder, f, indent=4, sort_keys=True)
 		f.close()
 
 
@@ -372,7 +372,7 @@ class DremioFile():
 		# write entity into json file
 		filepath = (filepath  + ".json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
-		json.dump(entity, f)
+		json.dump(entity, f, indent=4, sort_keys=True)
 		f.close()
 
 
