@@ -293,11 +293,18 @@ class DremioReader:
 				reflection_path = reflection_dataset['path']
 				self._logger.debug("_read_reflections: processing reflection " + reflection['id'] + " path: " + str(reflection_path))
 				reflection["path"] = reflection_path
-				self._d.reflections.append(reflection)
+				if self._is_reflection_in_vds_list(reflection):
+					self._d.reflections.append(reflection)
 #				self._read_acl(reflection)
 #				self._read_wiki(reflection)
 		else:
 			self._logger.debug("_read_reflections: skipping reflections processing as per job configuration")
+
+	def _is_reflection_in_vds_list(self, reflection):
+		for vds in self._d.vds_list:
+			if vds['id'] == reflection['datasetId']:
+				return True
+		return False
 
 	# Note, tags are only available for datasets
 	def _read_tags(self, entity):
