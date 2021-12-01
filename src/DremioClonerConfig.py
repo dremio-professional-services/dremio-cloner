@@ -164,7 +164,21 @@ class DremioClonerConfig():
 
 		f = f_open(config_file_name)
 
-		self.cloner_conf_json = json.load(f)['dremio_cloner']
+		cloner_conf_json_tmp = json.load(f)
+		stdout_logging = False
+		if 'dremio_get_config' in cloner_conf_json_tmp:
+			self.cloner_conf_json = cloner_conf_json_tmp['dremio_get_config']
+			stdout_logging = True
+		elif 'data' in cloner_conf_json_tmp:
+			for el in cloner_conf_json_tmp['data']:
+				if 'dremio_get_config' in el:
+					self.cloner_conf_json = el['dremio_get_config']
+					stdout_logging = True
+					break
+		else:
+			# old behaviour
+			self.cloner_conf_json = cloner_conf_json_tmp['dremio_cloner']
+
 		f.close()
 		for element in self.cloner_conf_json:
 			if 'command' in element:
@@ -175,7 +189,7 @@ class DremioClonerConfig():
 				self._process_target(element)
 			elif 'options' in element:
 				self._process_options(element)
-		if self.logging_filename == "STDOUT":
+		if self.logging_filename == "STDOUT" or stdout_logging:
 			handlers = [logging.StreamHandler()]
 		else:
 			handlers = [logging.FileHandler(filename=self.logging_filename, encoding='utf-8', mode='a+')]

@@ -1,0 +1,10 @@
+{
+  "sourceFile": "<SOURCE_FILE>",
+  "destinationFile": "<DEST_FILE>",
+  "spaceFolderMigrations": [
+    {"srcPath": ["Demo"], "dstPath": ["Demo2"]}
+  ],
+  "sourceMigrations": [
+    {"srcPath": ["FieldEngHive", "default"], "dstPath": ["FieldEngHiveNew", "default2"]}
+  ]
+}
