@@ -50,9 +50,15 @@ class DremioWriter:
 	_target_dremio_users = []
 	_target_dremio_groups = []
 	_target_dremio_roles = []
-
-	# Resolved Datasets for Reflections
-	_existing_reflections = list()
+	# Dremio target folders
+	# This is required for CI/CD use cases to compare folders from JSON with destination to be able replicate deletion
+	_target_folders = []
+	# Dremio target vds list
+	# This is required for CI/CD use cases to compare vds list from JSON with destination to be able replicate deletion
+	_target_vds_list = []
+	# Dremio target reflections
+	_target_reflections = []
+	_target_reflections_vds_filtered = []
 
 	# Dry run collections
 	_dry_run_processed_vds_list = []
@@ -72,7 +78,28 @@ class DremioWriter:
 			self._logger.warn("ACL Transformation has been defined while Referenced Users and Referenced Groups/Roles are not present in the Source Dremio Data.")
 
 		if self._config.reflection_process_mode != 'skip':
-			self._existing_reflections = self._dremio_env.list_reflections()['data']
+			# Even when filtering out unnecessary reflections the behavior should be exactly the same.
+			self._read_target_reflections()
+
+		if self._config.reflection_process_mode == 'create_overwrite_delete' or self._config.vds_process_mode == 'create_overwrite_delete' or self._config.folder_process_mode == 'create_overwrite_delete':
+			self._read_target_folders_and_vds_list()
+
+		if self._config.reflection_process_mode == 'create_overwrite_delete':
+			unmatched_target_reflections = self._find_deletable_reflections()
+			for reflection in unmatched_target_reflections:
+				self._logger.info("write_dremio_environment: Deleting reflection " + "/".join(reflection['path']) + " -> " + reflection['name'])
+				self._dremio_env.delete_reflection(reflection['id'], dry_run = self._config.dry_run, report_error=True)
+		if self._config.vds_process_mode == 'create_overwrite_delete':
+			unmatched_target_vds = self._find_deletable_vds()
+			for vds in unmatched_target_vds:
+				self._logger.info("write_dremio_environment: Deleting VDS " + "/".join(vds['path']))
+				self._dremio_env.delete_catalog_entity(vds['id'], dry_run = self._config.dry_run, report_error=True)
+		if self._config.folder_process_mode == 'create_overwrite_delete':
+			unmatched_target_folders = self._find_deletable_folders()
+			for folder in unmatched_target_folders:
+				self._logger.info("write_dremio_environment: Deleting folder " + "/".join(folder['path']))
+				self._dremio_env.delete_catalog_entity(folder['id'], dry_run = self._config.dry_run, report_error=True)
+
 		if self._config.source_process_mode == 'skip':
 			# even though they are being skipped, we still need to map source names in case other objects depend on them
 			for source in self._d.sources:
@@ -132,6 +159,158 @@ class DremioWriter:
 		else:
 			for tags in self._d.tags:
 				self._write_tags(tags, self._config.tag_process_mode)
+
+	def _find_deletable_folders(self):
+		# Find unmatched reflections in target system
+		unmatched_folders = []
+		for target_folder in self._target_folders:
+			found = False
+			for applied_folder in self._d.folders:
+				if target_folder['path'] == applied_folder['path']:
+					found = True
+					break
+			if not found:
+				unmatched_folders.append(target_folder)
+		return unmatched_folders
+
+
+	def _find_deletable_vds(self):
+		# Find unmatched reflections in target system
+		unmatched_vds = []
+		for target_vds in self._target_vds_list:
+			found = False
+			for applied_vds in self._d.vds_list:
+				if target_vds['path'] == applied_vds['path']:
+					found = True
+					break
+			if not found:
+				unmatched_vds.append(target_vds)
+		return unmatched_vds
+
+	def _find_deletable_reflections(self):
+		# Find unmatched reflections in target system
+		unmatched_reflections = []
+		for target_reflection in self._target_reflections_vds_filtered:
+			found = False
+			for applied_reflection in self._d.reflections:
+				if target_reflection['path'] == applied_reflection['path'] and target_reflection['name'] == \
+						applied_reflection['name']:
+					found = True
+					break
+			if not found:
+				unmatched_reflections.append(target_reflection)
+		return unmatched_reflections
+
+	def _is_reflection_in_vds_list(self, reflection):
+		for vds in self._target_vds_list:
+			if vds['id'] == reflection['datasetId']:
+				return True
+		return False
+
+	def _read_target_reflections(self):
+		self._logger.debug("_read_target_reflections")
+		self._target_reflections = self._dremio_env.list_reflections()['data']
+
+	def _read_target_folders_and_vds_list(self):
+		containers = self._dremio_env.list_catalog()['data']
+		for container in containers:
+			self._logger.debug("_read_destination_folders_and_vds_list: processing container " + self._utils.get_entity_desc(container))
+			self._process_container(container)
+		for reflection in self._target_reflections:
+			if self._is_reflection_in_vds_list(reflection):
+				reflection_dataset = self._dremio_env.get_catalog_entity_by_id(reflection['datasetId'])
+				if reflection_dataset is None:
+					self._logger.debug("_read_reflections: error processing reflection, cannot get path for dataset: " + reflection['datasetId'])
+					continue
+				reflection_path = reflection_dataset['path']
+				reflection["path"] = reflection_path
+				self._target_reflections_vds_filtered.append(reflection)
+
+	# Identify a container and delegate processing
+	def _process_container(self, container):
+		self._logger.debug("_process_container: " + self._utils.get_entity_desc(container))
+		if container['containerType'] == "SPACE":
+			self._read_space(container)
+		else:
+			self._logger.debug("_process_container: skipping " + self._utils.get_entity_desc(container))
+
+	def _read_space(self, container):
+		self._logger.debug("_read_space: processing container: " + self._utils.get_entity_desc(container))
+		if self._filter.match_space_filter(container):
+			entity = self._get_entity_definition_by_id(container)
+			if entity is not None:
+				self._logger.debug("_read_space: " + self._utils.get_entity_desc(container))
+				self._read_space_children(entity)
+			else:
+				self._logger.error("_read_space: error reading entity for container: " + self._utils.get_entity_desc(container))
+
+	# Helper method, used by most read* methods
+	def _get_entity_definition_by_id(self, src):
+		self._logger.debug("_get_entity_definition_by_id: processing src: " + self._utils.get_entity_desc(src))
+		if 'id' not in src:
+			self._logger.error("_read_entity_definition: bad data, skipping entity: " + self._utils.get_entity_desc(src))
+			return None
+		else:
+			entity = self._dremio_env.get_catalog_entity_by_id(src['id'])
+			if entity is None:
+				self._logger.error("_read_entity_definition: cannot retrieve entity for id: " + src['id'])
+			return entity
+
+	def _read_space_children(self, parent_entity):
+		self._logger.debug("_read_space_children: processing parent_entity: " + self._utils.get_entity_desc(parent_entity))
+		if 'entityType' not in parent_entity:
+			self._logger.error("_read_space_children: bad data, skipping entity: " + self._utils.get_entity_desc(parent_entity))
+			return
+		for child in parent_entity['children']:
+			if child['type'] == "DATASET":
+				self._read_dataset(child)
+			elif child['type'] == "FILE":
+				continue
+			elif child['containerType'] == "FOLDER":
+				self._read_space_folder(child)
+			else:
+				self._logger.error("_read_space_children: not supported entity type " + child['type'])
+
+	def _read_dataset(self, dataset):
+		self._logger.debug("_read_dataset: processing dataset: " + self._utils.get_entity_desc(dataset))
+		entity = self._get_entity_definition_by_id(dataset)
+		if entity is not None:
+			self._logger.debug("_read_dataset: " + dataset['datasetType'] + " : " + self._utils.get_entity_desc(dataset))
+			if dataset['datasetType'] == "VIRTUAL":
+				tags = self._dremio_env.get_catalog_tags(entity['id'])
+				if self._filter.match_vds_filter(dataset, tags=tags):
+					self._target_vds_list.append(entity)
+			else:
+				self._logger.debug("_read_dataset: Skipping " + dataset['datasetType'] + " for " + self._utils.get_entity_desc(dataset) + ".")
+
+	def _read_space_folder(self, folder):
+		self._logger.debug("_read_space_folder: processing folder: " + self._utils.get_entity_desc(folder))
+		entity = self._get_entity_definition_by_id(folder)
+		if entity is None:
+			self._logger.error("_read_space_folder: error reading entity for folder: " + self._utils.get_entity_desc(folder))
+			return
+		if self._filter.match_space_folder_filter(folder):
+			self._logger.debug("_read_space_folder: " + self._utils.get_entity_desc(folder))
+			self._target_folders.append(entity)
+			# Validate all parent folders in the path have been saved already
+			folder_path = entity['path']
+			for i in range(1, len(folder_path)-1):
+				folderSaved = False
+				for item in self._target_folders:
+					if item['path'][-1] == folder_path[i]:
+						folderSaved = True
+				if not folderSaved:
+					parent_entity = self._get_entity_definition_by_path(folder_path[0:i+1])
+					self._target_folders.append(parent_entity)
+		self._read_space_children(entity)
+
+	def _get_entity_definition_by_path(self, path):
+		self._logger.debug("_get_entity_definition_by_path: processing path: " + str(path))
+		path = self._utils.normalize_path(path)
+		entity = self._dremio_env.get_catalog_entity_by_path(path)
+		if entity is None:
+			self._logger.error("_read_entity_definition: cannot retrieve entity for path: " + str(path))
+		return entity
 
 	def _write_space(self, entity, process_mode, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 		if self._filter.match_space_filter(entity):
@@ -484,18 +663,10 @@ class DremioWriter:
 				return None
 		else:  # Reflection already exists in the target environment
 			if process_mode == 'create_only':
-				self._logger.info("_write_reflection: Found existing refleciton and reflection_process_mode is set to create_only. Skipping " + self._utils.get_entity_desc(reflection))
+				self._logger.info("_write_reflection: Found existing reflection and reflection_process_mode is set to create_only. Skipping " + self._utils.get_entity_desc(reflection))
 				return None
 			# make sure there are changes to update as it will invalidate existing reflection data
-			if reflection['type'] == existing_reflection['type'] and \
-				reflection['name'] == existing_reflection['name'] and \
-				('partitionDistributionStrategy' in reflection and reflection['partitionDistributionStrategy'] == existing_reflection['partitionDistributionStrategy']) and \
-			    ('measureFields' in reflection and reflection['measureFields'] == existing_reflection['measureFields']) and \
-				('dimensionFields' in reflection and reflection['dimensionFields'] == existing_reflection['dimensionFields']) and \
-				('displayFields' in reflection and reflection['displayFields'] == existing_reflection['displayFields']) and \
-				('sortFields' in reflection and reflection['sortFields'] == existing_reflection['sortFields']) and \
-				('partitionFields' in reflection and reflection['partitionFields'] == existing_reflection['partitionFields']) and \
-				('distributionFields' in reflection and reflection['distributionFields'] == existing_reflection['distributionFields']):
+			if self._is_reflection_equal(existing_reflection, reflection):
 				# Nothing to do
 				self._logger.debug("_write_reflection: No pending changes. Skipping " + self._utils.get_entity_desc(reflection))
 				return None
@@ -510,9 +681,25 @@ class DremioWriter:
 				return False
 		return True
 
+	def _is_reflection_equal(self, existing_reflection, reflection):
+		return reflection['type'] == existing_reflection['type'] and \
+			   reflection['name'] == existing_reflection['name'] and \
+			   ('partitionDistributionStrategy' not in reflection or reflection['partitionDistributionStrategy'] ==
+				existing_reflection['partitionDistributionStrategy']) and \
+			   ('measureFields' not in reflection or reflection['measureFields'] == existing_reflection[
+				   'measureFields']) and \
+			   ('dimensionFields' not in reflection or reflection['dimensionFields'] == existing_reflection[
+				   'dimensionFields']) and \
+			   ('displayFields' not in reflection or reflection['displayFields'] == existing_reflection[
+				   'displayFields']) and \
+			   ('sortFields' not in reflection or reflection['sortFields'] == existing_reflection['sortFields']) and \
+			   ('partitionFields' not in reflection or reflection['partitionFields'] == existing_reflection[
+				   'partitionFields']) and \
+			   ('distributionFields' not in reflection or reflection['distributionFields'] == existing_reflection[
+				   'distributionFields'])
 
 	def _find_existing_reflection(self, reflection, dataset):
-		for existing_reflection in self._existing_reflections:
+		for existing_reflection in self._target_reflections:
 			# Match reflections by name
 			if reflection['name'] == existing_reflection['name']:
 				existing_dataset = self._dremio_env.get_catalog_entity_by_id(existing_reflection['datasetId'])

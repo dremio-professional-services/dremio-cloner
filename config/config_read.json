@@ -57,6 +57,8 @@
 	{"vds.filter":"*"},
 	{"vds.filter.tag":""},
 	{"vds.exclude.filter":""},
-	{"vds.dependencies.process_mode":"get"}]
+	{"vds.dependencies.process_mode":"get"},
+
+  	{"reflection.only_for_matching_vds":"True"}]
   }]
 }

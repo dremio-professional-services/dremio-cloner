@@ -49,6 +49,9 @@
 
 	{"vds.filter":"*"},
 	{"vds.exclude.filter":""},
-	{"vds.dependencies.process_mode":"ignore"}]
+	{"vds.dependencies.process_mode":"ignore"},
+
+  	{"reflection.only_for_matching_vds":"True"}]
+
   }]
 }

@@ -70,10 +70,11 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;vds.process\_mode&quot;
     - &quot;vds.filter&quot;
     - &quot;vds.exclude.filter&quot;
-    - &quot; vds.dependencies.process\_mode&quot;
+    - &quot;vds.dependencies.process\_mode&quot;
   - scope of _Reflection_ processing 
     - &quot;reflection.process\_mode&quot;
 	- &quot;reflection.id\_include\_list&quot;
+	- &quot;reflection.only\_for\_matching\_vds&quot
   - scope of _Workload Management_ processing
     - &quot;wlm.queue.process\_mode&quot;
     - &quot;wlm.rule.process\_mode&quot;
