@@ -100,6 +100,8 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
 def should_quote(identifier, dremio_data):
     if identifier == "default":
         return True
+    if identifier.find(".") != -1:
+        return True
     for vds in dremio_data.vds_list:
         if identifier in vds['path']:
             return True
