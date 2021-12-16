@@ -141,6 +141,7 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
         return
 
     join_keys = [key for key in parsed.keys() if key.lower().find("join") != -1]
+    union_keys = [key for key in parsed.keys() if key.lower().find("union") != -1]
     _key = None
     _value = None
     vds_path_str = '.'.join(vds_path)
@@ -157,11 +158,22 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
                 if item.lower().startswith(src_path.lower()):
                     _newvalue = dst_path + item[len(src_path):]
                     parsed[join_key] = _newvalue
-                    print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
+                    print(log_text + ' - Matching VDS SQL JOIN (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
             else:
                 replace_table_names(item, vds_path, src_path, dst_path, log_text)
         if 'on' in parsed:
             on_clause_replace(parsed['on'], src_path, dst_path, vds_path_str, log_text)
+        return
+    elif len(union_keys) > 0:
+        for union_key in union_keys:
+            item = parsed[union_key]
+            if isinstance(item, str):
+                if item.lower().startswith(src_path.lower()):
+                    _newvalue = dst_path + item[len(src_path):]
+                    parsed[union_key] = _newvalue
+                    print(log_text + ' - Matching VDS SQL UNION (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
+            else:
+                replace_table_names(item, vds_path, src_path, dst_path, log_text)
         return
     else:
         print("VDS not having any FROM clause - unhandled parse key: " + str(parsed))
@@ -188,19 +200,25 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
         print("ERROR: _value is of type " + str(_value))
 
 def should_quote(identifier, dremio_data):
-    if identifier == "default":
-        return True
-    if identifier.find(".") != -1:
-        return True
-    if identifier.find("?") != -1:
-        return True
-    for vds in dremio_data.vds_list:
-        if identifier in vds['path']:
-            return True
-    for pds in dremio_data.pds_list:
-        if identifier in pds['path']:
-            return True
-    return False
+    # TODO revert
+    return True
+    # if identifier == "default":
+    #     return True
+    # if identifier.find(".") != -1:
+    #     return True
+    # if identifier.find("?") != -1:
+    #     return True
+    # if identifier.find(" ") != -1:
+    #     return True
+    # if identifier.find("/") != -1:
+    #     return True
+    # for vds in dremio_data.vds_list:
+    #     if identifier in vds['path']:
+    #         return True
+    # for pds in dremio_data.pds_list:
+    #     if identifier in pds['path']:
+    #         return True
+    # return False
 
 def main():
     if len(sys.argv) != 2:
