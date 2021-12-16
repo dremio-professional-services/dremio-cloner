@@ -1,8 +1,11 @@
 import sys
 
+from mo_sql_parsing import parse
+from mo_sql_parsing import format
+import sqlparse
+
 from DremioFile import DremioFile
 from DremioClonerConfig import DremioClonerConfig
-import re
 import json
 import uuid
 
@@ -30,31 +33,80 @@ def rebuild_path_sqlcontext(migration, resource_path):
         return migration['dstPath'][:len(resource_path)]
     return rebuild_path(migration, resource_path)
 
+#
+# def quote(str):
+#     return '"' + str + '"'
 
-def quote(str):
-    return '"' + str + '"'
+# def generate_all_quoted_and_non_quoted_permutations(src_path):
+#     nonquoted = src_path
+#     quoted = list(map(quote, nonquoted))
+#     permutations = []
+#     for x in range(len(nonquoted)):
+#         for y in range(len(quoted)):
+#             t1 = nonquoted[:]
+#             t2 = quoted[:]
+#             t1[x] = quoted[x]
+#             t2[x] = nonquoted[x]
+#             t1[y] = quoted[y]
+#             t2[y] = nonquoted[y]
+#             permutations.append(t1)
+#             permutations.append(t2)
+#     permutations.append(nonquoted)
+#     permutations.append(quoted)
+#     strnewlist = []
+#     for e in permutations:
+#         strnewlist.append(".".join(e))
+#     return set(strnewlist)
 
-def generate_all_quoted_and_non_quoted_permutations(src_path):
-    nonquoted = src_path
-    quoted = list(map(quote, nonquoted))
-    permutations = []
-    for x in range(len(nonquoted)):
-        for y in range(len(quoted)):
-            t1 = nonquoted[:]
-            t2 = quoted[:]
-            t1[x] = quoted[x]
-            t2[x] = nonquoted[x]
-            t1[y] = quoted[y]
-            t2[y] = nonquoted[y]
-            permutations.append(t1)
-            permutations.append(t2)
-    permutations.append(nonquoted)
-    permutations.append(quoted)
-    strnewlist = []
-    for e in permutations:
-        strnewlist.append(".".join(e))
-    return set(strnewlist)
 
+def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
+    if not isinstance(parsed, dict):
+        print("ERROR: passed parsed needs to be of tope DICT " + str(type(parsed)))
+        return
+
+    join_keys = [key for key in parsed.keys() if key.lower().find("join") != -1]
+    _key = None
+    _value = None
+    if 'from' in parsed:
+        _key = 'from'
+        _value = parsed['from']
+    elif 'value' in parsed:
+        _key = 'value'
+        _value = parsed['value']
+    elif len(join_keys) > 0:
+        for join_key in join_keys:
+            replace_table_names(parsed[join_key], vds_path, src_path, dst_path, log_text)
+        return
+    else:
+        print("VDS not having any FROM clause - unhandled parse key: " + str(parsed))
+        return
+
+    if isinstance(_value, list):
+        for item in _value:
+            replace_table_names(item, vds_path, src_path, dst_path, log_text)
+    elif isinstance(_value, str):
+        vds_path_str = '.'.join(vds_path)
+        # for permutation in src_permutations:
+        if _value.lower().startswith(src_path.lower()):
+            _newvalue = dst_path + _value[len(src_path):]
+            parsed[_key] = _newvalue
+            print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + _value + ' -> ' + _newvalue)
+
+    elif isinstance(_value, dict):
+        replace_table_names(_value, vds_path, src_path, dst_path, log_text)
+    else:
+        print("ERROR: _value is of type " + str(_value))
+
+def should_quote(identifier, dremio_data):
+    if identifier == "default":
+        return True
+    for vds in dremio_data.vds_list:
+        if identifier in vds['path']:
+            return True
+    for pds in dremio_data.pds_list:
+        if identifier in pds['path']:
+            return True
+    return False
 
 def main():
     if len(sys.argv) != 2:
@@ -147,8 +199,9 @@ def main():
 
             # Migrate vds_list
             #####################
-            src_permutations = generate_all_quoted_and_non_quoted_permutations(migration['srcPath'])
-            dst_path = ".".join(list(map(quote, migration['dstPath'])))
+            # src_permutations = generate_all_quoted_and_non_quoted_permutations(migration['srcPath'])
+            src_path = ".".join(migration['srcPath'])
+            dst_path = ".".join(migration['dstPath'])
             for vds in dremio_data.vds_list:
                 if 'sqlContext' in vds and path_matches_sqlcontext(migration['srcPath'], vds['sqlContext']):
                     oldpath = vds['sqlContext']
@@ -159,12 +212,16 @@ def main():
                     vds['path'] = rebuild_path(migration, oldpath)
                     print("Matching VDS path: " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['path'])))
                 sql = vds['sql']
-                for permutation in src_permutations:
-                    escaped = re.escape(permutation)
-                    if re.search(escaped, sql, flags=re.IGNORECASE):
-                        sql = re.sub(escaped, dst_path, sql, flags=re.IGNORECASE)
-                        print("Matching VDS SQL (" + '.'.join(vds['path']) + "): " + permutation + " -> " + dst_path)
-                vds['sql'] = sql
+                parsed = parse(sql)
+                replace_table_names(parsed, vds['path'], src_path, dst_path, 'VDS migration')
+                vds['sql'] = format(parsed, ansi_quotes=True, should_quote= lambda x: should_quote(x, dremio_data))
+
+                # for permutation in src_permutations:
+                #     escaped = re.escape(permutation)
+                #     if re.search(escaped, sql, flags=re.IGNORECASE):
+                #         sql = re.sub(escaped, dst_path, sql, flags=re.IGNORECASE)
+                #         print("Matching VDS SQL (" + '.'.join(vds['path']) + "): " + permutation + " -> " + dst_path)
+                # vds['sql'] = sql
 
             # Migrate wiki
             #####################
@@ -343,36 +400,47 @@ def main():
         for migration in sourceMigrations:
             # Migrate vds_list
             #####################
-            src_permutations = generate_all_quoted_and_non_quoted_permutations(migration['srcPath'])
-            dst_path = ".".join(list(map(quote, migration['dstPath'])))
+            # src_permutations = generate_all_quoted_and_non_quoted_permutations(migration['srcPath'])
+            src_path = ".".join(migration['srcPath'])
+            dst_path = ".".join(migration['dstPath'])
+            # dst_path = ".".join(list(map(quote, migration['dstPath'])))
             for vds in dremio_data.vds_list:
                 if 'sqlContext' in vds and path_matches(migration['srcPath'], vds['sqlContext']):
                     oldpath = vds['sqlContext']
                     vds['sqlContext'] = rebuild_path(migration, oldpath)
                     print("Source Migration - Matching VDS SQL Context (" + '.'.join(vds['path']) + "): " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['sqlContext'])))
                 sql = vds['sql']
-                for permutation in src_permutations:
-                    escaped = re.escape(permutation)
-                    if re.search(escaped, sql, flags=re.IGNORECASE):
-                        sql = re.sub(escaped, dst_path, sql, flags=re.IGNORECASE)
-                        print("Source Migration - Matching VDS SQL (" + '.'.join(vds['path']) + "): " + permutation + " -> " + dst_path)
-                vds['sql'] = sql
+                parsed = parse(sql)
+                replace_table_names(parsed, vds['path'], src_path, dst_path, 'Source Migration')
+                vds['sql'] = format(parsed, ansi_quotes=True, should_quote= lambda x: should_quote(x, dremio_data))
+                # for permutation in src_permutations:
+                #     escaped = re.escape(permutation)
+                #     if re.search(escaped, sql, flags=re.IGNORECASE):
+                #         sql = re.sub(escaped, dst_path, sql, flags=re.IGNORECASE)
+                #         print("Source Migration - Matching VDS SQL (" + '.'.join(vds['path']) + "): " + permutation + " -> " + dst_path)
+                # vds['sql'] = sql
             for vds_parent in dremio_data.vds_parents:
                 src_path = '/'.join(migration['srcPath'])
                 dst_path = '/'.join(migration['dstPath'])
                 parents = []
                 for parent in vds_parent['parents']:
-                    if parent.startswith(src_path):
+                    if parent.lower().startswith(src_path.lower()):
                         print("Matching vds_parent: " + ('.'.join(vds_parent['path'])) + " - changed dependency: " + src_path + " -> " + dst_path)
-                        parents.append(parent.replace(src_path, dst_path))
+                        # parents.append(parent.lstrip(src_path) + dst_path)
+                        parents.append(dst_path + parent[len(src_path):])
                     else:
                         parents.append(parent)
 
                 vds_parent['parents'] = parents
-        # TODO probably we can also migrate PDS promotions, for now we do not handle it and just export an empty list
-        dremio_data.pds_list = []
-        dremio_data.sources = []
-        dremio_data.homes = []
+
+    # Maybe make configurable
+    for vds in dremio_data.vds_list:
+        vds['sql'] = sqlparse.format(vds['sql'], reindent=True, indent_width=2)
+    # sqlparse_format = sqlparse.format(format(parsed), reindent=True, indent_width=2)
+    # TODO probably we can also migrate PDS promotions, for now we do not handle it and just export an empty list
+    dremio_data.pds_list = []
+    dremio_data.sources = []
+    dremio_data.homes = []
 
     file.save_dremio_environment(dremio_data)
 
