@@ -33,6 +33,62 @@ def rebuild_path_sqlcontext(migration, resource_path):
         return migration['dstPath'][:len(resource_path)]
     return rebuild_path(migration, resource_path)
 
+def replace_slashed_comments(sql):
+    lines = []
+    multiline_comment_open = False
+    for line in sql.splitlines():
+        stripped = line.strip()
+        multiline_comment_open_idx = stripped.find('/*')
+        if multiline_comment_open:
+            multiline_comment_close_idx = stripped.find('*/')
+            if multiline_comment_close_idx == -1:
+                lines.append('-- ' + stripped)
+            else:
+                before = stripped[:multiline_comment_close_idx]
+                after = stripped[multiline_comment_close_idx + 2:]
+                if len(before) > 0:
+                    # within comment
+                    lines.append('-- ' + before)
+                if len(after) > 0:
+                    # append code
+                    lines.append(after)
+                multiline_comment_open = False
+        elif stripped.startswith('// '):
+            lines.append('-- ' + stripped[3:])
+        elif stripped.startswith('//'):
+            lines.append('-- ' + stripped[2:])
+        elif stripped.startswith('-- '):
+            lines.append(stripped)
+        elif stripped.startswith('--'):
+            lines.append('-- ' + stripped[2:])
+        elif multiline_comment_open_idx != -1:
+            before = stripped[:multiline_comment_open_idx]
+            after = stripped[multiline_comment_open_idx+2:]
+            if len(before) > 0:
+                # append code
+                lines.append(before)
+            if len(after) > 0:
+                # within comment
+                lines.append('-- ' + after)
+            multiline_comment_close_idx = stripped.find('*/')
+            if multiline_comment_close_idx == -1:
+                # not closed in same line
+                multiline_comment_open = True
+            else:
+                before = stripped[:multiline_comment_close_idx]
+                after = stripped[multiline_comment_close_idx + 2:]
+                if len(before) > 0:
+                    # within comment
+                    lines.append('-- ' + before)
+                if len(after) > 0:
+                    # append code
+                    lines.append(after)
+        # elif ' //' in stripped:
+        #     lines.append(stripped.replace(' //', ' --'))
+        else:
+            lines.append(stripped)
+    return '\n'.join(lines)
+
 #
 # def quote(str):
 #     return '"' + str + '"'
@@ -58,15 +114,36 @@ def rebuild_path_sqlcontext(migration, resource_path):
 #         strnewlist.append(".".join(e))
 #     return set(strnewlist)
 
+def on_clause_replace(clause, src_path, dst_path, vds_path_str, log_text):
+    if isinstance(clause, dict):
+        for v in clause.values():
+            if isinstance(v, list):
+                # TODO probably map later if required -> List then check strings
+                continue
+            on_clause_replace(v, src_path, dst_path, vds_path_str, log_text)
+    elif isinstance(clause, list):
+        for idx, item in enumerate(clause):
+            if isinstance(item, dict):
+                on_clause_replace(item, src_path, dst_path, vds_path_str, log_text)
+            elif isinstance(item, str):
+                if item.lower().startswith(src_path.lower()):
+                    _newvalue = dst_path + item[len(src_path):]
+                    clause[idx] = _newvalue
+                    print(log_text + ' - Matching VDS SQL ON CLAUSE (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
+            else:
+                print("UNSUPPORTED TYPE IN on_clause_replace: " + str(type(clause)))
+    else:
+        print("UNSUPPORTED TYPE IN on_clause_replace: " + str(type(clause)))
 
 def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
     if not isinstance(parsed, dict):
-        print("ERROR: passed parsed needs to be of tope DICT " + str(type(parsed)))
+        print("ERROR: passed parsed needs to be of type DICT " + str(type(parsed)))
         return
 
     join_keys = [key for key in parsed.keys() if key.lower().find("join") != -1]
     _key = None
     _value = None
+    vds_path_str = '.'.join(vds_path)
     if 'from' in parsed:
         _key = 'from'
         _value = parsed['from']
@@ -75,18 +152,31 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
         _value = parsed['value']
     elif len(join_keys) > 0:
         for join_key in join_keys:
-            replace_table_names(parsed[join_key], vds_path, src_path, dst_path, log_text)
+            item = parsed[join_key]
+            if isinstance(item, str):
+                if item.lower().startswith(src_path.lower()):
+                    _newvalue = dst_path + item[len(src_path):]
+                    parsed[join_key] = _newvalue
+                    print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
+            else:
+                replace_table_names(item, vds_path, src_path, dst_path, log_text)
+        if 'on' in parsed:
+            on_clause_replace(parsed['on'], src_path, dst_path, vds_path_str, log_text)
         return
     else:
         print("VDS not having any FROM clause - unhandled parse key: " + str(parsed))
         return
 
     if isinstance(_value, list):
-        for item in _value:
-            replace_table_names(item, vds_path, src_path, dst_path, log_text)
+        for idx, item in enumerate(_value):
+            if isinstance(item, str):
+                if item.lower().startswith(src_path.lower()):
+                    _newvalue = dst_path + item[len(src_path):]
+                    _value[idx] = _newvalue
+                    print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
+            else:
+                replace_table_names(item, vds_path, src_path, dst_path, log_text)
     elif isinstance(_value, str):
-        vds_path_str = '.'.join(vds_path)
-        # for permutation in src_permutations:
         if _value.lower().startswith(src_path.lower()):
             _newvalue = dst_path + _value[len(src_path):]
             parsed[_key] = _newvalue
@@ -101,6 +191,8 @@ def should_quote(identifier, dremio_data):
     if identifier == "default":
         return True
     if identifier.find(".") != -1:
+        return True
+    if identifier.find("?") != -1:
         return True
     for vds in dremio_data.vds_list:
         if identifier in vds['path']:
@@ -213,10 +305,13 @@ def main():
                     oldpath = vds['path']
                     vds['path'] = rebuild_path(migration, oldpath)
                     print("Matching VDS path: " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['path'])))
-                sql = vds['sql']
-                parsed = parse(sql)
-                replace_table_names(parsed, vds['path'], src_path, dst_path, 'VDS migration')
-                vds['sql'] = format(parsed, ansi_quotes=True, should_quote= lambda x: should_quote(x, dremio_data))
+                sql = replace_slashed_comments(vds['sql'])
+                try:
+                    parsed = parse(sql)
+                    replace_table_names(parsed, vds['path'], src_path, dst_path, 'VDS migration')
+                    vds['sql'] = format(parsed, ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
+                except:
+                    print("INVALID Query - VDS migration: " + '.'.join(vds['path']))
 
                 # for permutation in src_permutations:
                 #     escaped = re.escape(permutation)
@@ -345,7 +440,7 @@ def main():
                         'children': []
                     }
                     dremio_data.folders.append(parent_folder)
-                print("Appending VDS " + str(vds['path']) + " to folder " + str(parent_folder['path']))
+                print("Appending VDS " + ('.'.join(vds['path'])) + " to folder " + ('.'.join(parent_folder['path'])))
                 parent_folder['children'].append({'id': vds['id'], 'path': vds['path'],
                          'type': 'DATASET', 'datasetType': 'VIRTUAL'})
 
@@ -411,10 +506,13 @@ def main():
                     oldpath = vds['sqlContext']
                     vds['sqlContext'] = rebuild_path(migration, oldpath)
                     print("Source Migration - Matching VDS SQL Context (" + '.'.join(vds['path']) + "): " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['sqlContext'])))
-                sql = vds['sql']
-                parsed = parse(sql)
-                replace_table_names(parsed, vds['path'], src_path, dst_path, 'Source Migration')
-                vds['sql'] = format(parsed, ansi_quotes=True, should_quote= lambda x: should_quote(x, dremio_data))
+                sql = replace_slashed_comments(vds['sql'])
+                try:
+                    parsed = parse(sql)
+                    replace_table_names(parsed, vds['path'], src_path, dst_path, 'Source Migration')
+                    vds['sql'] = format(parsed, ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
+                except:
+                    print("INVALID Query - PDS migration: " + '.'.join(vds['path']))
                 # for permutation in src_permutations:
                 #     escaped = re.escape(permutation)
                 #     if re.search(escaped, sql, flags=re.IGNORECASE):
