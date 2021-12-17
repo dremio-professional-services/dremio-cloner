@@ -190,7 +190,7 @@ def should_quote(identifier, dremio_data):
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ('default', 'key', 'index', 'join', 'from', 'both', 'order'):
+    if lowerId in ('default', 'key', 'index', 'join', 'from', 'both', 'order', 'start'):
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
