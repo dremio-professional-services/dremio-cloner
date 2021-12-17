@@ -562,6 +562,7 @@ def main():
         try:
             sql = format(vds['parsedSql'], ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
             vds['sql'] = sqlparse.format(sql, reindent=True, indent_width=2)
+            print("GENERATE SQL for: " + '.'.join(vds['path']))
             new_vds_list.append(vds)
         except Exception as e:
             write_error_files(config, vds, str(e), error_idx)
