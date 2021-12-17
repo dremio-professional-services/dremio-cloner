@@ -1,5 +1,6 @@
 import sys
 
+from mo_parsing import ParseException
 from mo_sql_parsing import parse
 from mo_sql_parsing import format
 import sqlparse
@@ -8,6 +9,7 @@ from DremioFile import DremioFile
 from DremioClonerConfig import DremioClonerConfig
 import json
 import uuid
+import os
 
 def path_matches(match_path, resource_path):
     if len(match_path) > len(resource_path):
@@ -89,30 +91,6 @@ def replace_slashed_comments(sql):
             lines.append(stripped)
     return '\n'.join(lines)
 
-#
-# def quote(str):
-#     return '"' + str + '"'
-
-# def generate_all_quoted_and_non_quoted_permutations(src_path):
-#     nonquoted = src_path
-#     quoted = list(map(quote, nonquoted))
-#     permutations = []
-#     for x in range(len(nonquoted)):
-#         for y in range(len(quoted)):
-#             t1 = nonquoted[:]
-#             t2 = quoted[:]
-#             t1[x] = quoted[x]
-#             t2[x] = nonquoted[x]
-#             t1[y] = quoted[y]
-#             t2[y] = nonquoted[y]
-#             permutations.append(t1)
-#             permutations.append(t2)
-#     permutations.append(nonquoted)
-#     permutations.append(quoted)
-#     strnewlist = []
-#     for e in permutations:
-#         strnewlist.append(".".join(e))
-#     return set(strnewlist)
 
 def on_clause_replace(clause, src_path, dst_path, vds_path_str, log_text):
     if isinstance(clause, dict):
@@ -225,6 +203,38 @@ def should_quote(identifier, dremio_data):
     #         return True
     return False
 
+def write_error_files(config, vds, content, err_idx):
+    folder = None
+    if config.target_filename is not None:
+        folder = config.target_filename + '_errors'
+        os.makedirs(folder, exist_ok=True)
+    elif config.target_directory is not None:
+        folder = config.target_directory + '_errors'
+        os.makedirs(folder, exist_ok=True)
+    else:
+        raise Exception('Target filename or directory must be specified.')
+
+    error_file_path = os.path.join(folder, 'error_' + str(err_idx) + '.txt')
+    error_file = open(error_file_path, "w")
+    error_file.write(content)
+    error_file.close()
+
+    sql_file_path = os.path.join(folder, 'error_' + str(err_idx) + '.sql')
+    sql_file = open(sql_file_path, "w")
+    sql_file.write(vds['sql'])
+    sql_file.close()
+
+
+def build_error_message_sql_parse(err, vds):
+    content = 'VDS:\n' + ('.'.join(vds['path'])) + '\n\n-----\n'
+    content += 'Message:\n' + err.message + '\n\n-----\n'
+    content += 'Line:\n' + err.line + '\n\n'
+    content += '\n--------------------\n'
+    for cause in err.causes:
+        content += str(cause) + '\n'
+    return content
+
+
 def main():
     if len(sys.argv) != 2:
         print("Please pass a configuration file.")
@@ -253,6 +263,22 @@ def main():
 
     # Only container types SPACE and FOLDER is migrated, no SOURCES
     dremio_data.containers = [container for container in dremio_data.containers if container['containerType'] in ['SPACE', 'FOLDER']]
+
+    # Parse SQL in VDS list
+    new_vds_list = []
+    error_idx = 1
+    for vds in dremio_data.vds_list:
+        try:
+            print("PARSING SQL - VDS migration: " + '.'.join(vds['path']))
+            sql = replace_slashed_comments(vds['sql'])
+            vds['parsedSql'] = parse(sql)
+            new_vds_list.append(vds)
+        except ParseException as e:
+            content = build_error_message_sql_parse(e, vds)
+            write_error_files(config, vds, content, error_idx)
+            print("ERROR PARSING SQL - INVALID Query - VDS migration: " + '.'.join(vds['path']))
+            error_idx += 1
+    dremio_data.vds_list = new_vds_list
 
     if spaceFolderMigrations is not None and len(spaceFolderMigrations) > 0:
         for migration in spaceFolderMigrations:
@@ -328,26 +354,7 @@ def main():
                     oldpath = vds['path']
                     vds['path'] = rebuild_path(migration, oldpath)
                     print("Matching VDS path: " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['path'])))
-                sql = replace_slashed_comments(vds['sql'])
-                # if sql.find("Help Document Prod Plants") > 0 and sql.find("New FG") > 0:
-                #     print(sql)
-                # TODO read globally and convert sql once at the end. Remove invalid SQL from VDS_LIST and write into error file.
-                # TODO when converting back to sql and error happens also write to error file and remove from vds_list
-                try:
-                    parsed = parse(sql)
-                    replace_table_names(parsed, vds['path'], src_path, dst_path, 'VDS migration')
-                    # from formatting_patch import Formatter
-                    # vds['sql'] = Formatter(ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data)).format(parsed)
-                    vds['sql'] = format(parsed, ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
-                except:
-                    print("INVALID Query - VDS migration: " + '.'.join(vds['path']))
-
-                # for permutation in src_permutations:
-                #     escaped = re.escape(permutation)
-                #     if re.search(escaped, sql, flags=re.IGNORECASE):
-                #         sql = re.sub(escaped, dst_path, sql, flags=re.IGNORECASE)
-                #         print("Matching VDS SQL (" + '.'.join(vds['path']) + "): " + permutation + " -> " + dst_path)
-                # vds['sql'] = sql
+                    replace_table_names(vds['parsedSql'], vds['path'], src_path, dst_path, 'VDS migration')
 
             # Migrate wiki
             #####################
@@ -535,20 +542,7 @@ def main():
                     oldpath = vds['sqlContext']
                     vds['sqlContext'] = rebuild_path(migration, oldpath)
                     print("Source Migration - Matching VDS SQL Context (" + '.'.join(vds['path']) + "): " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['sqlContext'])))
-                sql = replace_slashed_comments(vds['sql'])
-                try:
-                    parsed = parse(sql)
-                    replace_table_names(parsed, vds['path'], src_path, dst_path, 'Source Migration')
-                    # vds['sql'] = Formatter(ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data)).format(parsed)
-                    vds['sql'] = format(parsed, ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
-                except:
-                    print("INVALID Query - PDS migration: " + '.'.join(vds['path']))
-                # for permutation in src_permutations:
-                #     escaped = re.escape(permutation)
-                #     if re.search(escaped, sql, flags=re.IGNORECASE):
-                #         sql = re.sub(escaped, dst_path, sql, flags=re.IGNORECASE)
-                #         print("Source Migration - Matching VDS SQL (" + '.'.join(vds['path']) + "): " + permutation + " -> " + dst_path)
-                # vds['sql'] = sql
+                replace_table_names(vds['parsedSql'], vds['path'], src_path, dst_path, 'Source Migration')
             for vds_parent in dremio_data.vds_parents:
                 src_path = '/'.join(migration['srcPath'])
                 dst_path = '/'.join(migration['dstPath'])
@@ -563,9 +557,19 @@ def main():
 
                 vds_parent['parents'] = parents
 
-    # Maybe make configurable
+    new_vds_list = []
     for vds in dremio_data.vds_list:
-        vds['sql'] = sqlparse.format(vds['sql'], reindent=True, indent_width=2)
+        try:
+            sql = format(vds['parsedSql'], ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
+            vds['sql'] = sqlparse.format(sql, reindent=True, indent_width=2)
+            new_vds_list.append(vds)
+        except Exception as e:
+            write_error_files(config, vds, str(e), error_idx)
+            print("ERROR: Unable to generate SQL for: " + '.'.join(vds['path']))
+            error_idx += 1
+        vds.pop('parsedSql')
+    dremio_data.vds_list = new_vds_list
+
     # TODO probably we can also migrate PDS promotions, for now we do not handle it and just export an empty list
     dremio_data.pds_list = []
     dremio_data.sources = []
