@@ -181,14 +181,16 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
         print("ERROR: _value is of type " + str(_value))
 
 def should_quote(identifier, dremio_data):
-    if identifier == "day":
+    if identifier == '*':
+        return False
+    if identifier == 'day':
         # TIMESTAMPDIFF requires non-quoted 'day'
         # that also means we are not able to handle columns named 'day'
-        print("WARNING: Column with name 'day' found, please rename column, because it will not be quoted, since it is a function for TIMESTAMPDIFF.")
+        print('WARNING: Column with name \'day\' found, please rename column, because it will not be quoted, since it is a function for TIMESTAMPDIFF.')
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ("default", "key", "index", "join", "from", "both", "order"):
+    if lowerId in ('default', 'key', 'index', 'join', 'from', 'both', 'order'):
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
