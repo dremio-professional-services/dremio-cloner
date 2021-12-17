@@ -83,8 +83,8 @@ def replace_slashed_comments(sql):
                 if len(after) > 0:
                     # append code
                     lines.append(after)
-        # elif ' //' in stripped:
-        #     lines.append(stripped.replace(' //', ' --'))
+        elif ' //' in stripped:
+            lines.append(stripped.replace(' //', ' --'))
         else:
             lines.append(stripped)
     return '\n'.join(lines)
@@ -137,7 +137,7 @@ def on_clause_replace(clause, src_path, dst_path, vds_path_str, log_text):
 
 def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
     if not isinstance(parsed, dict):
-        print("ERROR: passed parsed needs to be of type DICT " + str(type(parsed)))
+        print("ERROR: Passed parsed needs to be of type DICT " + str(type(parsed)))
         return
 
     join_keys = [key for key in parsed.keys() if key.lower().find("join") != -1]
@@ -172,11 +172,14 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
                     _newvalue = dst_path + item[len(src_path):]
                     parsed[union_key] = _newvalue
                     print(log_text + ' - Matching VDS SQL UNION (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
+            elif isinstance(item, list):
+                for x in item:
+                    replace_table_names(x, vds_path, src_path, dst_path, log_text)
             else:
-                replace_table_names(item, vds_path, src_path, dst_path, log_text)
+                print("ERROR: item is of type in UNION " + str(_value))
         return
     else:
-        print("VDS not having any FROM clause - unhandled parse key: " + str(parsed))
+        print("WARNING: VDS not having any FROM clause - unhandled parse key: " + str(parsed))
         return
 
     if isinstance(_value, list):
@@ -200,25 +203,27 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
         print("ERROR: _value is of type " + str(_value))
 
 def should_quote(identifier, dremio_data):
-    # TODO revert
-    return True
-    # if identifier == "default":
-    #     return True
-    # if identifier.find(".") != -1:
-    #     return True
-    # if identifier.find("?") != -1:
-    #     return True
-    # if identifier.find(" ") != -1:
-    #     return True
-    # if identifier.find("/") != -1:
-    #     return True
+    if identifier == "day":
+        # TIMESTAMPDIFF requires non-quoted 'day'
+        # that also means we are not able to handle columns named 'day'
+        print("WARNING: Column with name 'day' found, please rename column, because it will not be quoted, since it is a function for TIMESTAMPDIFF.")
+        return False
+    # return True
+    lowerId = identifier.lower()
+    if lowerId in ("default", "key", "index", "join", "from", "both", "order"):
+        return True
+    if identifier[0].isdigit():
+        # if starts with digit needs to be quoted
+        return True
+    if not identifier.isalnum():
+        return True
     # for vds in dremio_data.vds_list:
     #     if identifier in vds['path']:
     #         return True
     # for pds in dremio_data.pds_list:
     #     if identifier in pds['path']:
     #         return True
-    # return False
+    return False
 
 def main():
     if len(sys.argv) != 2:
@@ -324,9 +329,15 @@ def main():
                     vds['path'] = rebuild_path(migration, oldpath)
                     print("Matching VDS path: " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['path'])))
                 sql = replace_slashed_comments(vds['sql'])
+                # if sql.find("Help Document Prod Plants") > 0 and sql.find("New FG") > 0:
+                #     print(sql)
+                # TODO read globally and convert sql once at the end. Remove invalid SQL from VDS_LIST and write into error file.
+                # TODO when converting back to sql and error happens also write to error file and remove from vds_list
                 try:
                     parsed = parse(sql)
                     replace_table_names(parsed, vds['path'], src_path, dst_path, 'VDS migration')
+                    # from formatting_patch import Formatter
+                    # vds['sql'] = Formatter(ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data)).format(parsed)
                     vds['sql'] = format(parsed, ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
                 except:
                     print("INVALID Query - VDS migration: " + '.'.join(vds['path']))
@@ -528,6 +539,7 @@ def main():
                 try:
                     parsed = parse(sql)
                     replace_table_names(parsed, vds['path'], src_path, dst_path, 'Source Migration')
+                    # vds['sql'] = Formatter(ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data)).format(parsed)
                     vds['sql'] = format(parsed, ansi_quotes=True, should_quote=lambda x: should_quote(x, dremio_data))
                 except:
                     print("INVALID Query - PDS migration: " + '.'.join(vds['path']))
@@ -554,7 +566,6 @@ def main():
     # Maybe make configurable
     for vds in dremio_data.vds_list:
         vds['sql'] = sqlparse.format(vds['sql'], reindent=True, indent_width=2)
-    # sqlparse_format = sqlparse.format(format(parsed), reindent=True, indent_width=2)
     # TODO probably we can also migrate PDS promotions, for now we do not handle it and just export an empty list
     dremio_data.pds_list = []
     dremio_data.sources = []
