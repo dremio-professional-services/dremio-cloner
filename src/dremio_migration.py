@@ -190,7 +190,7 @@ def should_quote(identifier, dremio_data):
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ('default', 'key', 'index', 'join', 'from', 'both', 'order', 'start'):
+    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql', 'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with', 'distinct', 'having']:
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
@@ -296,14 +296,28 @@ def main():
 
             # Migrate spaces
             #####################
+            dst_space_exists = False
+            for space in dremio_data.spaces:
+                if space['name'] == migration['dstPath'][0]:
+                    dst_space_exists = True
+                    break
+
+            new_spaces = []
             for space in dremio_data.spaces:
                 if space['name'] == migration['srcPath'][0]:
-                    # space['id'] = str(uuid.uuid4())
-                    oldspace = space['name']
-                    space['name'] = migration['dstPath'][0]
-                    print("Matching space: " + oldspace + " -> " + space['name'])
-                    # Delete children, that will be reconstructed in a later phase
-                    space['children'] = []
+                    if not dst_space_exists:
+                        oldspace = space['name']
+                        space['name'] = migration['dstPath'][0]
+                        print("Matching space: " + oldspace + " -> " + space['name'])
+                        # Delete children, that will be reconstructed in a later phase
+                        space['children'] = []
+                        new_spaces.append(space)
+                    else:
+                        print("Dropping old space: " + space['name'] + " because destination space already exists " + migration['dstPath'][0])
+                else:
+                    # not matching, just adding back
+                    new_spaces.append(space)
+            dremio_data.spaces = new_spaces
 
             # Migrate folders
             ####################
@@ -375,7 +389,7 @@ def main():
                     found = True
                     break
             if not found:
-                print("Dropping space which does not match any dstPath -> " + ".".join(space['name']))
+                print("Dropping space which does not match any dstPath -> " + space['name'])
                 non_matching_spaces.append(space['name'])
 
         dremio_data.spaces = [space for space in dremio_data.spaces if space['name'] not in non_matching_spaces]
@@ -477,7 +491,7 @@ def main():
                         'path': parent_folder_path,
                         'children': []
                     }
-                    dremio_data.folders.append(parent_folder)
+                    dremio_data.folders.insert(0, parent_folder)
                 print("Appending VDS " + ('.'.join(vds['path'])) + " to folder " + ('.'.join(parent_folder['path'])))
                 parent_folder['children'].append({'id': vds['id'], 'path': vds['path'],
                          'type': 'DATASET', 'datasetType': 'VIRTUAL'})
