@@ -55,7 +55,7 @@ class DremioFile():
 			os.remove(filename)
 		f = open(filename, "w", encoding="utf-8")
 		f.write('{ "data": [')
-		json.dump({'dremio_environment': [{'file_version':'0.3'},{'base_url':self._config.source_endpoint},{'timestamp_utc':str(datetime.utcnow())}]}, f)
+		json.dump({'dremio_environment': [{'file_version':'0.3'},{'base_url':self._config.source_endpoint},{'timestamp_utc':str(datetime.utcnow())}]}, f, indent=4, sort_keys=True)
 		# Remove password if present
 		for config_item in self._config.cloner_conf_json:
 			if 'source' in config_item:
@@ -63,59 +63,59 @@ class DremioFile():
 					if 'password' in source_item:
 						source_item['password'] = ''
 						break
-		f.write(',')
-		json.dump({'dremio_get_config':self._config.cloner_conf_json}, f)
-		f.write(',')
-		json.dump({'containers':dremio_data.containers}, f)
+		f.write(',\n')
+		json.dump({'dremio_get_config':self._config.cloner_conf_json}, f, indent=4, sort_keys=True)
+		f.write(',\n')
+		json.dump({'containers':dremio_data.containers}, f, indent=4, sort_keys=True)
 		if self._config.home_process_mode == 'process':
-			f.write(',')
-			json.dump({'homes':dremio_data.homes}, f)
+			f.write(',\n')
+			json.dump({'homes':dremio_data.homes}, f, indent=4, sort_keys=True)
 		if self._config.source_process_mode == 'process':
-			f.write(',')
-			json.dump({'sources':dremio_data.sources}, f)
+			f.write(',\n')
+			json.dump({'sources':dremio_data.sources}, f, indent=4, sort_keys=True)
 		if self._config.space_process_mode == 'process':
-			f.write(',')
-			json.dump({'spaces':dremio_data.spaces}, f)
+			f.write(',\n')
+			json.dump({'spaces':dremio_data.spaces}, f, indent=4, sort_keys=True)
 		if self._config.folder_process_mode == 'process':
-			f.write(',')
-			json.dump({'folders':dremio_data.folders}, f)
+			f.write(',\n')
+			json.dump({'folders':dremio_data.folders}, f, indent=4, sort_keys=True)
 		if self._config.pds_process_mode == 'process':
-			f.write(',')
-			json.dump({'pds':dremio_data.pds_list}, f)
+			f.write(',\n')
+			json.dump({'pds':dremio_data.pds_list}, f, indent=4, sort_keys=True)
 		if self._config.vds_process_mode == 'process':
-			f.write(',')
-			json.dump({'vds':dremio_data.vds_list}, f)
-		f.write(',')
-		json.dump({'files':dremio_data.files}, f)
+			f.write(',\n')
+			json.dump({'vds':dremio_data.vds_list}, f, indent=4, sort_keys=True)
+		f.write(',\n')
+		json.dump({'files':dremio_data.files}, f, indent=4, sort_keys=True)
 		if self._config.reflection_process_mode == 'process':
-			f.write(',')
-			json.dump({'reflections':dremio_data.reflections}, f)
+			f.write(',\n')
+			json.dump({'reflections':dremio_data.reflections}, f, indent=4, sort_keys=True)
 		if self._config.user_process_mode == 'process':
-			f.write(',')
-			json.dump({'referenced_users':dremio_data.referenced_users}, f)
+			f.write(',\n')
+			json.dump({'referenced_users':dremio_data.referenced_users}, f, indent=4, sort_keys=True)
 		if self._config.group_process_mode == 'process':
-			f.write(',')
-			json.dump({'referenced_groups':dremio_data.referenced_groups}, f)
-			f.write(',')
-			json.dump({'referenced_roles': dremio_data.referenced_roles}, f)
+			f.write(',\n')
+			json.dump({'referenced_groups':dremio_data.referenced_groups}, f, indent=4, sort_keys=True)
+			f.write(',\n')
+			json.dump({'referenced_roles': dremio_data.referenced_roles}, f, indent=4, sort_keys=True)
 		if self._config.wlm_queue_process_mode == 'process':
-			f.write(',')
-			json.dump({'queues':dremio_data.queues}, f)
+			f.write(',\n')
+			json.dump({'queues':dremio_data.queues}, f, indent=4, sort_keys=True)
 		if self._config.wlm_rule_process_mode == 'process':
-			f.write(',')
-			json.dump({'rules':dremio_data.rules}, f)
+			f.write(',\n')
+			json.dump({'rules':dremio_data.rules}, f, indent=4, sort_keys=True)
 		if self._config.tag_process_mode == 'process':
-			f.write(',')
-			json.dump({'tags':dremio_data.tags}, f)
+			f.write(',\n')
+			json.dump({'tags':dremio_data.tags}, f, indent=4, sort_keys=True)
 		if self._config.wiki_process_mode == 'process':
-			f.write(',')
-			json.dump({'wikis':dremio_data.wikis}, f)
+			f.write(',\n')
+			json.dump({'wikis':dremio_data.wikis}, f, indent=4, sort_keys=True)
 		if self._config.vote_process_mode == 'process':
-			f.write(',')
-			json.dump({'votes':dremio_data.votes}, f)
+			f.write(',\n')
+			json.dump({'votes':dremio_data.votes}, f, indent=4, sort_keys=True)
 		if dremio_data.vds_parents:
-			f.write(',')
-			json.dump({'vds_parents':dremio_data.vds_parents}, f)
+			f.write(',\n')
+			json.dump({'vds_parents':dremio_data.vds_parents}, f, indent=4, sort_keys=True)
 		f.write(' ] }')
 		f.close()
 

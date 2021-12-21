@@ -286,18 +286,25 @@ class DremioReader:
 					if reflection['id'] not in self._config.reflection_id_include_list:
 						self._logger.debug("_read_reflections: ignoring reflection id " + reflection['id'] + ", not in include list")
 						continue
-				reflection_dataset = self._dremio_env.get_catalog_entity_by_id(reflection['datasetId'])
-				if reflection_dataset is None:
-					self._logger.debug("_read_reflections: error processing reflection, cannot get path for dataset: " + reflection['datasetId'])
-					continue
-				reflection_path = reflection_dataset['path']
-				self._logger.debug("_read_reflections: processing reflection " + reflection['id'] + " path: " + str(reflection_path))
-				reflection["path"] = reflection_path
-				self._d.reflections.append(reflection)
-#				self._read_acl(reflection)
-#				self._read_wiki(reflection)
+				if self._is_reflection_in_vds_list(reflection):
+					reflection_dataset = self._dremio_env.get_catalog_entity_by_id(reflection['datasetId'])
+					if reflection_dataset is None:
+						self._logger.debug("_read_reflections: error processing reflection, cannot get path for dataset: " + reflection['datasetId'])
+						continue
+					reflection_path = reflection_dataset['path']
+					self._logger.debug("_read_reflections: processing reflection " + reflection['id'] + " path: " + str(reflection_path))
+					reflection["path"] = reflection_path
+					self._d.reflections.append(reflection)
 		else:
 			self._logger.debug("_read_reflections: skipping reflections processing as per job configuration")
+
+	def _is_reflection_in_vds_list(self, reflection):
+		if not self._config.reflection_only_matching_vds:
+			return True
+		for vds in self._d.vds_list:
+			if vds['id'] == reflection['datasetId']:
+				return True
+		return False
 
 	# Note, tags are only available for datasets
 	def _read_tags(self, entity):

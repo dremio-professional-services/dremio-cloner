@@ -102,7 +102,7 @@ class DremioClonerConfig():
 	source_ignore_missing_acl_user = False	# Flag to write a Source if an ACL user is missing in the target Dremio environment
 	source_ignore_missing_acl_group = False	# Flag to write a Source if an ACL group is missing in the target Dremio environment
 	source_retry_timedout = False			# Flag to retry Sources that timed out
-	folder_process_mode = None				# Flag to process Folder: process, skip, create_only, update_only, create_overwrite
+	folder_process_mode = None				# Flag to process Folder: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
 	folder_ignore_missing_acl_user = False	# Flag to write a Folder if an ACL user is missing in the target Dremio environment
 	folder_ignore_missing_acl_group = False	# Flag to write a Folder if an ACL group is missing in the target Dremio environment
 	pds_list_useapi = False					# Using API for listing PDS may cause issues when the source is not available at the runtime
@@ -114,15 +114,16 @@ class DremioClonerConfig():
 	vds_filter = None						# Filter for VDS
 	vds_filter_tag = None					# Filter for VDS
 	vds_exclude_filter = None				# Exclusion Filter for VDS
-	vds_process_mode = None					# Flag to process VDS: process, skip, create_only, update_only, create_overwrite
+	vds_process_mode = None					# Flag to process VDS: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
 	vds_dependencies_process_mode = 'ignore' # Flag to process VDS dependencies (VDS and PDS): ignore, get
 	vds_ignore_missing_acl_user = False		# Flag to write a VDS if an ACL user is missing in the target Dremio environment
 	vds_ignore_missing_acl_group = False	# Flag to write a VDS if an ACL group is missing in the target Dremio environment
 	vds_max_hierarchy_depth = 100			# The max hierarchy depth to process
-	reflection_process_mode = None			# Flag to process reflection: process, skip, create_only, update_only, create_overwrite
+	reflection_process_mode = None			# Flag to process reflection: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
 	reflection_filter_mode = None			# Flag to filter reflection: apply_vds_pds_filter
 	reflection_id_include_list = []			# List of reflection ids to include. Empty list means include all reflections which is the default behaviour
 	reflection_refresh_mode = 'skip' 		# Flag to refresh reflections: refresh, skip
+	reflection_only_matching_vds = False 	# Flag to export only reflections which have a matching VDS. The old and standard behavior is exporting all reflections, regardless
 	wlm_queue_process_mode = 'process'		# Flag to process WLM Queues: process, skip
 	wlm_rule_process_mode = 'process'		# Flag to process WLM Rules: process, skip
 	wiki_process_mode = 'process'			# Flag to process Wikis: process, skip, create_only, update_only, create_overwrite
@@ -376,6 +377,8 @@ class DremioClonerConfig():
 				self.reflection_refresh_mode = self._str(item, 'pds.reflection_refresh_mode')
 			elif 'reflection.id_include_list' in item:
 				self.reflection_id_include_list = self._array(item, 'reflection.id_include_list')
+			elif 'reflection.only_for_matching_vds' in item:
+				self.reflection_only_matching_vds = self._bool(item, 'reflection.only_for_matching_vds')
 			# Report Options
 			elif 'report.csv.delimiter' in item:
 				self.report_csv_delimiter = self._str(item, 'report.csv.delimiter')
@@ -433,7 +436,8 @@ class DremioClonerConfig():
 			self._logger.fatal("Invalid configuration for pds.process_mode.")
 		if (self.command == self.CMD_PUT and (self.vds_process_mode is None or
 			     (self.vds_process_mode != 'skip' and self.vds_process_mode != 'update_only' and 
-			     	self.vds_process_mode != 'create_only' and self.vds_process_mode != 'create_overwrite'))):
+			     	self.vds_process_mode != 'create_only' and self.vds_process_mode != 'create_overwrite' and
+				 	self.vds_process_mode != 'create_overwrite_delete' ))):
 			self._logger.fatal("Invalid configuration for vds.process_mode.")
 		# Make sure we do not overwrite JSON environment file
 		if (self.command == self.CMD_GET and self.target_filename is not None and not self.target_file_or_dir_overwrite and os.path.isfile(self.target_filename)):

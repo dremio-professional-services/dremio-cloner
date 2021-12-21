@@ -28,6 +28,7 @@ import urllib
 class Dremio:
 	# API URLs
 	_catalog_url = 'api/v3/catalog/'
+	_reflection_url = 'api/v3/reflection/'
 	_catalog_url_by_path = 'api/v3/catalog/by-path/'
 	_login_url = 'apiv2/login'
 	_eula_url = 'apiv2/eula/accept'
@@ -320,6 +321,13 @@ class Dremio:
 		return self._api_get_json(self._get_job_url + jobid + '/results?offset=' + str(offset) + '&limit=' + str(limit),
 								  source="get_job_info")
 
+	def delete_reflection(self, reflection_id, dry_run=True, report_error=True):
+		if dry_run:
+			logging.warn("delete_reflection: Dry Run. Not submitting changes to API for delete reflection: " + reflection_id)
+			return
+		return self._api_delete(self._reflection_url + reflection_id, source="delete_reflection", report_error = report_error)
+
+
 	def delete_catalog_entity(self, entity_id, dry_run=True, report_error=True):
 		if dry_run:
 			logging.warn("delete_catalog_entity: Dry Run. Not submitting changes to API for delete entity: " + entity_id)
@@ -481,6 +489,9 @@ class Dremio:
 		try:
 			response = requests.request("DELETE", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			if response.status_code == 200:
+				if response.text == '':
+					# if text is empty then response.json() fails, e.g. delete reflections return 200 and empty text.
+					return None
 				return response.json()
 			elif response.status_code == 204:
 				return None

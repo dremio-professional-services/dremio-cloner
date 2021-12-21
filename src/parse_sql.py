@@ -15,7 +15,7 @@
 # limitations under the License.
 ########
 
-from moz_sql_parser import parse
+from mo_sql_parsing import parse
 import json, re
 
 tablist = []
