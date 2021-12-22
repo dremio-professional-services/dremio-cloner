@@ -114,71 +114,31 @@ def on_clause_replace(clause, src_path, dst_path, vds_path_str, log_text):
         print("UNSUPPORTED TYPE IN on_clause_replace: " + str(type(clause)))
 
 def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
-    if not isinstance(parsed, dict):
-        print("ERROR: Passed parsed needs to be of type DICT " + str(type(parsed)))
-        return
-
-    join_keys = [key for key in parsed.keys() if key.lower().find("join") != -1]
-    union_keys = [key for key in parsed.keys() if key.lower().find("union") != -1]
-    _key = None
-    _value = None
     vds_path_str = '.'.join(vds_path)
-    if 'from' in parsed:
-        _key = 'from'
-        _value = parsed['from']
-    elif 'value' in parsed:
-        _key = 'value'
-        _value = parsed['value']
-    elif len(join_keys) > 0:
-        for join_key in join_keys:
-            item = parsed[join_key]
-            if isinstance(item, str):
-                if item.lower().startswith(src_path.lower()):
-                    _newvalue = dst_path + item[len(src_path):]
-                    parsed[join_key] = _newvalue
-                    print(log_text + ' - Matching VDS SQL JOIN (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
-            else:
-                replace_table_names(item, vds_path, src_path, dst_path, log_text)
-        if 'on' in parsed:
-            on_clause_replace(parsed['on'], src_path, dst_path, vds_path_str, log_text)
-        return
-    elif len(union_keys) > 0:
-        for union_key in union_keys:
-            item = parsed[union_key]
-            if isinstance(item, str):
-                if item.lower().startswith(src_path.lower()):
-                    _newvalue = dst_path + item[len(src_path):]
-                    parsed[union_key] = _newvalue
-                    print(log_text + ' - Matching VDS SQL UNION (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
-            elif isinstance(item, list):
-                for x in item:
-                    replace_table_names(x, vds_path, src_path, dst_path, log_text)
-            else:
-                print("ERROR: item is of type in UNION " + str(_value))
-        return
-    else:
-        print("WARNING: VDS not having any FROM clause - unhandled parse key: " + str(parsed))
-        return
+    if isinstance(parsed, dict):
+        for _key, _value in parsed.items():
+            if isinstance(_value, list) or isinstance(_value, dict):
+                replace_table_names(_value, vds_path, src_path, dst_path, log_text)
+            elif isinstance(_value, str):
+                if _value.lower().startswith(src_path.lower()):
+                    _newvalue = dst_path + _value[len(src_path):]
+                    parsed[_key] = _newvalue
+                    print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + _value + ' -> ' + _newvalue)
 
-    if isinstance(_value, list):
-        for idx, item in enumerate(_value):
+            else:
+                print("ERROR: _value is of type " + str(_value))
+    elif isinstance(parsed, list):
+        for idx, item in enumerate(parsed):
             if isinstance(item, str):
                 if item.lower().startswith(src_path.lower()):
                     _newvalue = dst_path + item[len(src_path):]
-                    _value[idx] = _newvalue
+                    parsed[idx] = _newvalue
                     print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + item + ' -> ' + _newvalue)
             else:
                 replace_table_names(item, vds_path, src_path, dst_path, log_text)
-    elif isinstance(_value, str):
-        if _value.lower().startswith(src_path.lower()):
-            _newvalue = dst_path + _value[len(src_path):]
-            parsed[_key] = _newvalue
-            print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + _value + ' -> ' + _newvalue)
+    elif parsed != None and not isinstance(parsed, (int, float, bool, complex)):
+        print("ERROR: Passed parsed needs to be of type DICT or LIST: " + str(type(parsed)))
 
-    elif isinstance(_value, dict):
-        replace_table_names(_value, vds_path, src_path, dst_path, log_text)
-    else:
-        print("ERROR: _value is of type " + str(_value))
 
 def should_quote(identifier, dremio_data):
     if identifier == '*':
