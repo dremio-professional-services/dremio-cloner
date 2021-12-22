@@ -124,8 +124,7 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
                     _newvalue = dst_path + _value[len(src_path):]
                     parsed[_key] = _newvalue
                     print(log_text + ' - Matching VDS SQL (' + (vds_path_str) + '): ' + _value + ' -> ' + _newvalue)
-
-            else:
+            elif _value != None and not isinstance(_value, (int, float, bool, complex)):
                 print("ERROR: _value is of type " + str(_value))
     elif isinstance(parsed, list):
         for idx, item in enumerate(parsed):
