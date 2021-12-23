@@ -10,11 +10,22 @@ Dremio Cloner can be utilized for:
 - Security Audit reporting
 - Reflection reporting
 
-Dremio cloner is executed with the following command:
-`python dremio_cloner.py [config_file.json]`
+Dremio Cloner is executed with the following command:
 
-Dremio Migration Tool helps to migrate spaces and folders to new paths. This is done by reading in a Dremio Cloner Export, modifying it and writing it into a new directory or file.
-This file can be read by Dremio Cloner and written into a destination system.
+```
+python dremio_cloner.py [config_file.json]`
+```
+
+Dremio Migration Tool helps to migrate spaces and folders to new paths. 
+This is done by reading in a Dremio Cloner Export, modifying it and writing it into a new directory or file.
+It also rewrites and reformats the SQL queries, probably SQL comments can be lost.
+The output file or directory  can be read by Dremio Cloner and written into a destination system.
+
+The Migration Tool is executed with the following command:
+
+```
+python dremio_migration.py [config_migration_file.json]
+```
 
 ## Prerequisites
 
