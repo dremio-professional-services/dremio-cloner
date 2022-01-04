@@ -3,17 +3,62 @@
 Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get, put, cascade-acl, report-acl, report-reflections.
 
 Dremio Cloner can be utilized for: 
-- Migrating entire dremio environments, for example, from community edition to enterprise edition
+- Migrating entire Dremio environments, for example, from community edition to enterprise edition
 - CI/CD processes
 - Disaster Recovery scenarios
 - Partial backup/restore
 - Security Audit reporting
 - Reflection reporting
 
-Dremio cloner is executied with the following command:
-`python dremio_cloner.py [config_file.json]`
+Dremio Cloner is executed with the following command:
 
-Dremio Cloner can be run on Python 2.7 and 3.
+```
+python dremio_cloner.py [config_file.json]`
+```
+
+Dremio Migration Tool helps to migrate spaces and folders to new paths. 
+This is done by reading in a Dremio Cloner Export, modifying it and writing it into a new directory or file.
+It also rewrites and reformats the SQL queries, probably SQL comments can be lost.
+The output file or directory  can be read by Dremio Cloner and written into a destination system.
+
+The Migration Tool is executed with the following command:
+
+```
+python dremio_migration.py [config_migration_file.json]
+```
+
+## Prerequisites
+
+Dremio Cloner requires Python 3 and requires some additional Python libraries, please install:
+
+```
+$ pip install mo-sql-parsing requests
+```
+
+If you are using Dremio Migration Tool, you additionally need to install `sqlparse`:
+
+```
+$ pip install sqlparse
+```
+
+### Important note
+
+Older versions of Dremio Cloner used the Python package `moz-sql-parser`, which is now _deprecated_ and got replaced by `mo-sql-parsing`. 
+If you ran an older version of Dremio Cloner before, you need to uninstall these packages before installing `mo-sql-parsing`.
+
+```
+$ pip list
+...
+mo-dots            4.22.21108
+mo-future          3.147.20327
+mo-imports         3.149.20327
+mo-kwargs          4.22.21108
+mo-logs            4.23.21108
+moz-sql-parser     4.40.21126
+
+$ pip uninstall -y moz-sql-parser mo-dots mo-future mo-imports mo-kwargs mo-logs 
+$ pip install mo-sql-parsing requests
+```
 
 ## Command &quot;get&quot;
 
