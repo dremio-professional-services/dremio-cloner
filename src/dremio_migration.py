@@ -149,7 +149,7 @@ def should_quote(identifier, dremio_data):
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql', 'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with', 'distinct', 'having']:
+    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql', 'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with', 'distinct', 'having', 'asc', 'desc']:
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
