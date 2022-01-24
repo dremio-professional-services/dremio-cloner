@@ -149,7 +149,7 @@ def should_quote(identifier, dremio_data):
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql', 'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with', 'distinct', 'having', 'asc', 'desc', 'union', 'offset', 'fetch', 'limit', 'text', 'intersect', 'except', 'case', 'to', 'minus']:
+    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql', 'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with', 'distinct', 'having', 'asc', 'desc', 'union', 'offset', 'fetch', 'limit', 'text', 'intersect', 'except', 'case', 'to', 'minus', 'data', 'language']:
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
@@ -329,7 +329,7 @@ def main():
                     oldpath = vds['path']
                     vds['path'] = rebuild_path(migration, oldpath)
                     print("Matching VDS path: " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds['path'])))
-                    replace_table_names(vds['parsedSql'], vds['path'], src_path, dst_path, 'VDS migration')
+                replace_table_names(vds['parsedSql'], vds['path'], src_path, dst_path, 'VDS migration')
 
             # Migrate wiki
             #####################
