@@ -149,7 +149,11 @@ def should_quote(identifier, dremio_data):
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql', 'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with', 'distinct', 'having', 'asc', 'desc', 'union', 'offset', 'fetch', 'limit', 'text', 'intersect', 'except', 'case', 'to', 'minus', 'data', 'language']:
+    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql',
+                   'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with',
+                   'distinct', 'having', 'asc', 'desc', 'union', 'offset', 'fetch', 'limit', 'text',
+                   'intersect', 'except', 'case', 'to', 'minus', 'data', 'language', 'user', 'left', 'right',
+                   'if', 'else', 'all']:
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
@@ -312,8 +316,18 @@ def main():
                 if path_matches(migration['srcPath'], vds_parent['path']):
                     oldpath = vds_parent['path']
                     vds_parent['path'] = rebuild_path(migration, oldpath)
-                    vds_parent['parents'] = [parent.replace('/'.join(migration['srcPath']), '/'.join(migration['dstPath'])) for parent in vds_parent['parents']]
                     print("Matching vds_parent: " + ('.'.join(oldpath)) + " -> " + ('.'.join(vds_parent['path'])))
+
+                new_parents = []
+                for parent in vds_parent['parents']:
+                    src_path_lower = '/'.join(migration['srcPath']).lower()
+                    dst_path = '/'.join(migration['dstPath'])
+                    if parent.lower().startswith(src_path_lower):
+                        new_parents.append(dst_path + parent[len(src_path_lower):])
+                    else:
+                        new_parents.append(parent)
+                vds_parent['parents'] = new_parents
+                # vds_parent['parents'] = [parent.replace('/'.join(migration['srcPath']), '/'.join(migration['dstPath'])) for parent in vds_parent['parents']]
 
             # Migrate vds_list
             #####################
