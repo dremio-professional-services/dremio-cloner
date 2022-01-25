@@ -441,10 +441,10 @@ class DremioReader:
 	def _find_entity(self, path):
 		self._logger.debug("_find_entity: processing path: " + str(path))
 		for vds in self._d.vds_list:
-			if self._utils.normalize_path(vds['path']) == path:
+			if 'path' in vds and self._utils.normalize_path(vds['path']) == path:
 				return vds
 		for pds in self._d.pds_list:
-			if self._utils.normalize_path(pds['path']) == path:
+			if 'path' in pds and self._utils.normalize_path(pds['path']) == path:
 				return pds
 
 	# Helper method, used by most read* methods
