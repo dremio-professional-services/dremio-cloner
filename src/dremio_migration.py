@@ -11,6 +11,45 @@ import json
 import uuid
 import os
 
+reserved_words = ['abs', 'asc', 'all', 'allocate', 'allow', 'alter', 'and', 'any', 'are', 'array', 'array_max_cardinality',
+                  'as', 'asensitive', 'asymmetric', 'at', 'atomic', 'authorization', 'avg', 'begin', 'begin_frame',
+                  'begin_partition', 'between', 'bigint', 'binary', 'bit', 'blob', 'boolean', 'both', 'by', 'call',
+                  'called', 'cardinality', 'cascaded', 'case', 'cast', 'ceil', 'ceiling', 'char', 'char_length',
+                  'character', 'character_length', 'check', 'classifier', 'clob', 'close', 'coalesce', 'collate',
+                  'collect', 'column', 'commit', 'condition', 'connect', 'constraint', 'contains', 'convert', 'corr',
+                  'corresponding', 'count', 'covar_pop', 'covar_samp', 'create', 'cross', 'cube', 'cume_dist', 'current',
+                  'current_catalog', 'current_date', 'current_default_transform_group', 'current_path', 'current_role',
+                  'current_row', 'current_schema', 'current_time', 'current_timestamp', 'current_transform_group_for_type',
+                  'current_user', 'cursor', 'cycle', 'data', 'date', 'day', 'deallocate', 'dec', 'decimal', 'declare', 'default',
+                  'define', 'delete', 'dense_rank', 'deref', 'desc', 'describe', 'deterministic', 'disallow', 'disconnect', 'distinct',
+                  'double', 'drop', 'dynamic', 'each', 'element', 'else', 'empty', 'end', 'end-exec', 'end_frame', 'end_partition',
+                  'equals', 'escape', 'every', 'except', 'exec', 'execute', 'exists', 'exp', 'explain', 'extend', 'external',
+                  'extract', 'false', 'fetch', 'filter', 'first_value', 'float', 'floor', 'for', 'foreign', 'frame_row', 'free',
+                  'from', 'full', 'function', 'fusion', 'get', 'global', 'grant', 'group', 'grouping', 'groups', 'having',
+                  'hold', 'hour', 'identity', 'if', 'import', 'in', 'index', 'indicator', 'initial', 'inner', 'inout', 'insensitive',
+                  'insert', 'int', 'integer', 'intersect', 'intersection', 'interval', 'into', 'is', 'join', 'key', 'lag', 'language',
+                  'large', 'last_value', 'lateral', 'lead', 'leading', 'left', 'like', 'like_regex', 'limit', 'ln', 'local',
+                  'localtime', 'localtimestamp', 'lower', 'match', 'matches', 'match_number', 'match_recognize', 'max',
+                  'measures', 'member', 'merge', 'method', 'min', 'minute', 'mod', 'modifies', 'module', 'month', 'more',
+                  'multiset', 'name', 'national', 'natural', 'nchar', 'nclob', 'new', 'next', 'no', 'none', 'normalize', 'not',
+                  'nth_value', 'ntile', 'null', 'nullif', 'numeric', 'occurrences_regex', 'octet_length', 'of', 'offset',
+                  'old', 'omit', 'on', 'one', 'only', 'open', 'or', 'order', 'out', 'outer', 'over', 'overlaps', 'overlay',
+                  'parameter', 'partition', 'partitions', 'pattern', 'per', 'percent', 'percentile_cont', 'percentile_disc', 'percent_rank',
+                  'period', 'permute', 'portion', 'position', 'position_regex', 'power', 'precedes', 'precision', 'prepare',
+                  'prev', 'primary', 'procedure', 'range', 'rank', 'reads', 'real', 'recursive', 'ref', 'references', 'referencing',
+                  'regr_avgx', 'regr_avgy', 'regr_count', 'regr_intercept', 'regr_r2', 'regr_slope', 'regr_sxx', 'regr_sxy',
+                  'regr_syy', 'release', 'reset', 'result', 'return', 'returns', 'revoke', 'right', 'rollback', 'rollup',
+                  'row', 'row_number', 'rows', 'running', 'savepoint', 'scope', 'scroll', 'search', 'second', 'seek',
+                  'select', 'sensitive', 'session_user', 'set', 'minus', 'show', 'similar', 'skip', 'smallint', 'some',
+                  'specific', 'specifictype', 'sql', 'sqlexception', 'sqlstate', 'sqlwarning', 'sqrt', 'start', 'static',
+                  'stddev_pop', 'stddev_samp', 'stream', 'submultiset', 'subset', 'substring', 'substring_regex', 'succeeds',
+                  'sum', 'symmetric', 'system', 'system_time', 'system_user', 'table', 'tablesample', 'text', 'then', 'time',
+                  'timestamp', 'timezone_hour', 'timezone_minute', 'tinyint', 'to', 'trailing', 'translate', 'translate_regex',
+                  'translation', 'treat', 'trigger', 'trim', 'trim_array', 'true', 'truncate', 'uescape', 'union', 'unique',
+                  'unknown', 'unnest', 'update', 'upper', 'upsert', 'user', 'using', 'value', 'values', 'value_of', 'var_pop',
+                  'var_samp', 'varbinary', 'varchar', 'varying', 'versioning', 'when', 'whenever', 'where', 'width_bucket',
+                  'window', 'with', 'within', 'without', 'year']
+
 def path_matches(match_path, resource_path):
     if len(match_path) > len(resource_path):
         return False
@@ -149,11 +188,7 @@ def should_quote(identifier, dremio_data):
         return False
     # return True
     lowerId = identifier.lower()
-    if lowerId in ['default', 'key', 'index', 'join', 'from', 'both', 'order', 'start', 'end', 'sql',
-                   'create', 'partition', 'partitions', 'by', 'group', 'inner', 'outer', 'as', 'with',
-                   'distinct', 'having', 'asc', 'desc', 'union', 'offset', 'fetch', 'limit', 'text',
-                   'intersect', 'except', 'case', 'to', 'minus', 'data', 'language', 'user', 'left', 'right',
-                   'if', 'else', 'all']:
+    if lowerId in reserved_words:
         return True
     if identifier[0].isdigit():
         # if starts with digit needs to be quoted
