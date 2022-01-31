@@ -595,8 +595,22 @@ def main():
         vds.pop('parsedSql')
     dremio_data.vds_list = new_vds_list
 
-    # TODO probably we can also migrate PDS promotions, for now we do not handle it and just export an empty list
-    dremio_data.pds_list = []
+    new_pds_list = []
+    for pds in dremio_data.pds_list:
+        pds_path = pds['path']
+        if sourceMigrations is not None and len(sourceMigrations) > 0:
+            for migration in sourceMigrations:
+                if path_matches(migration['srcPath'], pds_path):
+                    oldpath = pds_path
+                    pds['path'] = rebuild_path(migration, oldpath)
+                    print("Moved PDS: " + '.'.join(oldpath) + ' -> ' + '.'.join(pds['path']))
+                    new_pds_list.append(pds)
+                    # only one migration per pds path
+                    break
+
+    dremio_data.pds_list = new_pds_list
+
+
     dremio_data.sources = []
     dremio_data.homes = []
 
