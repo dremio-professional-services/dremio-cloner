@@ -743,13 +743,13 @@ class DremioWriter:
 						else:
 							self._logger.error("_process_acl: Source User " + user_def['id'] + " not found in the target Dremio Environment. ACL Entry cannot be processed as per ignore_missing_acl_user configuration. " + self._utils.get_entity_desc(entity))
 					elif "user" in new_acl_principal:
-						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
+						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else (user_def['permissions'] if 'permissions' in user_def else [])})
 					elif "group" in new_acl_principal:
-						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
+						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else (user_def['permissions'] if 'permissions' in user_def else [])})
 					elif "role" in new_acl_principal:
 						if 'roles' not in transformed_acl:
 							transformed_acl['roles'] = []
-						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else user_def['permissions']})
+						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else (user_def['permissions'] if 'permissions' in user_def else [])})
 			if 'groups' in acl:
 				# Note, taking a copy of the list for proper removal of items
 				for group_def in acl['groups'][:]:
@@ -763,13 +763,13 @@ class DremioWriter:
 							# Flag is not set - return error status
 							self._logger.error("_process_acl: Source Group " + group_def['id'] + " not found in the target Dremio Environment. ACL Entry cannot be processed as per ignore_missing_acl_group configuration. " + self._utils.get_entity_desc(entity))
 					elif "user" in new_acl_principal:
-						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
+						transformed_acl['users'].append({"id":new_acl_principal["user"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else (group_def['permissions'] if 'permissions' in group_def else [])})
 					elif "group" in new_acl_principal:
-						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
+						transformed_acl['groups'].append({"id":new_acl_principal["group"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else (group_def['permissions'] if 'permissions' in group_def else [])})
 					elif "role" in new_acl_principal:
 						if 'roles' not in transformed_acl:
 							transformed_acl['roles'] = []
-						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else group_def['permissions']})
+						transformed_acl['roles'].append({"id":new_acl_principal["role"],"permissions":new_acl_principal['permissions'] if "permissions" in new_acl_principal else (group_def['permissions'] if 'permissions' in group_def else [])})
 			if 'roles' in acl:
 				# Note, taking a copy of the list for proper removal of items
 				for role_def in acl['roles'][:]:
@@ -1150,12 +1150,12 @@ class DremioWriter:
 	def _find_pds_by_path(self, path):
 		# First, try finding in the PDS list from the source file
 		for pds in self._d.pds_list:
-			if path == self._utils.normalize_path(pds['path']):
+			if "path" in pds and path == self._utils.normalize_path(pds['path']):
 				return pds
 		# For dry run, check processed pds
 		if self._config.dry_run:
 			for pds in self._dry_run_processed_pds_list:
-				if path == self._utils.normalize_path(pds['path']):
+				if "path" in pds and path == self._utils.normalize_path(pds['path']):
 					return pds
 		# Finally, try finding in the target environment
 		entity = self._dremio_env.get_catalog_entity_by_path(path)
