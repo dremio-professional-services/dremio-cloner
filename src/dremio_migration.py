@@ -159,6 +159,7 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
             if isinstance(_value, list) or isinstance(_value, dict):
                 replace_table_names(_value, vds_path, src_path, dst_path, log_text)
             elif isinstance(_value, str):
+                _value = removeEscapedDot(_value)
                 if _value.lower().startswith(src_path.lower()):
                     _newvalue = dst_path + _value[len(src_path):]
                     parsed[_key] = _newvalue
@@ -168,6 +169,7 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
     elif isinstance(parsed, list):
         for idx, item in enumerate(parsed):
             if isinstance(item, str):
+                item = removeEscapedDot(item)
                 if item.lower().startswith(src_path.lower()):
                     _newvalue = dst_path + item[len(src_path):]
                     parsed[idx] = _newvalue
@@ -177,6 +179,8 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
     elif parsed != None and not isinstance(parsed, (int, float, bool, complex)):
         print("ERROR: Passed parsed needs to be of type DICT or LIST: " + str(type(parsed)))
 
+def removeEscapedDot(item):
+    return item.replace('\\.', '.')
 
 def should_quote(identifier, dremio_data):
     if identifier == '*':
