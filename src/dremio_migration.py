@@ -159,7 +159,6 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
             if isinstance(_value, list) or isinstance(_value, dict):
                 replace_table_names(_value, vds_path, src_path, dst_path, log_text)
             elif isinstance(_value, str):
-                _value = removeEscapedDot(_value)
                 if _value.lower().startswith(src_path.lower()):
                     _newvalue = dst_path + _value[len(src_path):]
                     parsed[_key] = _newvalue
@@ -169,7 +168,6 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
     elif isinstance(parsed, list):
         for idx, item in enumerate(parsed):
             if isinstance(item, str):
-                item = removeEscapedDot(item)
                 if item.lower().startswith(src_path.lower()):
                     _newvalue = dst_path + item[len(src_path):]
                     parsed[idx] = _newvalue
@@ -179,8 +177,6 @@ def replace_table_names(parsed, vds_path, src_path, dst_path, log_text):
     elif parsed != None and not isinstance(parsed, (int, float, bool, complex)):
         print("ERROR: Passed parsed needs to be of type DICT or LIST: " + str(type(parsed)))
 
-def removeEscapedDot(item):
-    return item.replace('\\.', '.')
 
 def should_quote(identifier, dremio_data):
     if identifier == '*':
@@ -562,8 +558,13 @@ def main():
             # Migrate vds_list
             #####################
             # src_permutations = generate_all_quoted_and_non_quoted_permutations(migration['srcPath'])
-            src_path = ".".join(migration['srcPath'])
-            dst_path = ".".join(migration['dstPath'])
+            # SQL parser escapes the dots so that they replacement matches
+            src_path_list = migration['srcPath'].copy()
+            src_path_list[-1] = src_path_list[-1].replace('.', '\\.')
+            dst_path_list = migration['dstPath'].copy()
+            dst_path_list[-1] = dst_path_list[-1].replace('.', '\\.')
+            src_path = ".".join(src_path_list)
+            dst_path = ".".join(dst_path_list)
             # dst_path = ".".join(list(map(quote, migration['dstPath'])))
             for vds in dremio_data.vds_list:
                 if 'sqlContext' in vds and path_matches(migration['srcPath'], vds['sqlContext']):
