@@ -558,8 +558,13 @@ def main():
             # Migrate vds_list
             #####################
             # src_permutations = generate_all_quoted_and_non_quoted_permutations(migration['srcPath'])
-            src_path = ".".join(migration['srcPath'])
-            dst_path = ".".join(migration['dstPath'])
+            # SQL parser escapes the dots so that they replacement matches
+            src_path_list = migration['srcPath'].copy()
+            src_path_list[-1] = src_path_list[-1].replace('.', '\\.')
+            dst_path_list = migration['dstPath'].copy()
+            dst_path_list[-1] = dst_path_list[-1].replace('.', '\\.')
+            src_path = ".".join(src_path_list)
+            dst_path = ".".join(dst_path_list)
             # dst_path = ".".join(list(map(quote, migration['dstPath'])))
             for vds in dremio_data.vds_list:
                 if 'sqlContext' in vds and path_matches(migration['srcPath'], vds['sqlContext']):
