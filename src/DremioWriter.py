@@ -380,7 +380,7 @@ class DremioWriter:
 		for map in self._config.source_transformation:
 			if wiki['path'][0] == map['source-source-name']:
 				self._logger.info("_map_wiki_source: mapping wiki source name in path " + wiki['path'][0] + " into " + map['target-source-name'])
-				wiki['path'][0] = map['target-source-name']
+				wiki['path'][0] = map['target-source-name'].replace(" ", "%20")
 				break
 
 	def _map_reflection_source(self, reflection):
@@ -388,7 +388,15 @@ class DremioWriter:
 		for map in self._config.source_transformation:
 			if reflection['path'][0] == map['source-source-name']:
 				self._logger.info("_map_reflection_source: mapping reflection source name in path " + reflection['path'][0] + " into " + map['target-source-name'])
-				reflection['path'][0] = map['target-source-name']
+				reflection['path'][0] = map['target-source-name'].replace(" ", "%20")
+				break
+
+	def _map_tag_source(self, tag):
+		# see if the tag path contains a source name that is being mapped to a different name in source_transformation
+		for map in self._config.source_transformation:
+			if tag['path'][0] == map['source-source-name']:
+				self._logger.info("_map_tag_source: mapping tag source name in path " + tag['path'][0] + " into " + map['target-source-name'])
+				tag['path'][0] = map['target-source-name'].replace(" ", "%20")
 				break
 
 	def _retrieve_users_groups(self):
@@ -1220,6 +1228,7 @@ class DremioWriter:
 
 	def _write_tags(self, tags, process_mode):
 		self._logger.debug("_write_tag: processing tags: " + str(tags))
+		self._map_tag_source(tags)
 		new_tags = tags['tags']
 		tags_path = tags['path']
 		# Check if the tags already exist

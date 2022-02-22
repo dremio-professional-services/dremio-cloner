@@ -75,6 +75,7 @@ class DremioReader:
 					self._d.pds_list.append(pds)
 					self._read_acl(pds)
 					self._read_wiki(pds)
+					self._read_tags(pds)
 
 	# Read Dremio catalog from source environment recursively going to containers and their children objects 
 	def _read_catalog(self):
