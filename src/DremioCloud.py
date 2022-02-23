@@ -28,7 +28,7 @@ import urllib
 class DremioCloud:
 	# API URLs
 
-	_url_prefix = 'v1/projects/'
+	_url_prefix = 'v0/projects/'
 	_catalog_url = '/catalog/'
 	_catalog_url_by_path = '/catalog/by-path/'
 	_login_url = 'ui/login/userpass'
