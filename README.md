@@ -437,6 +437,7 @@ Note, that this command does not provide any option for Scope definition. Please
 | **Configuration Option** | **Description** |
 | --- | --- |
 | pds.filter | A filter that defines what PDSs will be **included** into processing. &quot;\*&quot; will include all PDSs. Empty field will exclude all PDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _pds.exclude.filter_. |
+| pds.filter.names | If specified, a list filter that defines what PDSs will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all PDSs specified by _pds.filter_, which is the default behavior. Works in logical AND with _pds.exclude.filter_. Example: `{"pds.filter.names": ["MyPDS1", "MyPDS2", "MyPDS3"]},` |
 | pds.exclude.filter | A filter that defines what PDSs will be **excluded** into processing. &quot;\*&quot; will exclude all PDSs. Empty field will include all PDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _pds.filter_. |
 | pds.list.useapi | Forces to use API for collecting list of PDSs if set to True. Default value is False which means that INFOMRATION\_SCHEMA will be utilized instead of API. False is a recommended value. |
 
@@ -445,6 +446,7 @@ Note, that this command does not provide any option for Scope definition. Please
 | **Configuration Option** | **Description** |
 | --- | --- |
 | vds.filter | A filter that defines what VDSs will be **included** into processing. &quot;\*&quot; will include all VDSs. Empty field will exclude all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.exclude.filter_. |
+| vds.filter.names | If specified, a list filter that defines what VDSs will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all VDSs specified by _vds.filter_, which is the default behavior. Works in logical AND with _vds.exclude.filter_. Example: `{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},` |
 | vds.exclude.filter | A filter that defines what VDSs will be **excluded** into processing. &quot;\*&quot; will exclude all VDSs. Empty field will include all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.filter_. |
 
 ### Scope of Dremio Reflection processing

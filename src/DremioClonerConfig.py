@@ -107,11 +107,13 @@ class DremioClonerConfig():
 	folder_ignore_missing_acl_group = False	# Flag to write a Folder if an ACL group is missing in the target Dremio environment
 	pds_list_useapi = False					# Using API for listing PDS may cause issues when the source is not available at the runtime
 	pds_filter = None						# Filter for PDS
+	pds_filter_names = []  					# List of PDSs to process if not empty
 	pds_exclude_filter = None				# Exclusion Filter for PDS
 	pds_process_mode = None					# Flag to process Source PDS: process, skip, promote
 	pds_ignore_missing_acl_user = False		# Flag to write a Source PDS if an ACL user is missing in the target Dremio environment
 	pds_ignore_missing_acl_group = False	# Flag to write a Source PDS if an ACL group is missing in the target Dremio environment
 	vds_filter = None						# Filter for VDS
+	vds_filter_names = []  					# List of VDSs to process if not empty
 	vds_filter_tag = None					# Filter for VDS
 	vds_exclude_filter = None				# Exclusion Filter for VDS
 	vds_process_mode = None					# Flag to process VDS: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
@@ -343,6 +345,8 @@ class DremioClonerConfig():
 			elif 'pds.filter' in item:
 				self.pds_filter = self._str(item, 'pds.filter')
 				self._pds_filter_re = self._compile_pattern(self.pds_filter)
+			elif 'pds.filter.names' in item:
+				self.pds_filter_names = self._array(item, 'pds.filter.names')
 			elif 'pds.exclude.filter' in item:
 				self.pds_exclude_filter = self._str(item, 'pds.exclude.filter')
 				self._pds_exclude_filter_re = self._compile_pattern(self.pds_exclude_filter)
@@ -357,6 +361,8 @@ class DremioClonerConfig():
 			elif 'vds.filter' in item:
 				self.vds_filter = self._str(item, 'vds.filter')
 				self._vds_filter_re = self._compile_pattern(self.vds_filter)
+			elif 'vds.filter.names' in item:
+				self.vds_filter_names = self._array(item, 'vds.filter.names')
 			elif 'vds.filter.tag' in item:
 				self.vds_filter_tag = self._str(item, 'vds.filter.tag')
 			elif 'vds.exclude.filter' in item:

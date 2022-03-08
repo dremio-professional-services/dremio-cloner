@@ -95,15 +95,29 @@ class DremioClonerFilter():
 			self._logger.debug("match_source_folder_filter: skipping SOURCE FOLDER " + container['path'][0] if 'path' in container else container['name'] + " as per job configuration")
 		return False
 
+	def _match_listed_pds_names(self, pds):
+		if self._config.pds_filter_names != [] and ('path' in pds and pds['path'][-1] not in self._config.pds_filter_names):
+			return False
+		return True
+
 	def match_pds_filter(self, pds, loginfo = True):
+		if not self._match_listed_pds_names(pds):
+			return False
 		if self._match_path(self._config._source_filter_re, self._config._source_exclude_filter_re, self._config._source_folder_filter_re, self._config._source_folder_exclude_filter_re, self._config._pds_filter_re, self._config._pds_exclude_filter_re, pds):
 			return True
 		if loginfo:
 			self._logger.debug("match_pds_filter: skipping PDS " + pds['path'][-1] if 'path' in pds else pds['name'] + " as per job configuration")
 		return False
 
+	def _match_listed_vds_names(self, vds):
+		if self._config.vds_filter_names != [] and ('path' in vds and vds['path'][-1] not in self._config.vds_filter_names):
+			return False
+		return True
+
 	def match_vds_filter(self, vds, tags=None, loginfo = True):
 		if not self._match_listed_space_names(vds):
+			return False
+		if not self._match_listed_vds_names(vds):
 			return False
 		if self._match_path(self._config._space_filter_re, self._config._space_exclude_filter_re, self._config._space_folder_filter_re, self._config._space_folder_exclude_filter_re, self._config._vds_filter_re, self._config._vds_exclude_filter_re, vds):
 			if self._config.vds_filter_tag is None or self._config.vds_filter_tag == "*":
@@ -121,7 +135,6 @@ class DremioClonerFilter():
 			if tag == self._config.vds_filter_tag:
 				return True
 		return False
-
 
 	def match_reflection_path(self, reflection_path, reflection_dataset):
 		if 'type' in reflection_dataset and reflection_dataset['type'] == 'VIRTUAL_DATASET':

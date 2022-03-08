@@ -52,11 +52,14 @@
 		{"vds.ignore_missing_acl_group":"True"},
 
 	  	{"space.filter": "*"},
+		{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},
 		{"space.exclude.filter": ""},
 		{"space.folder.filter":"*"},
 		{"space.folder.exclude.filter":""},
 
 		{"source.filter":"*"},
+		{"source.filter.names": ["Source1", "Source2", "Source3"]},
+		{"source.filter.types": ["S3", "POSTGRES", "NAS"]},
 		{"source.exclude.filter":""},
 		{"source.folder.filter":"*"},
 		{"source.folder.exclude.filter":""},
@@ -64,10 +67,12 @@
 	  	{"reflection.filter_mode": "apply_vds_pds_filter"},
 
 		{"pds.filter":"*"},
+		{"pds.filter.names": ["MyPDS1", "MyPDS2", "MyPDS3"]},
 		{"pds.exclude.filter":""},
 	  	{"pds.list.useapi":"False"},
 
 		{"vds.filter":"*"},
+		{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},
 		{"vds.exclude.filter":""},
 	  	{"vds.max_hierarchy_depth":"10"}]
 	}]
