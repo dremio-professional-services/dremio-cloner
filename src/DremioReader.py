@@ -66,10 +66,11 @@ class DremioReader:
 		if self._config.pds_list_useapi or not self._filter.is_pds_in_scope():
 			self._logger.info("_read_all_pds: skipping PDS reading as per pds.filter configuration.")
 		else:
-			pds_list = self._dremio_env.list_pds(self._d.sources,
-												 self._config.source_folder_filter, self._config.source_folder_exclude_filter,
-												 self._config.pds_filter, self._config.pds_exclude_filter,
-												 pds_error_list=self._d.pds_error_list)
+			pds_list = self._dremio_env.list_pds(self._d.sources, self._config.source_folder_filter,
+												self._config.source_folder_filter_paths,
+												self._config.source_folder_exclude_filter,
+												self._config.pds_filter, self._config.pds_exclude_filter,
+												pds_error_list=self._d.pds_error_list)
 			for pds in pds_list:
 				if self._filter.match_pds_filter(pds):
 					self._d.pds_list.append(pds)
@@ -258,7 +259,8 @@ class DremioReader:
 				entity.pop("tag")
 			self._logger.debug("_read_dataset: " + dataset['datasetType'] + " : " + self._utils.get_entity_desc(dataset))
 			if dataset['datasetType'] == "PROMOTED" or dataset['datasetType'] == "DIRECT":
-				self._d.pds_list.append(entity)
+				if self._filter.match_pds_filter(dataset):
+					self._d.pds_list.append(entity)
 			elif dataset['datasetType'] == "VIRTUAL":
 				tags = self._dremio_env.get_catalog_tags(entity['id'])
 				if self._filter.match_vds_filter(dataset, tags=tags):

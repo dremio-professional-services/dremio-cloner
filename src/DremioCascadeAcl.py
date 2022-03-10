@@ -65,8 +65,8 @@ class DremioCascadeAcl:
 						if self._filter.match_source_filter(entity):
 							self._source_list.append(entity)
 			# Retrieve list of filtered PDS
-			self._pds_list = self._dremio_env.list_pds(self._source_list,
-													   self._config.source_folder_filter, self._config.source_folder_exclude_filter,
+			self._pds_list = self._dremio_env.list_pds(self._source_list, self._config.source_folder_filter,
+													   self._config.source_folder_filter_paths, self._config.source_folder_exclude_filter,
 												   	   self._config.pds_filter, self._config.pds_exclude_filter)
 			self._logger.info("cascade_acl: Not using API for PDS retrieval. Filtered PDS are NOT reported in the log.")
 		# Process ACLs

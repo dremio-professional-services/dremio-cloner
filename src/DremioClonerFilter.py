@@ -53,8 +53,27 @@ class DremioClonerFilter():
 			self._logger.info("match_space_filter: skipping SPACE " + container['path'][0] if 'path' in container else container['name'] + " as per job configuration")
 		return False
 
+	def _match_listed_space_folder_filter_paths(self, container):
+		if self._config.space_folder_filter_paths != []:
+			if 'path' not in container:
+				return False
+			path = container['path']
+			folder_matched = False
+			for space_folder_filter in self._config.space_folder_filter_paths:
+				if not folder_matched:
+					space_folder_filter_re = self._config._compile_pattern(space_folder_filter)
+					for i in range(len(path)):
+						if space_folder_filter_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+							folder_matched = True
+							break
+			if not folder_matched:
+				return False
+		return True
+
 	def match_space_folder_filter(self, container, loginfo = True):
 		if not self._match_listed_space_names(container):
+			return False
+		if not self._match_listed_space_folder_filter_paths(container):
 			return False
 		if self._match_path(self._config._space_filter_re, self._config._space_exclude_filter_re, self._config._space_folder_filter_re, self._config._space_folder_exclude_filter_re, None, None, container):
 			return True
@@ -88,7 +107,32 @@ class DremioClonerFilter():
 			self._logger.debug("match_source_filter: skipping SOURCE " + container['path'][0] if 'path' in container else container['name'] + " as per job configuration")
 		return False
 
+	def _match_listed_source_folder_paths(self, container):
+		if self._config.source_folder_filter_paths != []:
+			if 'path' not in container:
+				return False
+			path = container['path']
+			folder_matched = False
+			for source_folder_filter in self._config.source_folder_filter_paths:
+				if not folder_matched:
+					source_folder_filter_re = self._config._compile_pattern(source_folder_filter)
+					for i in range(len(path[1:])):
+						normalized_path = self._utils.normalize_path(path[1:len(path) - i])
+						if source_folder_filter_re.match(normalized_path) is not None:
+							folder_matched = True
+							break
+						# check if the full normalized path is a substring of the source_folder_filter (assumes no wildcards)
+						# only really applicable when pds.list.useapi is True (which should be never due to inefficiencies) and hence we are traversing a folder structure
+						if i == 0 and source_folder_filter.find(normalized_path) >= 0:
+							folder_matched = True
+							break
+			if not folder_matched:
+				return False
+		return True
+
 	def match_source_folder_filter(self, container, loginfo = True):
+		if not self._match_listed_source_folder_paths(container):
+			return False
 		if self._match_path(self._config._source_filter_re, self._config._source_exclude_filter_re, self._config._source_folder_filter_re, self._config._source_folder_exclude_filter_re, None, None, container):
 			return True
 		if loginfo:
@@ -101,6 +145,8 @@ class DremioClonerFilter():
 		return True
 
 	def match_pds_filter(self, pds, loginfo = True):
+		if not self._match_listed_source_folder_paths(pds):
+			return False
 		if not self._match_listed_pds_names(pds):
 			return False
 		if self._match_path(self._config._source_filter_re, self._config._source_exclude_filter_re, self._config._source_folder_filter_re, self._config._source_folder_exclude_filter_re, self._config._pds_filter_re, self._config._pds_exclude_filter_re, pds):
@@ -116,6 +162,8 @@ class DremioClonerFilter():
 
 	def match_vds_filter(self, vds, tags=None, loginfo = True):
 		if not self._match_listed_space_names(vds):
+			return False
+		if not self._match_listed_space_folder_filter_paths(vds):
 			return False
 		if not self._match_listed_vds_names(vds):
 			return False

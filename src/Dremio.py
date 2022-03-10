@@ -102,6 +102,8 @@ class Dremio:
 	def get_catalog_entity_by_path(self, path, report_error=True):
 		if path[0] == '/':
 			path = path[1:]
+		if '#' in path:
+			path = path.replace("#", "%23")
 		return self._api_get_json(self._catalog_url_by_path + path, source="get_catalog_entity_by_path", report_error=report_error)
 
 	def get_catalog_entity_by_id(self, entity_id):
@@ -153,9 +155,8 @@ class Dremio:
 		return self._api_get_json(self._wlm_vote_url, source="list_votes")
 
 	# This method has to be refactored when DX-16597 is resolved
-	def list_pds(self, sources,
-				 source_folder_filter=None, source_folder_exclude_filter=None,
-				 pds_filter=None, pds_exclude_filter=None, pds_error_list=None):
+	def list_pds(self, sources, source_folder_filter=None, source_folder_filter_paths=None,
+				 source_folder_exclude_filter=None, pds_filter=None, pds_exclude_filter=None, pds_error_list=None):
 		pds_list = []
 		# Check filters for complete PDS suppression
 		if not sources:
@@ -171,7 +172,20 @@ class Dremio:
 
 		if source_folder_filter is not None and source_folder_filter != "*":
 			source_folder_filter = source_folder_filter.replace("*", "%")
-			sql = sql + " and TABLE_SCHEMA like '%." + source_folder_filter + "'"
+			source_folder_filter = source_folder_filter.replace("/", ".")
+			sql = sql + " and TABLE_SCHEMA like '%." + source_folder_filter + "%'"
+
+		if source_folder_filter_paths is not None and source_folder_filter_paths != []:
+			sql = sql + " and ("
+			first_path = True
+			for source_folder_filter_path in source_folder_filter_paths:
+				if not first_path:
+					sql = sql + ' or '
+				source_folder_filter_path = source_folder_filter_path.replace("*", "%")
+				source_folder_filter_path = source_folder_filter_path.replace("/", ".")
+				sql = sql + " TABLE_SCHEMA like '%." + source_folder_filter_path + "%'"
+				first_path = False
+			sql = sql + ') '
 
 		if source_folder_exclude_filter is not None:
 			source_folder_exclude_filter = source_folder_exclude_filter.replace("*", "%")

@@ -86,6 +86,7 @@ class DremioClonerConfig():
 	space_exclude_filter = None				# Exclusion Filter for Space entity type
 	space_cascade_acl_origin_override_object = None	# An ACL from this object will be utilized instead of the Space ACL as an ACL to set inside all Folders and VDSs in the Space
 	space_folder_filter = None				# Filter for Space Folder entity type
+	space_folder_filter_paths = []  		# List of Space Folder paths (as regex) to process if not empty
 	space_folder_exclude_filter = None		# Exclusion Filter for Space Folder entity type
 	space_folder_cascade_acl_origin_filter = None	# Filter for folders that will be used as ACL origins if specified
 	space_process_mode = None				# Flag to process Space: process, skip, create_only, update_only, create_overwrite
@@ -97,6 +98,7 @@ class DremioClonerConfig():
 	source_exclude_filter = None			# Exclusion Filter for Source entity type
 	source_cascade_acl_origin_override_object = None	# An ACL from this object will be utilized instead of the Source ACL as an ACL to set inside all PDS in the Source
 	source_folder_filter = None				# Filter for Source Folder entity type
+	source_folder_filter_paths = []  		# List of Source Folder paths (as regex) to process if not empty
 	source_folder_exclude_filter = None		# Exclusion Filter for Source Folder entity type
 	source_process_mode = None				# Flag to process Sources: process, skip, create_only, update_only, create_overwrite
 	source_ignore_missing_acl_user = False	# Flag to write a Source if an ACL user is missing in the target Dremio environment
@@ -296,6 +298,8 @@ class DremioClonerConfig():
 			elif 'space.folder.filter' in item:
 				self.space_folder_filter = self._str(item, 'space.folder.filter')
 				self._space_folder_filter_re = self._compile_pattern(self.space_folder_filter)
+			elif 'space.folder.filter.paths' in item:
+				self.space_folder_filter_paths = self._array(item, 'space.folder.filter.paths')
 			elif 'space.folder.exclude.filter' in item:
 				self.space_folder_exclude_filter = self._str(item, 'space.folder.exclude.filter')
 				self._space_folder_exclude_filter_re = self._compile_pattern(self.space_folder_exclude_filter)
@@ -321,6 +325,8 @@ class DremioClonerConfig():
 			elif 'source.folder.filter' in item:
 				self.source_folder_filter = self._str(item, 'source.folder.filter')
 				self._source_folder_filter_re = self._compile_pattern(self.source_folder_filter)
+			elif 'source.folder.filter.paths' in item:
+				self.source_folder_filter_paths = self._array(item, 'source.folder.filter.paths')
 			elif 'source.cascade-acl-origin.override-object' in item:
 				self.source_cascade_acl_origin_override_object = self._str(item, 'source.cascade-acl-origin.override-object')
 			elif 'source.folder.exclude.filter' in item:

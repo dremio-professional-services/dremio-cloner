@@ -55,6 +55,7 @@
 		{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},
 		{"space.exclude.filter": ""},
 		{"space.folder.filter":"*"},
+		{"space.folder.filter.paths": ["Staging", "Business/Folder2"]},
 		{"space.folder.exclude.filter":""},
 
 		{"source.filter":"*"},
@@ -62,6 +63,7 @@
 		{"source.filter.types": ["S3", "POSTGRES", "NAS"]},
 		{"source.exclude.filter":""},
 		{"source.folder.filter":"*"},
+		{"source.folder.filter.paths": ["folder1/folder2", "myfolder"]},
 		{"source.folder.exclude.filter":""},
 
 	  	{"reflection.filter_mode": "apply_vds_pds_filter"},
