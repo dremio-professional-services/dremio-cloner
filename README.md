@@ -97,6 +97,7 @@ The command is configured with a JSON file with configuration attributes listed 
 	- &quot;space.filter.names&quot;
     - &quot;space.exclude.filter&quot;
     - &quot;space.folder.filter&quot;
+    - &quot;space.folder.filter.paths&quot;
     - &quot;space.folder.exclude.filter&quot;
   - scope of _Source_ processing 
     - &quot;source.process\_mode&quot;
@@ -105,15 +106,18 @@ The command is configured with a JSON file with configuration attributes listed 
 	- &quot;source.filter.types&quot;
     - &quot;source.exclude.filter&quot;
     - &quot;source.folder.filter&quot;
+    - &quot;source.folder.filter.paths&quot;
     - &quot;source.folder.exclude.filter&quot;
   - scope of _PDS_ processing 
     - &quot;pds.process\_mode&quot;
     - &quot;pds.filter&quot;
+    - &quot;pds.filter.names&quot;
     - &quot;pds.exclude.filter
     - &quot;pds.list.useapi&quot;
   - scope of _VDS_ processing 
     - &quot;vds.process\_mode&quot;
     - &quot;vds.filter&quot;
+    - &quot;vds.filter.names&quot;
     - &quot;vds.exclude.filter&quot;
     - &quot;vds.dependencies.process\_mode&quot;
   - scope of _Reflection_ processing 
@@ -186,6 +190,7 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;space.exclude.filter&quot;
     - &quot;folder.process\_mode&quot;
     - &quot;space.folder.filter&quot;
+    - &quot;space.folder.filter.paths&quot;
     - &quot;space.folder.exclude.filter&quot;
   - scope of _Source_ processing 
     - &quot;source.process\_mode&quot;
@@ -194,15 +199,18 @@ The command is configured with a JSON file with configuration attributes listed 
 	- &quot;source.filter.types&quot;
     - &quot;source.exclude.filter&quot;
     - &quot;source.folder.filter&quot;
+    - &quot;source.folder.filter.paths&quot;
     - &quot;source.folder.exclude.filter&quot;
   - scope of _PDS_ processing 
     - &quot;pds.process\_mode&quot;
     - &quot;pds.filter&quot;
+    - &quot;pds.filter.names&quot;
     - &quot;pds.exclude.filter
     - &quot;pds.list.useapi&quot;
   - scope of _VDS_ processing 
     - &quot;vds.process\_mode&quot;
     - &quot;vds.filter&quot;
+    - &quot;vds.filter.names&quot;
     - &quot;vds.exclude.filter&quot;
     - &quot;vds.max\_hierarchy\_depth&quot;
   - scope of _Reflection_ processing 
