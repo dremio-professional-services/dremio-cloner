@@ -75,21 +75,24 @@ class DremioCloud:
 		self._password = password
 		self._authenticate()
 
-	# TODO Auth flow for Dremio Cloud may need altering here
+	# Auth flow caters for user/password or PAT login
 	def _authenticate(self):
-		headers = {"Content-Type": "application/json"}
-		payload = '{"username": "' + self._username + '","password": "' + self._password + '","orgId": "' + self._org_id + '"}'
-		payload = payload.encode(encoding='utf-8')
-		try:
-			response = requests.request("POST", self._login_endpoint + self._login_url, data=payload, headers=headers, timeout=self._api_timeout, verify=self._verify_ssl)
-		except Exception as e:
-			print(e)
-		if response.status_code != 200:
-			logging.critical("Authentication Error " + str(response.status_code))
-			raise RuntimeError("Authentication error.")
-		self._authtoken = response.json()['token']
-		# print(self._authtoken)
-		self._headers = {"Content-Type": "application/json", "Authorization": "Bearer " + self._authtoken}
+		if self._username:
+			headers = {"Content-Type": "application/json"}
+			payload = '{"username": "' + self._username + '","password": "' + self._password + '","orgId": "' + self._org_id + '"}'
+			payload = payload.encode(encoding='utf-8')
+			try:
+				response = requests.request("POST", self._login_endpoint + self._login_url, data=payload, headers=headers, timeout=self._api_timeout, verify=self._verify_ssl)
+			except Exception as e:
+				print(e)
+			if response.status_code != 200:
+				logging.critical("Authentication Error " + str(response.status_code))
+				raise RuntimeError("Authentication error.")
+			self._authtoken = response.json()['token']
+			# print(self._authtoken)
+			self._headers = {"Content-Type": "application/json", "Authorization": "Bearer " + self._authtoken}
+		else:
+			self._headers = {"Content-Type": "application/json", "Authorization": "Bearer " + self._password}
 
 	def _build_url(self, url):
 		return self._endpoint + url
