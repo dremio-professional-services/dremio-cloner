@@ -91,7 +91,7 @@ class DremioCloud:
 			self._authtoken = response.json()['token']
 			# print(self._authtoken)
 			self._headers = {"Content-Type": "application/json", "Authorization": "Bearer " + self._authtoken}
-		else:
+		else: #assume _password contains a PAT if no user provided
 			self._headers = {"Content-Type": "application/json", "Authorization": "Bearer " + self._password}
 
 	def _build_url(self, url):
