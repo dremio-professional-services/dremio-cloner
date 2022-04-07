@@ -152,7 +152,7 @@ class DremioClonerConfig():
 	_space_folder_exclude_filter_re = None
 	_space_folder_cascade_acl_origin_filter_re = None
 	_source_filter_re = None
-	_source_exluce_filter_re = None
+	_source_exclude_filter_re = None
 	_source_folder_filter_re = None
 	_source_folder_exclude_filter_re = None
 	_pds_filter_re = None
