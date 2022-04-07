@@ -209,7 +209,8 @@ class DremioWriter:
 
 	def _read_target_reflections(self):
 		self._logger.debug("_read_target_reflections")
-		self._target_reflections = self._dremio_env.list_reflections()['data']
+		reflections = self._dremio_env.list_reflections()
+		self._target_reflections = reflections['data'] if reflections is not None else []
 
 	def _read_target_folders_and_vds_list(self):
 		containers = self._dremio_env.list_catalog()['data']
