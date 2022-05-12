@@ -298,6 +298,22 @@ class DremioReader:
 					self._logger.debug("_read_reflections: processing reflection " + reflection['id'] + " path: " + str(reflection_path))
 					reflection["path"] = reflection_path
 					self._d.reflections.append(reflection)
+		elif self._config.reflection_process_mode == 'process' and self._config.source_ce:
+			# If processing reflections for CE, the reflections IDs must be specified in reflection_id_include_list
+			for reflection_id in self._config.reflection_id_include_list:
+				reflection = self._dremio_env.get_reflection(reflection_id)
+				if reflection is None:
+					self._logger.debug("_read_reflections: error processing CE reflection, cannot find reflection object for id: " + reflection_id)
+					continue
+				if self._is_reflection_in_vds_list(reflection):
+					reflection_dataset = self._dremio_env.get_catalog_entity_by_id(reflection['datasetId'])
+					if reflection_dataset is None:
+						self._logger.debug("_read_reflections: error processing CE reflection, cannot get path for dataset: " + reflection['datasetId'])
+						continue
+					reflection_path = reflection_dataset['path']
+					self._logger.debug("_read_reflections: processing CE reflection " + reflection['id'] + " path: " + str(reflection_path))
+					reflection["path"] = reflection_path
+					self._d.reflections.append(reflection)
 		else:
 			self._logger.debug("_read_reflections: skipping reflections processing as per job configuration")
 
