@@ -693,19 +693,14 @@ class DremioWriter:
 	def _is_reflection_equal(self, existing_reflection, reflection):
 		return reflection['type'] == existing_reflection['type'] and \
 			   reflection['name'] == existing_reflection['name'] and \
-			   ('partitionDistributionStrategy' not in reflection or reflection['partitionDistributionStrategy'] ==
-				existing_reflection['partitionDistributionStrategy']) and \
-			   ('measureFields' not in reflection or reflection['measureFields'] == existing_reflection[
-				   'measureFields']) and \
-			   ('dimensionFields' not in reflection or reflection['dimensionFields'] == existing_reflection[
-				   'dimensionFields']) and \
-			   ('displayFields' not in reflection or reflection['displayFields'] == existing_reflection[
-				   'displayFields']) and \
-			   ('sortFields' not in reflection or reflection['sortFields'] == existing_reflection['sortFields']) and \
-			   ('partitionFields' not in reflection or reflection['partitionFields'] == existing_reflection[
-				   'partitionFields']) and \
-			   ('distributionFields' not in reflection or reflection['distributionFields'] == existing_reflection[
-				   'distributionFields'])
+			   (reflection.get('partitionDistributionStrategy') ==
+				existing_reflection.get('partitionDistributionStrategy')) and \
+			   (reflection.get('measureFields') == existing_reflection.get('measureFields')) and \
+			   (reflection.get('dimensionFields') == existing_reflection.get('dimensionFields')) and \
+			   (reflection.get('displayFields') == existing_reflection.get('displayFields')) and \
+			   (reflection.get('sortFields') == existing_reflection.get('sortFields')) and \
+			   (reflection.get('partitionFields') == existing_reflection.get('partitionFields')) and \
+			   (reflection.get('distributionFields') == existing_reflection.get('distributionFields'))
 
 	def _find_existing_reflection(self, reflection, dataset):
 		for existing_reflection in self._target_reflections:
