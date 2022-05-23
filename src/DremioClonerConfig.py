@@ -379,7 +379,7 @@ class DremioClonerConfig():
 			elif 'vds.ignore_missing_acl_group' in item:
 				self.vds_ignore_missing_acl_group = self._bool(item, 'vds.ignore_missing_acl_group')
 			elif 'vds.max_hierarchy_depth' in item:
-				self.vds_max_hierarchy_depth = self._bool(item, 'vds.max_hierarchy_depth')
+				self.vds_max_hierarchy_depth = self._int(item, 'vds.max_hierarchy_depth')
 			# Reflection options
 			elif 'reflection.process_mode' in item:
 				self.reflection_process_mode = self._str(item, 'reflection.process_mode')
