@@ -32,7 +32,7 @@ class DremioClonerFilter():
 	def is_pds_in_scope(self):
 		return self._config._source_filter_re is not None and \
 				self._config._pds_filter_re is not None and \
-			   	self._config.source_folder_exclude_filter != '*' and \
+				self._config.source_folder_exclude_filter != '*' and \
 				self._config.pds_exclude_filter != '*' and \
 				self._config.pds_process_mode == 'process'
 
@@ -248,7 +248,10 @@ class DremioClonerFilter():
 		else:
 			self._logger.fatal("_match_path: Unexpected Entity Type " + str(entity))
 		if 'path' not in entity:
-			return root_exclusion_re is None or root_exclusion_re.match(entity['name']) is None
+			if root_re.match(entity['name']) is None:
+				return False
+			if root_exclusion_re is not None and root_exclusion_re.match(entity['name']) is not None:
+				return False
 		else:
 			path = entity['path']
 			# Match root object (Space of Source)
