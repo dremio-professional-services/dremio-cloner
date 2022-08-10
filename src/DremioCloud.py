@@ -172,7 +172,7 @@ class DremioCloud:
 
 	# This method has to be refactored when DX-16597 is resolved
 	def list_pds(self, sources,
-				 source_folder_filter=None, source_folder_exclude_filter=None,
+				 source_folder_filter=None, source_folder_filter_paths=None, source_folder_exclude_filter=None,
 				 pds_filter=None, pds_exclude_filter=None, pds_error_list=None):
 		pds_list = []
 		# Check filters for complete PDS suppression
