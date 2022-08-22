@@ -42,7 +42,7 @@ class DremioCloud:
 	_role_by_name_url = "/role/by-name/"
 	_post_sql_url = "/sql"
 	_get_job_url = "/job/"
-	_graph_url_postfix = "/graph"
+	_graph_url_postfix = "graph"
 	_refresh_reflections_postfix = "/refresh"
 	_endpoint = ""
 	_login_endpoint = ""
