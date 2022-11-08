@@ -163,7 +163,8 @@ class DremioClonerFilter():
 	def match_vds_filter(self, vds, tags=None, loginfo = True):
 		if not self._match_listed_space_names(vds):
 			return False
-		if not self._match_listed_space_folder_filter_paths(vds):
+		# Handle folders while avoiding case of VDS located directly in space
+		if not self._match_listed_space_folder_filter_paths(vds) and len(vds.get('path', 0)) > 2:
 			return False
 		if not self._match_listed_vds_names(vds):
 			return False
@@ -254,6 +255,10 @@ class DremioClonerFilter():
 				return False
 		else:
 			path = entity['path']
+			# Handle special case, where VDS is in space root
+			if entity.get('datasetType') == 'VIRTUAL' and len(path) == 2:
+				# In this case, do not exclude based on folder exclusion patterns
+				folder_exclusion_re = None
 			# Match root object (Space of Source)
 			if root_re.match(path[0]) is None:
 				return False
@@ -267,10 +272,11 @@ class DremioClonerFilter():
 			# Match Folders. Note, child folders do not need to be matched if its parent match
 			if folder_re is not None or folder_exclusion_re is not None:
 				folder_matched = False
-				for i in range(len(path)):
-					if folder_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
-						folder_matched = True
-						break
+				if folder_re is not None:  # Avoids potential NoneType Error
+					for i in range(len(path)):
+						if folder_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+							folder_matched = True
+							break
 				if not folder_matched:
 					return False
 				if folder_exclusion_re is not None:
