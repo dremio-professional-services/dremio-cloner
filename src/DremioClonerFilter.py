@@ -271,14 +271,17 @@ class DremioClonerFilter():
 				return False
 			# Match Folders. Note, child folders do not need to be matched if its parent match
 			if folder_re is not None or folder_exclusion_re is not None:
-				folder_matched = False
+				if entity.get('type') == 'DATASET':
+					# Do not include dataset name in folder filtering logic
+					path = path[:-1]
 				if folder_re is not None:  # Avoids potential NoneType Error
+					folder_matched = False
 					for i in range(len(path)):
 						if folder_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
 							folder_matched = True
 							break
-				if not folder_matched:
-					return False
+					if not folder_matched:
+						return False
 				if folder_exclusion_re is not None:
 					folder_exclusion_matched = False
 					for i in range(len(path)):
