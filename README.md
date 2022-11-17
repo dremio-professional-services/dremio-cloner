@@ -27,6 +27,9 @@ The Migration Tool is executed with the following command:
 python dremio_migration.py [config_migration_file.json]
 ```
 
+## Disclaimer
+*All scripts/code are run at your own risk, and while they have been written with the intention of minimizing the potential for unintended consequences, Dremio will not be responsible for any errors or problems. The scripts/code are provided by Dremio "as is" and any express or implied warranties are disclaimed by Dremio. In no event will Dremio be liable for any direct, indirect, incidental, special, exemplary, or consequential damages, or any loss of use or data, however caused and on any theory of liability, arising in any way out of the use of the scripts/code, even if advised of the possibility of such damage.*
+
 ## Prerequisites
 
 Dremio Cloner requires Python 3 and requires some additional Python libraries, please install:
