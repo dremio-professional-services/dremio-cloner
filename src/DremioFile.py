@@ -293,6 +293,7 @@ class DremioFile():
 			self._collect_directory(os.path.join(source_directory, 'rules'), None, None, dremio_data.rules)
 			self._collect_directory(os.path.join(source_directory, 'tags'), None, None, dremio_data.tags)
 			self._collect_directory(os.path.join(source_directory, 'wikis'), None, None, dremio_data.wikis)
+			self._collect_directory(os.path.join(source_directory, 'vds_parents'), None, None, dremio_data.vds_parents)
 		except OSError as e:
 			raise Exception("Error reading file. OS Error: " + e.strerror)
 		return dremio_data
