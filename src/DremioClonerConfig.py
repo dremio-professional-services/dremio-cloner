@@ -88,6 +88,7 @@ class DremioClonerConfig():
 	space_folder_filter = None				# Filter for Space Folder entity type
 	space_folder_filter_paths = []  		# List of Space Folder paths (as regex) to process if not empty
 	space_folder_exclude_filter = None		# Exclusion Filter for Space Folder entity type
+	space_folder_exclude_filter_paths = []	# List of Space Folder paths (as regex) to exclude if not empty
 	space_folder_cascade_acl_origin_filter = None	# Filter for folders that will be used as ACL origins if specified
 	space_process_mode = None				# Flag to process Space: process, skip, create_only, update_only, create_overwrite
 	space_ignore_missing_acl_user = False	# Flag to write a Space if an ACL user is missing in the target Dremio environment
@@ -303,6 +304,8 @@ class DremioClonerConfig():
 			elif 'space.folder.exclude.filter' in item:
 				self.space_folder_exclude_filter = self._str(item, 'space.folder.exclude.filter')
 				self._space_folder_exclude_filter_re = self._compile_pattern(self.space_folder_exclude_filter)
+			elif 'space.folder.exclude.filter.paths' in item:
+				self.space_folder_exclude_filter_paths = self._array(item, 'space.folder.exclude.filter.paths')
 			elif 'space.folder.cascade-acl-origin.filter' in item:
 				self.space_folder_cascade_acl_origin_filter = self._str(item, 'space.folder.cascade-acl-origin.filter')
 				self._space_folder_cascade_acl_origin_filter_re = self._compile_pattern(self.space_folder_cascade_acl_origin_filter)

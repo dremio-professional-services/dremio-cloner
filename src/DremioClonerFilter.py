@@ -70,10 +70,32 @@ class DremioClonerFilter():
 				return False
 		return True
 
+	def _match_listed_space_folder_exclude_filter_paths(self, container):
+		if self._config.space_folder_exclude_filter_paths != []:
+			if 'path' not in container:
+				return False
+			path = container['path']
+			folder_matched = False
+			for space_folder_exclude_filter in self._config.space_folder_exclude_filter_paths:
+				if not folder_matched:
+					space_folder_filter_re = self._config._compile_pattern(space_folder_exclude_filter)
+					for i in range(len(path)):
+						if space_folder_filter_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+							folder_matched = True
+							break
+			if not folder_matched:
+				return False
+			return True
+		else:
+			return False
+
 	def match_space_folder_filter(self, container, loginfo = True):
 		if not self._match_listed_space_names(container):
 			return False
 		if not self._match_listed_space_folder_filter_paths(container):
+			return False
+		# Explicit exclusion of folders wins over explicit inclusion
+		if self._match_listed_space_folder_exclude_filter_paths(container):
 			return False
 		if self._match_path(self._config._space_filter_re, self._config._space_exclude_filter_re, self._config._space_folder_filter_re, self._config._space_folder_exclude_filter_re, None, None, container):
 			return True
@@ -164,8 +186,12 @@ class DremioClonerFilter():
 		if not self._match_listed_space_names(vds):
 			return False
 		# Handle folders while avoiding case of VDS located directly in space
-		if not self._match_listed_space_folder_filter_paths(vds) and len(vds.get('path', 0)) > 2:
-			return False
+		if len(vds.get('path', 0)) > 2:
+			if not self._match_listed_space_folder_filter_paths(vds):
+				return False
+			# Explicit exclusion of folders wins over explicit inclusion
+			if self._match_listed_space_folder_exclude_filter_paths(vds):
+				return False
 		if not self._match_listed_vds_names(vds):
 			return False
 		if self._match_path(self._config._space_filter_re, self._config._space_exclude_filter_re, self._config._space_folder_filter_re, self._config._space_folder_exclude_filter_re, self._config._vds_filter_re, self._config._vds_exclude_filter_re, vds):

@@ -44,7 +44,9 @@
 	{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},
 	{"space.exclude.filter": ""},
 	{"space.folder.filter":"*"},
+	{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},
 	{"space.folder.exclude.filter":""},
+	{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
 
 	{"source.filter":"*"},
 	{"source.filter.names": ["Source1", "Source2", "Source3"]},
