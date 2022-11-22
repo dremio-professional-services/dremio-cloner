@@ -182,6 +182,11 @@ class DremioClonerFilter():
 			return False
 		return True
 
+	def _match_listed_exclude_vds_names(self, vds):
+		if self._config.vds_exclude_filter_names != [] and ('path' in vds and vds['path'][-1] in self._config.vds_exclude_filter_names):
+			return False
+		return True
+
 	def match_vds_filter(self, vds, tags=None, loginfo = True):
 		if not self._match_listed_space_names(vds):
 			return False
@@ -193,6 +198,9 @@ class DremioClonerFilter():
 			if self._match_listed_space_folder_exclude_filter_paths(vds):
 				return False
 		if not self._match_listed_vds_names(vds):
+			return False
+		# Explicit exclusion of VDSs wins over explicit inclusion
+		if not self._match_listed_exclude_vds_names(vds):
 			return False
 		if self._match_path(self._config._space_filter_re, self._config._space_exclude_filter_re, self._config._space_folder_filter_re, self._config._space_folder_exclude_filter_re, self._config._vds_filter_re, self._config._vds_exclude_filter_re, vds):
 			if self._config.vds_filter_tag is None or self._config.vds_filter_tag == "*":
