@@ -62,6 +62,7 @@
 	{"vds.filter.tag":""},
 	{"vds.exclude.filter":""},
 	{"vds.exclude.filter.names": ["ignoreVDSxyz", "dontProcessVDSxyz"]},
+	{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	{"vds.dependencies.process_mode":"get"},
 
   	{"reflection.only_for_matching_vds":"True"}]
