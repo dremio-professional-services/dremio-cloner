@@ -61,7 +61,7 @@ class Dremio:
 
 	def __init__(self, endpoint, username, password, accept_eula, api_timeout=10, retry_timedout_source=False, verify_ssl=True):
 		if not verify_ssl:
-			logging.warn("Unverified HTTPS requests will be made as per configuration.")
+			logging.warning("Unverified HTTPS requests will be made as per configuration.")
 			requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
 		self._endpoint = endpoint
 		self._verify_ssl = verify_ssl
@@ -216,7 +216,7 @@ class Dremio:
 		job_result = self.get_job_result(jobid)
 		num_rows = int(job_result['rowCount'])
 		if num_rows == 0:
-			logging.warn("list_pds: no PDS found as per filter criteria.")
+			logging.warning("list_pds: no PDS found as per filter criteria.")
 			return pds_list
 		logging.info("list_pds: processing " + str(num_rows) + " PDSs in batches of 100.")
 		# Page through the results, 100 rows per page
@@ -258,61 +258,61 @@ class Dremio:
 
 	def create_catalog_entity(self, entity, dry_run=True):
 		if dry_run:
-			logging.warn("create_catalog_entity: Dry Run. Not submitting changes to API.")
+			logging.warning("create_catalog_entity: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_post_json(self._catalog_url, entity, source="create_catalog_entity")
 
 	def update_catalog_entity(self, entity_id, entity, dry_run=True, report_error=True):
 		if dry_run:
-			logging.warn("update_catalog_entity: Dry Run. Not submitting changes to API.")
+			logging.warning("update_catalog_entity: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_put_json(self._catalog_url + entity_id, entity, source="update_catalog_entity", report_error = report_error)
 
 	def create_reflection(self, reflection, dry_run=True):
 		if dry_run:
-			logging.warn("create_reflection: Dry Run. Not submitting changes to API.")
+			logging.warning("create_reflection: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_post_json(self._reflections_url, reflection, source="create_reflection")
 
 	def update_reflection(self, reflection_id, reflection, dry_run=True):
 		if dry_run:
-			logging.warn("update_reflection: Dry Run. Not submitting changes to API.")
+			logging.warning("update_reflection: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_put_json(self._reflections_url + reflection_id, reflection, source="update_reflection")
 
 	def refresh_reflections_by_pds_id(self, pds_entity_id, dry_run=True):
 		if dry_run:
-			logging.warn("refresh_reflections_by_pds_id: Dry Run. Not submitting request to API.")
+			logging.warning("refresh_reflections_by_pds_id: Dry Run. Not submitting request to API.")
 			return
-		return self._api_post_json(self._reflections_url + pds_entity_id + self._refresh_reflections_postfix, "", source="refresh_reflections_by_pds_id")
+		return self._api_post_json(self._catalog_url + pds_entity_id + "/" + self._refresh_reflections_postfix, "", source="refresh_reflections_by_pds_id")
 
 	def refresh_reflections_by_pds_path(self, pds_entity_path, dry_run=True):
 		if dry_run:
-			logging.warn("refresh_reflections_by_pds_path: Dry Run. Not submitting request to API.")
+			logging.warning("refresh_reflections_by_pds_path: Dry Run. Not submitting request to API.")
 			return
 		pds = self.get_catalog_entity_by_path(pds_entity_path)
 		if pds is None:
 			logging.error("refresh_reflections_by_pds_path: Could not locate entity for path: " + str(pds_entity_path))
 			return None
 		pds_entity_id = pds['id']
-		result =  self._api_post_json(self._catalog_url + pds_entity_id + "/" + self._refresh_reflections_postfix, None, source="refresh_reflections_by_pds_path")
+		result = self._api_post_json(self._catalog_url + pds_entity_id + "/" + self._refresh_reflections_postfix, None, source="refresh_reflections_by_pds_path")
 		return result
 
 	def update_wiki(self, catalog_id, wiki, dry_run=True):
 		if dry_run:
-			logging.warn("update_wiki: Dry Run. Not submitting changes to API.")
+			logging.warning("update_wiki: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_post_json(self._catalog_url + catalog_id + "/collaboration/wiki", wiki, source="update_wiki")
 
 	def update_tag(self, catalog_id, tag, dry_run=True):
 		if dry_run:
-			logging.warn("update_tag: Dry Run. Not submitting changes to API.")
+			logging.warning("update_tag: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_post_json(self._catalog_url + catalog_id + "/collaboration/tag", tag, source="update_tag")
 
 	def promote_pds(self, pds_entity, dry_run=True):
 		if dry_run:
-			logging.warn("promote_pds: Dry Run. Not submitting changes to API.")
+			logging.warning("promote_pds: Dry Run. Not submitting changes to API.")
 			return
 		return self._api_post_json(self._catalog_url + self._encode_http_param(pds_entity['id']), pds_entity,
 								   source="promote_pds")
@@ -337,14 +337,14 @@ class Dremio:
 
 	def delete_reflection(self, reflection_id, dry_run=True, report_error=True):
 		if dry_run:
-			logging.warn("delete_reflection: Dry Run. Not submitting changes to API for delete reflection: " + reflection_id)
+			logging.warning("delete_reflection: Dry Run. Not submitting changes to API for delete reflection: " + reflection_id)
 			return
 		return self._api_delete(self._reflection_url + reflection_id, source="delete_reflection", report_error = report_error)
 
 
 	def delete_catalog_entity(self, entity_id, dry_run=True, report_error=True):
 		if dry_run:
-			logging.warn("delete_catalog_entity: Dry Run. Not submitting changes to API for delete entity: " + entity_id)
+			logging.warning("delete_catalog_entity: Dry Run. Not submitting changes to API for delete entity: " + entity_id)
 			return
 		return self._api_delete(self._catalog_url + entity_id, source="delete_catalog_entity", report_error = report_error)
 
