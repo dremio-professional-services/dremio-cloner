@@ -409,6 +409,12 @@ class Dremio:
 		if reauthenticate:
 			self._authenticate()
 		try:
+			try:
+				if json_data:
+					json_data = json_data.encode("utf-8")
+			except UnicodeEncodeError as e:
+				logging.error(e)
+				logging.error(f"Data: {json_data}")
 			if json_data is None:
 				response = requests.request("POST", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			elif as_json:
