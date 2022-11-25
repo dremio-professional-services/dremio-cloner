@@ -57,6 +57,7 @@
 		{"space.folder.filter":"*"},
 		{"space.folder.filter.paths": ["Staging", "Business/Folder2"]},
 		{"space.folder.exclude.filter":""},
+		{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
 
 		{"source.filter":"*"},
 		{"source.filter.names": ["Source1", "Source2", "Source3"]},
@@ -74,6 +75,7 @@
 		{"vds.filter":"*"},
 		{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},
 		{"vds.exclude.filter":""},
+		{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	  	{"vds.max_hierarchy_depth":"10"}]
 	}]
 }
