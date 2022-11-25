@@ -123,7 +123,6 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;vds.filter&quot;
     - &quot;vds.filter.names&quot;
     - &quot;vds.exclude.filter&quot;
-    - &quot;vds.exclude.filter.names&quot;
     - &quot;vds.exclude.filter.paths&quot;
     - &quot;vds.dependencies.process\_mode&quot;
   - scope of _Reflection_ processing 
@@ -465,7 +464,6 @@ Note, that this command does not provide any option for Scope definition. Please
 | vds.filter               | A filter that defines what VDSs will be **included** into processing. &quot;\*&quot; will include all VDSs. Empty field will exclude all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.exclude.filter_.                                                                                            |
 | vds.filter.names         | If specified, a list filter that defines what VDS **names** will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"vds.filter.names": []},`). Works in logical AND with other active _vds_ filters. Example: `{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},`  |
 | vds.exclude.filter       | A filter that defines what VDSs will be **excluded** into processing. &quot;\*&quot; will exclude all VDSs. Empty field will include all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.filter_.                                                                                                    |
-| vds.exclude.filter.names | If specified, a list filter that defines what VDS **names** will be **excluded** into processing. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"vds.exclude.filter.names": []},`). Works in logical AND with other active _vds_ filters. Example: `{"vds.exclude.filter.names": ["ignoreVDSxyz", "dontProcessVDSxyz"]},`                                       |
 | vds.exclude.filter.paths | If specified, a list filter that defines what VDSs **(incl. paths and wildcards)** will be **excluded** into processing. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"vds.exclude.filter.paths": []},`). Works in logical AND with other active _vds_ filters. Example: `{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},`   |
 
 ### Scope of Dremio Reflection processing

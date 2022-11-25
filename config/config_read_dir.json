@@ -60,7 +60,6 @@
 	{"vds.filter":"*"},
 	{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},
 	{"vds.exclude.filter":""},
-	{"vds.exclude.filter.names": ["ignoreVDSxyz", "dontProcessVDSxyz"]},
 	{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	{"vds.dependencies.process_mode":"get"},
 

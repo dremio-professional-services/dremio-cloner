@@ -119,7 +119,6 @@ class DremioClonerConfig():
 	vds_filter_names = []  					# List of VDSs to process if not empty
 	vds_filter_tag = None					# Filter for VDS
 	vds_exclude_filter = None				# Exclusion Filter for VDS
-	vds_exclude_filter_names = []  			# List of VDSs to exclude if not empty
 	vds_exclude_filter_paths = []			# List of VDS paths (as regex) to exclude if not empty
 	vds_process_mode = None					# Flag to process VDS: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
 	vds_dependencies_process_mode = 'ignore' # Flag to process VDS dependencies (VDS and PDS): ignore, get
@@ -379,8 +378,6 @@ class DremioClonerConfig():
 			elif 'vds.exclude.filter' in item:
 				self.vds_exclude_filter = self._str(item, 'vds.exclude.filter')
 				self._vds_exclude_filter_re = self._compile_pattern(self.vds_exclude_filter)
-			elif 'vds.exclude.filter.names' in item:
-				self.vds_exclude_filter_names = self._array(item, 'vds.exclude.filter.names')
 			elif 'vds.exclude.filter.paths' in item:
 				self.vds_exclude_filter_paths = self._array(item, 'vds.exclude.filter.paths')
 			elif 'vds.ignore_missing_acl_user' in item:
