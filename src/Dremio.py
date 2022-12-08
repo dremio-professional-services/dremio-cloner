@@ -410,7 +410,7 @@ class Dremio:
 			self._authenticate()
 		try:
 			try:
-				if json_data:
+				if json_data and isinstance(json_data, str):
 					json_data = json_data.encode("utf-8")
 			except UnicodeEncodeError as e:
 				logging.error(e)
