@@ -20,6 +20,7 @@ from DremioClonerConfig import DremioClonerConfig
 from DremioClonerUtils import DremioClonerUtils
 from DremioClonerLogger import DremioClonerLogger
 from DremioClonerFilter import DremioClonerFilter
+import datetime
 import json
 import parse_sql
 
@@ -558,6 +559,7 @@ class DremioWriter:
 					# API changed behavior around version 4 and may not return version attribute for ACL.
 					if 'accessControlList' in existing_entity and 'version' in existing_entity['accessControlList']:
 						entity['accessControlList']['version'] = existing_entity['accessControlList']['version']
+			entity['createdAt'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 			if self._config.dry_run:
 				self._logger.warn("_write_entity: Dry Run, NOT Updating entity: " + self._utils.get_entity_desc(entity))
 				return False
