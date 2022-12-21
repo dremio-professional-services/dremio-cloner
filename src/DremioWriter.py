@@ -346,7 +346,7 @@ class DremioWriter:
 	def _map_source(self, entity):
 		# see if the current source name is being mapped to a different name in source_transformation
 		for map in self._config.source_transformation:
-			if entity['name'] == map['source-source-name']:
+			if 'source-source-name' in map and entity['name'] == map['source-source-name']:
 				self._logger.info("_map_source: mapping source name " + entity['name'] + " into " + map['target-source-name'])
 				entity['name'] = map['target-source-name']
 				break
@@ -354,28 +354,53 @@ class DremioWriter:
 	def _map_pds_source(self, entity):
 		# see if the PDS contains a source name that is being mapped to a different name in source_transformation
 		for map in self._config.source_transformation:
-			if entity['path'][0] == map['source-source-name']:
+			if 'source-source-name' in map and entity['path'][0] == map['source-source-name']:
 				self._logger.info("_map_pds_source: mapping pds source name " + entity['path'][0] + " into " + map['target-source-name'])
 				entity['path'][0] = map['target-source-name']
 				if 'format' in entity and 'fullPath' in entity['format']:
 					entity['format']['fullPath'][0] = map['target-source-name']
 				break
+			if 'source-dataset-path' in map:
+				dataset_path = entity['path'][:len(map['source-dataset-path'])]
+				if dataset_path == map['source-dataset-path']:
+					self._logger.info("_map_pds_source: mapping pds path " + str(dataset_path) + " into " + str(map['target-dataset-path']))
+					entity['path'][:len(map['source-dataset-path'])] = map['target-dataset-path']
+					if 'format' in entity and 'fullPath' in entity['format']:
+						entity['format']['fullPath'][:len(map['source-dataset-path'])] = map['target-dataset-path']
+					break
 
 	def _map_vds_source(self):
 		for map in self._config.source_transformation:
-			# see if the VDS definition contains a source name that is mapped to a different name according to the source_transformation
-			for vds in self._d.vds_list:
-				if "sqlContext" in vds and map['source-source-name'] == vds["sqlContext"][0]:
-					vds["sqlContext"][0] = map['target-source-name']
-					self._logger.info("_map_vds_source: updating context for " + self._utils.get_entity_desc(vds) + " with target source name: " + vds["sqlContext"][0])
-				if map['source-source-name'] in vds["sql"]:
-					# If the source-source-name is not quoted in the SQL text then add quotes around target-source-name.
-					# This will avoid any issues with special characters in the target-source-name name
-					if (map['source-source-name'] + ".") in vds["sql"]:
-						vds["sql"] = vds["sql"].replace(map['source-source-name'], '"' + map['target-source-name'] + '"')
-					else:
-						vds["sql"] = vds["sql"].replace(map['source-source-name'], map['target-source-name'])
-					self._logger.info("_map_vds_source: updating sql for " + self._utils.get_entity_desc(vds) + " with target source name: " + map['target-source-name'])
+			if 'source-source-name' in map:
+				# see if the VDS definition contains a source name that is mapped to a different name according to the source_transformation
+				for vds in self._d.vds_list:
+					if "sqlContext" in vds and map['source-source-name'] == vds["sqlContext"][0]:
+						vds["sqlContext"][0] = map['target-source-name']
+						self._logger.info("_map_vds_source: updating context for " + self._utils.get_entity_desc(vds) + " with target source name: " + vds["sqlContext"][0])
+					if map['source-source-name'] in vds["sql"]:
+						# If the source-source-name is not quoted in the SQL text then add quotes around target-source-name.
+						# This will avoid any issues with special characters in the target-source-name name
+						if (map['source-source-name'] + ".") in vds["sql"]:
+							vds["sql"] = vds["sql"].replace(map['source-source-name'], '"' + map['target-source-name'] + '"')
+						else:
+							vds["sql"] = vds["sql"].replace(map['source-source-name'], map['target-source-name'])
+						self._logger.info("_map_vds_source: updating sql for " + self._utils.get_entity_desc(vds) + " with target source name: " + map['target-source-name'])
+			if 'source-dataset-path' in map:
+				fully_qualified_source_path = ".".join(map['source-dataset-path'])
+				fully_qualified_target_path = ".".join(map['target-dataset-path'])
+				# see if the VDS definition contains a dataset path that is mapped to a different path according to the source_transformation
+				for vds in self._d.vds_list:
+					path_len = len(map['source-dataset-path'])
+					non_quoted_source_path = [i.replace('"', '') for i in map['source-dataset-path']]
+					non_quoted_target_path = [i.replace('"', '') for i in map['target-dataset-path']]
+					if "sqlContext" in vds and non_quoted_source_path == vds["sqlContext"][:path_len]:
+						vds["sqlContext"][:path_len] = non_quoted_target_path
+						self._logger.info("_map_vds_source: updating context for " + self._utils.get_entity_desc(vds) + " with target dataset path: " + str(non_quoted_target_path))
+					if fully_qualified_source_path in vds["sql"]:
+						# This step currently assumes fully qualified paths, consistently placed double quotes and correct capitalization
+						vds["sql"] = vds["sql"].replace(fully_qualified_source_path, fully_qualified_target_path)
+						self._logger.info("_map_vds_source: updating sql for " + self._utils.get_entity_desc(vds) + " with target dataset path: " + str(fully_qualified_target_path))
+
 
 	def _map_wiki_source(self, wiki):
 		# see if the wiki path contains a source name that is being mapped to a different name in source_transformation
@@ -388,10 +413,18 @@ class DremioWriter:
 	def _map_reflection_source(self, reflection):
 		# see if the reflection path contains a source name that is being mapped to a different name in source_transformation
 		for map in self._config.source_transformation:
-			if reflection['path'][0] == map['source-source-name']:
+			if 'source-source-name' in map and reflection['path'][0] == map['source-source-name']:
 				self._logger.info("_map_reflection_source: mapping reflection source name in path " + reflection['path'][0] + " into " + map['target-source-name'])
 				reflection['path'][0] = map['target-source-name'].replace(" ", "%20")
 				break
+			if 'source-dataset-path' in map:
+				path_len = len(map['source-dataset-path'])
+				non_quoted_source_path = [i.replace('"', '') for i in map['source-dataset-path']]
+				non_quoted_target_path = [i.replace('"', '') for i in map['target-dataset-path']]
+				if reflection['path'][:path_len] == non_quoted_source_path:
+					self._logger.info("_map_reflection_source: mapping reflection path " + str(reflection['path'][:path_len]) + " into " + str(map['target-dataset-path']))
+					reflection['path'][:path_len] = non_quoted_target_path
+					break
 
 	def _map_tag_source(self, tag):
 		# see if the tag path contains a source name that is being mapped to a different name in source_transformation
