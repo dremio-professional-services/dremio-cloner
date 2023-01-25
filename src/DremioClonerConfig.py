@@ -197,10 +197,21 @@ class DremioClonerConfig():
 			elif 'options' in element:
 				self._process_options(element)
 		if self.logging_filename == "STDOUT" or stdout_logging:
-			handlers = [logging.StreamHandler()]
+			root = logging.getLogger()
+			root.setLevel(self.logging_level)
+			handler = logging.StreamHandler(sys.stdout)
+			handler.setLevel(logging.DEBUG)
+			formatter = logging.Formatter(self.logging_format)
+			handler.setFormatter(formatter)
+			root.addHandler(handler)
+			handler = logging.StreamHandler(sys.stderr)
+			handler.setLevel(logging.ERROR)
+			formatter = logging.Formatter(self.logging_format)
+			handler.setFormatter(formatter)
+			root.addHandler(handler)
 		else:
 			handlers = [logging.FileHandler(filename=self.logging_filename, encoding='utf-8', mode='a+')]
-		logging.basicConfig(handlers=handlers, format=self.logging_format, level=self.logging_level)
+			logging.basicConfig(handlers=handlers, format=self.logging_format, level=self.logging_level)
 		self._logger = DremioClonerLogger(self.max_errors, self.logging_verbose)
 		self._validate_configuration()
 
