@@ -234,6 +234,8 @@ class Dremio:
 							pds_error_list.append({"name": row['TABLE_NAME'], "path": normalized_path})
 						logging.error("list_pds: error reading entity for: " + normalized_path + row['TABLE_NAME'] + " The SOURCE is likely not available at the moment. See DEBUG logging for more information.")
 					else:
+						if "tag" in entity:
+							entity["tag"] = ""
 						pds_list.append(entity)
 			else:
 				logging.error("list_pds: error reading job result for jobId: " + jobid)
