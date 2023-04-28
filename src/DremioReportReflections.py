@@ -34,14 +34,14 @@ class DremioReportReflections:
 	_dremio_env = None
 
 	# Misc
-	_delimeter = None
+	_delimiter = None
 	_newline = None
 	_report_reflections = []
 
 	def __init__(self, source_dremio, config):
 		self._config = config
 		self._dremio_env = source_dremio
-		self._delimeter = self._config.report_csv_delimiter
+		self._delimiter = self._config.report_csv_delimiter
 		self._newline = self._config.report_csv_newline
 		self._logger = DremioClonerLogger(self._config.max_errors, self._config.logging_verbose)
 		self._utils = DremioClonerUtils(config)
@@ -50,7 +50,8 @@ class DremioReportReflections:
 		_query_reflections = self._retrieve_reflections()
 		for query_reflection in _query_reflections:
 			api_reflection = self._dremio_env.get_reflection(query_reflection['REFLECTION_ID'])
-			dataset_entity = self._dremio_env.get_catalog_entity_by_path(self._normalize_dataset_path(query_reflection['DATASET']))
+			normalized_dataset_path = self._normalize_dataset_path(query_reflection['DATASET'])
+			dataset_entity = self._dremio_env.get_catalog_entity_by_path(normalized_dataset_path)
 			if dataset_entity is None:
 				self._logger.error("process_dremio_reflections: unable to retrieve dataset from API: " + query_reflection['DATASET'])
 				source_pds_list = []
@@ -67,6 +68,7 @@ class DremioReportReflections:
 											 'NAME':query_reflection['NAME'],
 											 'STATUS':query_reflection['STATUS'],
 											 'TYPE':query_reflection['TYPE'],
+											 'DATASET_ID':query_reflection['dataset_id'],
 											 'DATASET_PATH':query_reflection['DATASET'],
 											 'MEASURES':query_reflection['measures'],
 											 'DIMENSIONS':query_reflection['dimensions'],
@@ -87,7 +89,8 @@ class DremioReportReflections:
 		self.save_dremio_report_reflections()
 
 	def _retrieve_reflections(self):
-		sql = 'SELECT REFLECTION_ID, NAME, TYPE, STATUS, NUM_FAILURES, DATASET, sortColumns, partitionColumns, distributionColumns, dimensions, measures, displayColumns, externalReflection FROM SYS.REFLECTIONS '
+		sql = 'SELECT REFLECTION_ID, NAME, TYPE, STATUS, NUM_FAILURES, CAST(NULL AS VARCHAR) AS dataset_id, DATASET, sortColumns, partitionColumns, distributionColumns, dimensions, measures, displayColumns, externalReflection FROM SYS.REFLECTIONS '
+		sql_v2 = 'SELECT REFLECTION_ID, reflection_name AS NAME, TYPE, STATUS, NUM_FAILURES, dataset_id, dataset_name AS DATASET, sort_columns AS sortColumns, partition_columns AS partitionColumns, distribution_columns AS distributionColumns, dimensions, measures, display_columns AS displayColumns, external_reflection AS externalReflection FROM SYS.REFLECTIONS '
 		jobid = self._dremio_env.submit_sql(sql)
 		# Wait for the job to complete. Should only take a moment
 		while True:
@@ -96,7 +99,16 @@ class DremioReportReflections:
 			if job_info is None:
 				self._logger.fatal("_retrieve_reflections: unexpected error. Cannot get a list of Reflections.")
 			if job_info["jobState"] in ['CANCELED', 'FAILED']:
-				self._logger.fatal("_retrieve_reflections: unexpected error, SQL job failed. Cannot get a list of PDS.")
+				self._logger.info("_retrieve_reflections: Possible schema error, retrying with new sys.reflections schema.")
+				jobid = self._dremio_env.submit_sql(sql_v2)
+				while True:
+					job_info = self._dremio_env.get_job_info(jobid)
+					if job_info is None:
+						self._logger.fatal("_retrieve_reflections: unexpected error. Cannot get a list of Reflections.")
+					if job_info["jobState"] in ['CANCELED', 'FAILED']:
+						self._logger.fatal("_retrieve_reflections: unexpected error, SQL job failed. Cannot get a list of PDS.")
+					if job_info["jobState"] == 'COMPLETED':
+						break
 			if job_info["jobState"] == 'COMPLETED':
 				break
 			time.sleep(1)
@@ -147,49 +159,51 @@ class DremioReportReflections:
 
 	def save_dremio_report_reflections(self):
 		self._f = open(self._config.target_filename, "w")
-		self._f.write(   'REFLECTION_ID'  + self._delimeter +
-						 'NAME'  + self._delimeter +
-						 'STATUS'  + self._delimeter +
-						 'TYPE'  + self._delimeter +
-						 'OPTIMIZATION_CONFIDENCE_PCT'  + self._delimeter +
-						 'DATASET_PATH'  + self._delimeter +
-						 'MEASURES'  + self._delimeter +
-						 'DIMENSIONS'  + self._delimeter +
-						 'DISPLAY_COLUMNS'  + self._delimeter +
-						 'SORT_COLUMNS'  + self._delimeter +
-						 'PARTITION_COLUMNS'  + self._delimeter +
-						 'DISTRIBUTION_COLUMNS'  + self._delimeter +
-						 'EXTERNAL_REFLECTION'  + self._delimeter +
-						 'NUM_FAILURES'  + self._delimeter +
-						 'STATUS_EXTENDED'  + self._delimeter +
-						 'TOTAL_SIZE_BYTES'  + self._delimeter +
-						 'ENABLED'  + self._delimeter +
-						 'PARTITION_DISTRIBUTION_STRATEGY'  + self._delimeter +
-						 'CREATED_AT'  + self._delimeter +
-						 'UPDATED_AT'  + self._delimeter +
+		self._f.write(   'REFLECTION_ID' + self._delimiter +
+						 'NAME' + self._delimiter +
+						 'STATUS' + self._delimiter +
+						 'TYPE' + self._delimiter +
+						 'OPTIMIZATION_CONFIDENCE_PCT' + self._delimiter +
+						 'DATASET_ID' + self._delimiter +
+						 'DATASET_PATH' + self._delimiter +
+						 'MEASURES' + self._delimiter +
+						 'DIMENSIONS' + self._delimiter +
+						 'DISPLAY_COLUMNS' + self._delimiter +
+						 'SORT_COLUMNS' + self._delimiter +
+						 'PARTITION_COLUMNS' + self._delimiter +
+						 'DISTRIBUTION_COLUMNS' + self._delimiter +
+						 'EXTERNAL_REFLECTION' + self._delimiter +
+						 'NUM_FAILURES' + self._delimiter +
+						 'STATUS_EXTENDED' + self._delimiter +
+						 'TOTAL_SIZE_BYTES' + self._delimiter +
+						 'ENABLED' + self._delimiter +
+						 'PARTITION_DISTRIBUTION_STRATEGY' + self._delimiter +
+						 'CREATED_AT' + self._delimiter +
+						 'UPDATED_AT' + self._delimiter +
 						 'SOURCE_PDS_LIST' + self._newline)
 
 		for reflection in self._report_reflections:
-			line = str(reflection['ID']) + self._delimeter + \
-				   str(reflection['NAME']) + self._delimeter + \
-				   str(reflection['STATUS']) + self._delimeter + \
-				   str(reflection['TYPE']) + self._delimeter + \
-				   str(self._get_optimization_confidence_pct(reflection)) + self._delimeter + \
-				   str(reflection['DATASET_PATH']) + self._delimeter + \
-				   str(reflection['MEASURES']) + self._delimeter + \
-				   str(reflection['DIMENSIONS']) + self._delimeter + \
-				   str(reflection['DISPLAY_COLUMNS']) + self._delimeter + \
-				   str(reflection['SORT_COLUMNS']) + self._delimeter + \
-				   str(reflection['PARTITION_COLUMNS']) + self._delimeter + \
-				   str(reflection['DISTRIBUTION_COLUMNS']) + self._delimeter + \
-				   str(reflection['EXTERNAL_REFLECTION']) + self._delimeter + \
-				   str(reflection['NUM_FAILURES']) + self._delimeter + \
-				   str(reflection['STATUS_EXTENDED']) + self._delimeter + \
-				   str(reflection['TOTAL_SIZE_BYTES']) + self._delimeter + \
-				   str(reflection['ENABLED']) + self._delimeter + \
-				   str(reflection['PARTITION_DISTRIBUTION_STRATEGY']) + self._delimeter + \
-				   str(reflection['CREATED_AT']) + self._delimeter + \
-				   str(reflection['UPDATED_AT']) + self._delimeter + \
+			line = str(reflection['ID']) + self._delimiter + \
+				   str(reflection['NAME']) + self._delimiter + \
+				   str(reflection['STATUS']) + self._delimiter + \
+				   str(reflection['TYPE']) + self._delimiter + \
+				   str(self._get_optimization_confidence_pct(reflection)) + self._delimiter + \
+				   str(reflection['DATASET_ID']) + self._delimiter + \
+				   str(reflection['DATASET_PATH']) + self._delimiter + \
+				   str(reflection['MEASURES']) + self._delimiter + \
+				   str(reflection['DIMENSIONS']) + self._delimiter + \
+				   str(reflection['DISPLAY_COLUMNS']) + self._delimiter + \
+				   str(reflection['SORT_COLUMNS']) + self._delimiter + \
+				   str(reflection['PARTITION_COLUMNS']) + self._delimiter + \
+				   str(reflection['DISTRIBUTION_COLUMNS']) + self._delimiter + \
+				   str(reflection['EXTERNAL_REFLECTION']) + self._delimiter + \
+				   str(reflection['NUM_FAILURES']) + self._delimiter + \
+				   str(reflection['STATUS_EXTENDED']) + self._delimiter + \
+				   str(reflection['TOTAL_SIZE_BYTES']) + self._delimiter + \
+				   str(reflection['ENABLED']) + self._delimiter + \
+				   str(reflection['PARTITION_DISTRIBUTION_STRATEGY']) + self._delimiter + \
+				   str(reflection['CREATED_AT']) + self._delimiter + \
+				   str(reflection['UPDATED_AT']) + self._delimiter + \
 				   str(reflection['SOURCE_PDS_LIST']) + self._newline
 			self._f.write(line)
 		self._f.close()

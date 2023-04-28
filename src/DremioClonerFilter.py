@@ -315,7 +315,8 @@ class DremioClonerFilter():
 				if folder_re is not None:  # Avoids potential NoneType Error
 					folder_matched = False
 					for i in range(len(path)):
-						if folder_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+						normalized_folder_path = self._utils.normalize_path(path[1:len(path) - i])
+						if folder_re.match(normalized_folder_path) is not None:
 							folder_matched = True
 							break
 					if not folder_matched:
