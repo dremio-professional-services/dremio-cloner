@@ -473,7 +473,7 @@ class Dremio:
 								  self._get_error_message(response))
 			elif response.status_code == 401 or response.status_code == 403:
 				# Try to reauthenticate since the token might expire
-				if not reauthenticate:
+				if reauthenticate:
 					return self._api_put_json(url, json_data, source, report_error, False)
 				logging.critical(source + ": received HTTP Response Code " + str(response.status_code) +
 								 " for : <" + str(url) + ">" + self._get_error_message(response))
