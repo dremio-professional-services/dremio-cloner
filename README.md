@@ -388,7 +388,7 @@ Note, that this command does not provide any option for Scope definition. Please
 | **Configuration Option** | **Description** |
 | --- | --- |
 | endpoint | Defines Dremio API endpoint. For example, [http://localhost:9047/](http://localhost:9047/). Mandatory attribute. |
-| username | Dremio user name. Must be an Admin. Mandatory attribute. |
+| username | Dremio user name. Must be an Admin. Mandatory attribute. To be left empty ("") for Dremio Cloud. |
 | password | Dremio user password. Optional field. If not provided, CLI will request password at runtime. |
 | verify\_ssl | If set to False, Dremio Cloner will not validate SSL certificate of the Dremio Environment. Default is True. |
 | is\_community\_edition | Set to True if reading Dremio CE. Writing to Dremio CE is not supported. |
