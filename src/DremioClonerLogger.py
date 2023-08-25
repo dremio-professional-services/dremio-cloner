@@ -42,8 +42,8 @@ class DremioClonerLogger:
 			logging.error(error)
 			self.errors_encountered = self.errors_encountered + 1
 			if self.errors_encountered > self._max_errors:
-				logging.critical("Reached max number of errors: " + str(self._max_errors))
-				raise RuntimeError("Reached max number of errors: " + str(self._max_errors))
+				logging.critical("Exceeded max number of errors: " + str(self._max_errors))
+				raise RuntimeError("Exceeded max number of errors: " + str(self._max_errors))
 
 	def warn(self, warn):
 		logging.warning(warn)

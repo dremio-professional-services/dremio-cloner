@@ -213,8 +213,10 @@ class DremioReader:
 				self._read_file(child)
 			elif child['containerType'] == "FOLDER":
 				self._read_space_folder(child)
+			elif child['containerType'] == "FUNCTION":
+				self._read_function(child)
 			else:
-				self._logger.error("_read_space_children: not supported entity type " + child['type'])
+				self._logger.error("_read_space_children: not supported entity of type " + child['type'] + " and container type " + child['containerType'])
 
 	def _read_source_folder(self, folder):
 		self._logger.debug("_read_source_folder: processing folder: " + self._utils.get_entity_desc(folder))
@@ -273,6 +275,10 @@ class DremioReader:
 
 	def _read_file(self, file_name):
 		# do nothing
+		return
+
+	def _read_function(self, function):
+		self._logger.warn("_read_function via catalog or API not yet supported: skipping function: " + self._utils.normalize_path(function.get('path', '')))
 		return
 
 	def _read_reflections(self):
