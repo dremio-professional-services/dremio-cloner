@@ -270,6 +270,8 @@ class DremioWriter:
 				continue
 			elif child['containerType'] == "FOLDER":
 				self._read_space_folder(child)
+			elif child['containerType'] == "FUNCTION":
+				self._logger.warn("_read_space_children: FUNCTION is not yet supported. Skipping ...")
 			else:
 				self._logger.error("_read_space_children: not supported entity type " + child['type'])
 
