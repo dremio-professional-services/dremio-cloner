@@ -61,6 +61,7 @@ class DremioCloud:
 	_timed_out_sources = []
 
 	def __init__(self, endpoint, username, password, org_id, project_id, api_timeout=10, retry_timedout_source=False, verify_ssl=True):
+		self._session = requests.Session()
 		if not verify_ssl:
 			logging.warn("Unverified HTTPS requests will be made as per configuration.")
 			requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
@@ -82,7 +83,7 @@ class DremioCloud:
 			payload = '{"username": "' + self._username + '","password": "' + self._password + '","orgId": "' + self._org_id + '"}'
 			payload = payload.encode(encoding='utf-8')
 			try:
-				response = requests.request("POST", self._login_endpoint + self._login_url, data=payload, headers=headers, timeout=self._api_timeout, verify=self._verify_ssl)
+				response = self._session.request("POST", self._login_endpoint + self._login_url, data=payload, headers=headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			except Exception as e:
 				print(e)
 			if response.status_code != 200:
@@ -371,7 +372,7 @@ class DremioCloud:
 		try:
 			if source_name in self._timed_out_sources and not self._retry_timedout_source:
 				raise requests.exceptions.Timeout()
-			response = requests.request("GET", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
+			response = self._session.request("GET", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			if response.status_code == 200:
 				return response.json()
 			elif response.status_code == 400:  # Bad Request
@@ -414,11 +415,11 @@ class DremioCloud:
 			self._authenticate()
 		try:
 			if json_data is None:
-				response = requests.request("POST", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
+				response = self._session.request("POST", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			elif as_json:
-				response = requests.request("POST", self._endpoint + url, json=json_data, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
+				response = self._session.request("POST", self._endpoint + url, json=json_data, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			else:
-				response = requests.request("POST", self._endpoint + url, data=json_data, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
+				response = self._session.request("POST", self._endpoint + url, data=json_data, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			if response.status_code == 200:
 				return response.json()
 			# Success, but no response
@@ -457,7 +458,7 @@ class DremioCloud:
 		if reauthenticate:
 			self._authenticate()
 		try:
-			response = requests.request("PUT", self._endpoint + url, json=json_data, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
+			response = self._session.request("PUT", self._endpoint + url, json=json_data, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			if response.status_code == 200:
 				return response.json()
 			elif response.status_code == 400:  # The supplied CatalogEntity object is invalid.
@@ -505,7 +506,7 @@ class DremioCloud:
 		if reauthenticate:
 			self._authenticate()
 		try:
-			response = requests.request("DELETE", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
+			response = self._session.request("DELETE", self._endpoint + url, headers=self._headers, timeout=self._api_timeout, verify=self._verify_ssl)
 			if response.status_code == 200:
 				return response.json()
 			elif response.status_code == 204:
