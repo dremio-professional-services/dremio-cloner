@@ -121,17 +121,31 @@ class DremioWriter:
 			self._logger.info("write_dremio_environment: Skipping space processing due to configuration space.process_mode=skip.")
 		else:
 			for space in self._d.spaces:
-				self._write_space(space, self._config.space_process_mode, self._config.space_ignore_missing_acl_user, self._config.space_ignore_missing_acl_group)
+				if self._config.target_arctic_name:
+					space["entityType"] = "folder"
+					space["path"] = [self._config.target_arctic_name, space["name"]]
+					self._config.source_dremio_spaces.append(space["name"])
+					self._write_folder(space, self._config.folder_process_mode, self._config.folder_ignore_missing_acl_user, self._config.folder_ignore_missing_acl_group)
+				else:
+					self._write_space(space, self._config.space_process_mode, self._config.space_ignore_missing_acl_user, self._config.space_ignore_missing_acl_group)
+			if self._config.target_arctic_name:
+				self._config.source_dremio_spaces = list(set(self._config.source_dremio_spaces))  # de-duplicate entries
 		if self._config.folder_process_mode == 'skip':
 			self._logger.info("write_dremio_environment: Skipping folder processing due to configuration folder.process_mode=skip.")
 		else:
 			for folder in self._d.folders:
+				if self._config.target_arctic_name:
+					folder["path"] = [self._config.target_arctic_name] + folder["path"]
 				self._write_folder(folder, self._config.folder_process_mode, self._config.folder_ignore_missing_acl_user, self._config.folder_ignore_missing_acl_group)
 		if self._config.vds_process_mode == 'skip':
 			self._logger.info("write_dremio_environment: Skipping VDS processing due to configuration vds.process_mode=skip.")
 		else:
 			self._map_vds_source()
-			self._order_vds(0)
+			if self._config.target_arctic_name:
+				# TODO: implement VDS ordering for arctic target, if needed
+				pass
+			else:
+				self._order_vds(0)
 			self._write_vds_hierarchy()
 			self._write_remainder_vds()
 		if self._config.reflection_process_mode == 'skip':
@@ -403,6 +417,18 @@ class DremioWriter:
 						vds["sql"] = vds["sql"].replace(fully_qualified_source_path, fully_qualified_target_path)
 						self._logger.info("_map_vds_source: updating sql for " + self._utils.get_entity_desc(vds) + " with target dataset path: " + str(fully_qualified_target_path))
 
+	def _map_vds_to_arctic(self, vds):
+		if vds["path"][0] != self._config.target_arctic_name:
+			vds["path"] = [self._config.target_arctic_name] + vds["path"]
+			if "sqlContext" in vds:
+				vds["sqlContext"] = [self._config.target_arctic_name] + vds["sqlContext"]
+			vds["sql"] = self._map_sql_text(vds["sql"])
+
+	def _map_sql_text(self, sql):
+		# This step currently assumes consistently placed double quotes and correct capitalization
+		for space in self._config.source_dremio_spaces:
+			sql = sql.replace(space, self._config.target_arctic_name + '"."' + space)
+		return sql
 
 	def _map_wiki_source(self, wiki):
 		# see if the wiki path contains a source name that is being mapped to a different name in source_transformation
@@ -485,6 +511,8 @@ class DremioWriter:
 				if item[0] == level:
 					vds = item[1]
 					if self._filter.match_vds_filter(vds):
+						if self._config.target_arctic_name:
+							self._map_vds_to_arctic(vds)
 						self._logger.debug("_write_vds_hierarchy: writing vds: " + self._utils.get_entity_desc(vds))
 						self._write_entity(vds, self._config.vds_process_mode, self._config.vds_ignore_missing_acl_user, self._config.vds_ignore_missing_acl_group)
 
@@ -500,6 +528,8 @@ class DremioWriter:
 			for i in range(len(self._d.vds_list) - 1, -1, -1):
 				vds = self._d.vds_list[i]
 				if self._filter.match_vds_filter(vds):
+					if self._config.target_arctic_name:
+						self._map_vds_to_arctic(vds)
 					self._logger.debug("_write_remainder_vds: writing vds: " + self._utils.get_entity_desc(vds))
 					if self._write_entity(vds, self._config.vds_process_mode, self._config.vds_ignore_missing_acl_user, self._config.vds_ignore_missing_acl_group, False):
 						self._d.vds_list.remove(vds)
@@ -510,6 +540,8 @@ class DremioWriter:
 			for i in range(len(self._unresolved_vds) - 1, -1, -1):
 				vds = self._unresolved_vds[i]
 				if self._filter.match_vds_filter(vds):
+					if self._config.target_arctic_name:
+						self._map_vds_to_arctic(vds)
 					self._logger.debug("_write_remainder_vds: writing vds: " + self._utils.get_entity_desc(vds))
 					if self._write_entity(vds, self._config.vds_process_mode, self._config.vds_ignore_missing_acl_user, self._config.vds_ignore_missing_acl_group, False):
 						self._unresolved_vds.remove(vds)
@@ -581,7 +613,7 @@ class DremioWriter:
 			self._logger.debug("_write_entity: Overwriting entity definition as per process_mode configuration : " + self._utils.get_entity_desc(entity))
 			# Update entity definition with data from entity existing in the target environment
 			entity['id'] = existing_entity['id']
-			entity['tag'] = existing_entity['tag']  # Tag from the entity existing in the target environment required for proper concurrency control
+			entity['tag'] = existing_entity.get('tag', "")  # Tag from the entity existing in the target environment required for proper concurrency control
 			# Update ACL version for proper concurrency control, but do not use ACL if not really needed as HOME folders are not allowed to have ACL
 			if ('path' in entity and entity['path'][0][:1] == '@') or ('name' in entity and entity['name'][:1] == '@'): 
 				if 'accessControlList' in entity:
@@ -682,6 +714,8 @@ class DremioWriter:
 		if 'canAlter' in reflection:
 			reflection.pop("canAlter")
 		self._map_reflection_source(reflection)
+		if self._config.target_arctic_name:
+			reflection["path"] = [self._config.target_arctic_name] + reflection["path"]
 		reflection_path = reflection['path']
 		# Write Reflection
 		reflection.pop("path")

@@ -68,6 +68,8 @@ class DremioClonerConfig():
 	target_dremio_cloud = False
 	target_dremio_cloud_org_id = None
 	target_dremio_cloud_project_id = None
+	target_arctic_name = None
+	source_dremio_spaces = []
 	container_filename = "___container.json"
 	dremio_conf_filename = "___dremio_cloner_conf.json"
 	# Options
@@ -246,6 +248,8 @@ class DremioClonerConfig():
 				self.target_dremio_cloud_org_id = item['dremio_cloud_org_id']
 			elif 'dremio_cloud_project_id' in item:
 				self.target_dremio_cloud_project_id = item['dremio_cloud_project_id']
+			elif 'dremio_cloud_arctic_name' in item:
+				self.target_arctic_name = item['dremio_cloud_arctic_name']
 
 	def _process_source(self, json_conf):
 		for item in json_conf['source']:
