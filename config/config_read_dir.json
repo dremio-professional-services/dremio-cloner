@@ -10,7 +10,9 @@
   },
   {"target": [
 	{"directory":"<TARGET_DIRECTORY_PATH>"},
-	{"overwrite": "False"}]
+	{"overwrite": "False"},
+	{"separate_sql_and_metadata_files": "False"}
+    ]
   },
   {"options": [
 	{"logging.level":"logging.DEBUG"},

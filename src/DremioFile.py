@@ -242,7 +242,8 @@ class DremioFile():
 			if self._config.vds_process_mode == 'process':
 				for vds in dremio_data.vds_list:
 					self._write_entity_json_file(os.path.join(target_directory, "spaces"), vds)
-					self._write_entity_sql_file(os.path.join(target_directory, "spaces"), vds)
+					if self._config.target_separate_sql_and_metadata_files is True:
+						self._write_entity_sql_file(os.path.join(target_directory, "spaces"), vds)
 			if self._config.pds_process_mode == 'process':
 				for pds in dremio_data.pds_list:
 					self._write_entity_json_file(os.path.join(target_directory, "sources"), pds)
@@ -318,7 +319,7 @@ class DremioFile():
 							container_list.append(data)
 					else:
 						object_list.append(data)
-				elif filename.endswith('.sql'):
+				elif filename.endswith('.sql'): # only has effect if target_separate_sql_and_metadata_files is True
 					try:
 						entity_data = next(filter(lambda x: x['path'][-1] == filename.replace('.sql', ''), object_list))
 						with open(os.path.join(dirpath, filename), 'r') as f:
@@ -397,11 +398,11 @@ class DremioFile():
 		filepath = self._build_path(root_dir=root_dir, path_parts=path_parts, file_extension=".json")
 		filepath.parent.mkdir(parents=True, exist_ok=True)
 		
-		
-		# remove the sql, because that will be saved in a separate file
 		entity_data = copy.copy(entity)
-		if 'sql' in entity_data:
-			del entity_data['sql']
+		if self._config.target_separate_sql_and_metadata_files is True:
+			# remove the sql, because that will be saved in a separate file
+			if 'sql' in entity_data:
+				del entity_data['sql']
 
 		with filepath.open('w', encoding="utf-8") as f:
 			json.dump(entity_data, f, indent=4, sort_keys=True)
