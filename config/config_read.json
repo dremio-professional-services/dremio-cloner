@@ -10,7 +10,9 @@
   },
   {"target": [
 	{"filename":"<TARGET_JSON_FILE_NAME>"},
-	{"overwrite": "False"}]
+	{"overwrite": "False"},
+	{"separate_sql_and_metadata_files": "False"}
+  ]
   },
   {"options": [
 	{"logging.level":"logging.DEBUG"},

@@ -84,6 +84,7 @@ The command is configured with a JSON file with configuration attributes listed 
   - &quot;filename&quot;
   - &quot;directory&quot;
   - &quot;overwrite&quot;
+  - &quot;separate_sql_and_metadata_files&quot;
 - &quot;options&quot;:
   - logging options 
     - &quot;logging.level&quot;
@@ -405,6 +406,7 @@ Note, that this command does not provide any option for Scope definition. Please
 | filename | Defines a JSON filename to be used as either source of information for **put** command or target for saving data for **get** command. The JSON file will encapsulate entire information on a Dremio environment. Either _filename_ or _directory_ must be defined.|
 | directory | Similar to filename above. However, a folder structure, identical to Dremio environment will be created and the information on a Dremio objects will be stored in sepearate files within this folder structure. This option allows for use cases with indivudal processing of Dremio objects by external tools, such as github. |
 | overwrite | Allows to overwrite existing JSON file or directory. |
+| separate_sql_and_metadata_files | Per VDS create a JSON metadata file and a SQL file with the VDS definition (only applicable when a directory is set). This option allows more efficient management of changes in code editors and improves readability of the SQL queries. |
 
 ### Logging options
 
