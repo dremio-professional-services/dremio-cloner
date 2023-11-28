@@ -427,7 +427,13 @@ class DremioWriter:
 	def _map_sql_text(self, sql):
 		# This step currently assumes consistently placed double quotes and correct capitalization
 		for space in self._config.source_dremio_spaces:
-			sql = sql.replace(space, self._config.target_arctic_name + '"."' + space)
+			if space in sql:
+				# If the space is not quoted in the SQL text then add quotes around the space and catalog name.
+				if (' ' + space + ".") in sql:
+					sql = sql.replace(space, '"' + self._config.target_arctic_name + '"."' + space + '"')
+				# if the space is already quoted then just prepend the catalog name
+				elif (' "' + space + '".') in sql:
+					sql = sql.replace(space, self._config.target_arctic_name + '"."' + space)
 		return sql
 
 	def _map_wiki_source(self, wiki):
