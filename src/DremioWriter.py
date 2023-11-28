@@ -421,7 +421,9 @@ class DremioWriter:
 		if vds["path"][0] != self._config.target_arctic_name:
 			vds["path"] = [self._config.target_arctic_name] + vds["path"]
 			if "sqlContext" in vds:
-				vds["sqlContext"] = [self._config.target_arctic_name] + vds["sqlContext"]
+				for space in self._config.source_dremio_spaces:
+					if space == vds["sqlContext"][0]:
+						vds["sqlContext"] = [self._config.target_arctic_name] + vds["sqlContext"]
 			vds["sql"] = self._map_sql_text(vds["sql"])
 
 	def _map_sql_text(self, sql):
