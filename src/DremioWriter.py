@@ -1124,10 +1124,10 @@ class DremioWriter:
 
 	def _read_entity_definition(self, entity):
 		self._logger.debug("_read_entity_definition: processing entity: " + self._utils.get_entity_desc(entity))
-		if 'name' in entity:
-			return self._dremio_env.get_catalog_entity_by_path(entity['name'])
-		elif 'path' in entity:
+		if 'path' in entity:
 			return self._dremio_env.get_catalog_entity_by_path(self._utils.normalize_path(entity['path']))
+		elif 'name' in entity:
+			return self._dremio_env.get_catalog_entity_by_path(entity['name'])
 		else:
 			self._logger.error("_read_entity_definition: bad data: " + self._utils.get_entity_desc(entity))
 			return None

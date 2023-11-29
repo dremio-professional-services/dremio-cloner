@@ -268,8 +268,14 @@ class DremioCloud:
 		if dry_run:
 			logging.warn("update_catalog_entity: Dry Run. Not submitting changes to API.")
 			return
-		url = self._url_prefix + self._project_id + self._catalog_url + entity_id
-		return self._api_put_json(url, entity, source="update_catalog_entity", report_error = report_error)
+		# if entity is a folder and the id contains 'tableKey' then this is an Arctic folder which cannot be updated
+		# see https://docs.dremio.com/cloud/reference/api/catalog/folder#updating-a-folder
+		if entity['entityType'] == 'folder' and 'tableKey' in entity['id']:
+			logging.debug("update_catalog_entity: entity is an Arctic folder, Arctic folders cannot be updated, continuing.")
+			return entity
+		else:
+			url = self._url_prefix + self._project_id + self._catalog_url + self._encode_http_param(entity_id)
+			return self._api_put_json(url, entity, source="update_catalog_entity", report_error = report_error)
 
 	def create_reflection(self, reflection, dry_run=True):
 		if dry_run:
@@ -309,14 +315,14 @@ class DremioCloud:
 		if dry_run:
 			logging.warn("update_wiki: Dry Run. Not submitting changes to API.")
 			return
-		url = self._url_prefix + self._project_id + self._catalog_url + catalog_id + "/collaboration/wiki"
+		url = self._url_prefix + self._project_id + self._catalog_url + self._encode_http_param(catalog_id) + "/collaboration/wiki"
 		return self._api_post_json(url, wiki, source="update_wiki")
 
 	def update_tag(self, catalog_id, tag, dry_run=True):
 		if dry_run:
 			logging.warn("update_tag: Dry Run. Not submitting changes to API.")
 			return
-		url = self._url_prefix + self._project_id + self._catalog_url + catalog_id + "/collaboration/tag"
+		url = self._url_prefix + self._project_id + self._catalog_url + self._encode_http_param(catalog_id) + "/collaboration/tag"
 		return self._api_post_json(url, tag, source="update_tag")
 
 	def promote_pds(self, pds_entity, dry_run=True):
