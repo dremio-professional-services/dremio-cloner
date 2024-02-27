@@ -54,8 +54,11 @@
 		{"vds.ignore_missing_acl_group":"True"},
 
 	  	{"space.filter": "*"},
+		{"space.filter.names": ["default-arctic-catalog"]},
+		{"space.exclude.filter": ""},
 		{"space.exclude.filter": ""},
 		{"space.folder.filter":"*"},
+		{"space.folder.filter.paths": []},
 		{"space.folder.exclude.filter":""},
 		{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
 

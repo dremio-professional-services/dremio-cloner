@@ -9,7 +9,8 @@
 	{"graph_api_support": "True"},
 	{"is_dremio_cloud": "True"},
 	{"dremio_cloud_org_id": "<DREMIO-CLOUD-ORG-ID>"},
-	{"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"}]
+	{"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"},
+	{"dremio_cloud_source_catalog_name": "default-arctic-catalog"}]
   },
   {"target": [
 	{"filename":"<TARGET_JSON_FILE_NAME>"},
@@ -38,7 +39,7 @@
 
 
 	{"space.filter": "*"},
-	{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},
+	{"space.filter.names": ["default-arctic-catalog"]},
 	{"space.exclude.filter": ""},
 	{"space.folder.filter":"*"},
 	{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},

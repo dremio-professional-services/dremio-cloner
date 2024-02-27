@@ -9,7 +9,8 @@
 	    {"is_dremio_cloud": "True"},
 	    {"dremio_cloud_org_id": "<DREMIO-CLOUD-ORG-ID>"},
 	    {"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"},
-	    {"dremio_cloud_arctic_name": "<DEFAULT-ARCTIC-CATALOG-NAME>"}]
+	    {"dremio_cloud_target_catalog_name": "<DEFAULT-ARCTIC-CATALOG-NAME>"},
+	    {"dremio_cloud_spaces_to_catalog": "True"}]
 	},
 	{"source": [
 		{"filename":"<SOURCE_JSON_FILE_NAME>"}]
