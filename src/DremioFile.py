@@ -22,6 +22,8 @@ import json
 import logging
 import os, errno
 from shutil import rmtree
+import pathlib
+import copy
 
 class DremioFile():
 
@@ -240,6 +242,8 @@ class DremioFile():
 			if self._config.vds_process_mode == 'process':
 				for vds in dremio_data.vds_list:
 					self._write_entity_json_file(os.path.join(target_directory, "spaces"), vds)
+					if self._config.target_separate_sql_and_metadata_files is True:
+						self._write_entity_sql_file(os.path.join(target_directory, "spaces"), vds)
 			if self._config.pds_process_mode == 'process':
 				for pds in dremio_data.pds_list:
 					self._write_entity_json_file(os.path.join(target_directory, "sources"), pds)
@@ -302,18 +306,28 @@ class DremioFile():
 	def _collect_directory(self, directory, container_list, folder_list, object_list):
 		for (dirpath, dirnames, filenames) in os.walk(directory):
 			for filename in filenames:
-				f = open(os.path.join(dirpath, filename), "r", encoding="utf-8")
-				data = json.load(f)
-				f.close()
-				if self._config.container_filename == filename:
-					# First level of dirpath is a container if container_list passed
-					if container_list is None or ('/' in dirpath[len(directory)+1:] or '\\' in dirpath[len(directory)+1:]):
-						if folder_list is not None:
-							folder_list.append(data)
+				if filename.endswith('.json'):
+					f = open(os.path.join(dirpath, filename), "r", encoding="utf-8")
+					data = json.load(f)
+					f.close()
+					if self._config.container_filename == filename:
+						# First level of dirpath is a container if container_list passed
+						if container_list is None or ('/' in dirpath[len(directory)+1:] or '\\' in dirpath[len(directory)+1:]):
+							if folder_list is not None:
+								folder_list.append(data)
+						else:
+							container_list.append(data)
 					else:
-						container_list.append(data)
-				else:
-					object_list.append(data)
+						object_list.append(data)
+				elif filename.endswith('.sql'): # only has effect if target_separate_sql_and_metadata_files is True
+					try:
+						entity_data = next(filter(lambda x: x['path'][-1] == filename.replace('.sql', ''), object_list))
+						with open(os.path.join(dirpath, filename), 'r') as f:
+							entity_data['sql'] = f.read()
+					except StopIteration as e: 
+						raise Exception(f"The entity data was not found for {filename.replace('.sql', '')}, does the {filename.replace('.sql', '.json')} exist?")
+						
+
 
 	def _write_container_json_file(self, root_dir, container):
 		filepath = os.path.join(root_dir, container['name'], self._config.container_filename).encode(encoding='utf-8', errors='strict')
@@ -357,24 +371,42 @@ class DremioFile():
 		f.close()
 
 
+	def _build_path(self, root_dir, path_parts, file_extension):
+		sanitized_path_parts = [self._replace_special_characters(path_part) for path_part in path_parts]
+		sanitized_path_parts[-1] = sanitized_path_parts[-1] + file_extension
+
+		path = pathlib.Path(root_dir)
+		for part in sanitized_path_parts:
+			path = path / part
+
+		return path
+		
+
+	def _write_entity_sql_file(self, root_dir, entity):
+		# check if any folder needs to be created
+		path_parts = entity['path']
+		filepath = self._build_path(root_dir=root_dir, path_parts=path_parts, file_extension=".sql")
+		filepath.parent.mkdir(parents=True, exist_ok=True)
+
+		with filepath.open('w', encoding="utf-8") as f:
+			f.write(entity['sql'])
+
+
 	def _write_entity_json_file(self, root_dir, entity):
 		# check if any folder needs to be created
-		path = entity['path']
-		filepath = root_dir
-		for item in path:
-			if not os.path.isdir(filepath.encode(encoding='utf-8', errors='strict')):
-				try:
-					os.makedirs(filepath.encode(encoding='utf-8', errors='strict'))
-				except OSError as e:
-					if e.errno != errno.EEXIST:
-						raise "Cannot create directory: " + filepath
-			# Replace special characters with underscore
-			filepath = os.path.join(filepath, self._replace_special_characters(item))
-		# write entity into json file
-		filepath = (filepath  + ".json").encode(encoding='utf-8', errors='strict')
-		f = open(filepath, "w", encoding="utf-8")
-		json.dump(entity, f, indent=4, sort_keys=True)
-		f.close()
+		path_parts = entity['path']
+		filepath = self._build_path(root_dir=root_dir, path_parts=path_parts, file_extension=".json")
+		filepath.parent.mkdir(parents=True, exist_ok=True)
+		
+		entity_data = copy.copy(entity)
+		if self._config.target_separate_sql_and_metadata_files is True:
+			# remove the sql, because that will be saved in a separate file
+			if 'sql' in entity_data:
+				del entity_data['sql']
+
+		with filepath.open('w', encoding="utf-8") as f:
+			json.dump(entity_data, f, indent=4, sort_keys=True)
+			
 
 
 	def _replace_special_characters(self, fs_item):
