@@ -64,6 +64,7 @@ class DremioClonerConfig():
 	target_filename = None
 	target_directory = None
 	target_file_or_dir_overwrite = False
+	target_separate_sql_and_metadata_files = False
 	target_type = None
 	target_dremio_cloud = False
 	target_dremio_cloud_org_id = None
@@ -238,6 +239,8 @@ class DremioClonerConfig():
 				self.target_directory = item['directory']
 			elif 'overwrite' in item:
 				self.target_file_or_dir_overwrite = self._bool(item, 'overwrite')
+			elif 'separate_sql_and_metadata_files' in item:
+				self.target_separate_sql_and_metadata_files = self._bool(item, 'separate_sql_and_metadata_files')
 			elif 'verify_ssl' in item:
 				self.target_verify_ssl = self._bool(item, 'verify_ssl')
 			elif 'is_community_edition' in item:
