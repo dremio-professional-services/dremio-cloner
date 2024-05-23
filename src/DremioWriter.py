@@ -432,10 +432,10 @@ class DremioWriter:
 			if space in sql:
 				# If the space is not quoted in the SQL text then add quotes around the space and catalog name.
 				if (' ' + space + ".") in sql:
-					sql = sql.replace(space, '"' + self._config.target_catalog_name + '"."' + space + '"')
+					sql = sql.replace(' ' + space, ' "' + self._config.target_catalog_name + '"."' + space + '"')
 				# if the space is already quoted then just prepend the catalog name
 				elif (' "' + space + '".') in sql:
-					sql = sql.replace(space, self._config.target_catalog_name + '"."' + space)
+					sql = sql.replace(' "' + space, ' "' + self._config.target_catalog_name + '"."' + space)
 		return sql
 
 	def _map_wiki_source(self, wiki):
