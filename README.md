@@ -80,6 +80,7 @@ The command is configured with a JSON file with configuration attributes listed 
   - &quot;is\_dremio\_cloud&quot;
   - &quot;dremio\_cloud\_org\_id&quot;
   - &quot;dremio\_cloud\_project\_id&quot;
+  - &quot;dremio\_cloud\_source\_catalog\_name&quot;
 - &quot;target&quot;: defines an output filename or a directory with
   - &quot;filename&quot;
   - &quot;directory&quot;
@@ -167,6 +168,8 @@ The command is configured with a JSON file with configuration attributes listed 
   - &quot;is\_dremio\_cloud&quot;
   - &quot;dremio\_cloud\_org\_id&quot;
   - &quot;dremio\_cloud\_project\_id&quot;
+  - &quot;dremio\_cloud\_target\_catalog\_name&quot;
+  - &quot;dremio\_cloud\_spaces\_to\_catalog&quot;
 - &quot;options&quot;:
   - logging options 
     - &quot;logging.level&quot;
@@ -398,6 +401,9 @@ Note, that this command does not provide any option for Scope definition. Please
 | is\_dremio\_cloud | Set to True if reading from or writing to Dremio Cloud. Default value is False. |
 | dremio\_cloud\_org\_id | Dremio Cloud Organization ID to connect to. |
 | dremio\_cloud\_project\_id | Dremio Cloud Project ID to connect to. |
+| dremio\_cloud\_source\_catalog\_name | Dremio Cloud root catalog name during "get" operation. |
+| dremio\_cloud\_target\_catalog\_name | Dremio Cloud root catalog name during "put" operation. |
+| dremio\_cloud\_spaces\_to\_catalog | Set to True if migrating from spaces to Arctic catalog |
 
 ### _Target_ or _source_ section, when defined with a file name
 

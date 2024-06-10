@@ -2,13 +2,15 @@
 	{"command":"put"},
 	{"target": [
 	    {"endpoint": "https://api.dremio.cloud/"},
-	    {"username": "<DREMIO-ADMIN-USER>"},
-	    {"password": "<OPTIONAL_PASSWORD>"},
+	    {"username": ""},
+	    {"password": "<DREMIO_ADMIN_PAT>"},
 	    {"verify_ssl": "False"},
 	  	{"is_community_edition": "False"},
 	    {"is_dremio_cloud": "True"},
 	    {"dremio_cloud_org_id": "<DREMIO-CLOUD-ORG-ID>"},
-	    {"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"}]
+	    {"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"},
+	    {"dremio_cloud_target_catalog_name": "<DEFAULT-ARCTIC-CATALOG-NAME>"},
+	    {"dremio_cloud_spaces_to_catalog": "True"}]
 	},
 	{"source": [
 		{"filename":"<SOURCE_JSON_FILE_NAME>"}]
@@ -23,24 +25,22 @@
 	  	{"logging.verbose": "False"},
 
 		{"max_errors":"9999"},
-		{"http_timeout":"10"},
+		{"http_timeout":"30"},
 		{"source.retry_timedout":"false"},
 
-		{"space.process_mode":"update"},
-		{"folder.process_mode":"create_overwrite"},
-		{"source.process_mode":"create_overwrite"},
-		{"pds.process_mode":"promote"},
-		{"vds.process_mode":"create_overwrite"},
-	    {"reflection.process_mode": "create_overwrite"},
-	    {"pds.reflection_refresh_mode": "refresh"},
-	  	{"wiki.process_mode": "create_overwrite"},
-		{"tag.process_mode": "process"},
-		{"home.process_mode": "process"},
-		{"vote.process_mode": "process"},
-		{"wlm.queue.process_mode": "process"},
-		{"wlm.rule.process_mode": "process"},
-
-	  	{"transformation": {"acl": {"file": "acl_transformation.json"}}},
+		{"space.process_mode":"create_only"},
+		{"folder.process_mode":"create_only"},
+		{"source.process_mode":"skip"},
+		{"pds.process_mode":"create_only"},
+		{"vds.process_mode":"create_only"},
+	    {"reflection.process_mode": "create_only"},
+	    {"pds.reflection_refresh_mode": "skip"},
+	  	{"wiki.process_mode": "skip"},
+		{"tag.process_mode": "skip"},
+		{"home.process_mode": "skip"},
+		{"vote.process_mode": "skip"},
+		{"wlm.queue.process_mode": "skip"},
+		{"wlm.rule.process_mode": "skip"},
 
 	  	{"space.ignore_missing_acl_user":"True"},
 		{"space.ignore_missing_acl_group":"True"},
@@ -54,11 +54,8 @@
 		{"vds.ignore_missing_acl_group":"True"},
 
 	  	{"space.filter": "*"},
-		{"space.filter.names": ["default-arctic-catalog"]},
-		{"space.exclude.filter": ""},
 		{"space.exclude.filter": ""},
 		{"space.folder.filter":"*"},
-		{"space.folder.filter.paths": []},
 		{"space.folder.exclude.filter":""},
 		{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
 
@@ -74,7 +71,7 @@
 	  	{"pds.list.useapi":"False"},
 
 		{"vds.filter":"*"},
-		{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},
+		{"vds.filter.names": []},
 		{"vds.exclude.filter":""},
 		{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	  	{"vds.max_hierarchy_depth":"10"}]

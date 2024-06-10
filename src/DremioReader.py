@@ -92,6 +92,10 @@ class DremioReader:
 			container.pop("createdAt")
 		if "tag" in container:
 			container.pop("tag")
+		if self._config.source_catalog_name and container['containerType'] == "SOURCE":
+			source_path = container.get('path')
+			if source_path and source_path[0] == self._config.source_catalog_name:
+				self._read_space(container)
 		if container['containerType'] == "HOME":
 			self._read_home(container)
 		elif container['containerType'] == "SPACE":
@@ -264,7 +268,10 @@ class DremioReader:
 				if self._filter.match_pds_filter(dataset):
 					self._d.pds_list.append(entity)
 			elif dataset['datasetType'] == "VIRTUAL":
-				tags = self._dremio_env.get_catalog_tags(entity['id'])
+				if self._config.tag_process_mode == 'process':
+					tags = self._dremio_env.get_catalog_tags(entity['id'])
+				else:
+					tags = None
 				if self._filter.match_vds_filter(dataset, tags=tags):
 					self._d.vds_list.append(entity)
 			else:

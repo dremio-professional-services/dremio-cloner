@@ -69,6 +69,10 @@ class DremioClonerConfig():
 	target_dremio_cloud = False
 	target_dremio_cloud_org_id = None
 	target_dremio_cloud_project_id = None
+	target_catalog_name = None
+	spaces_to_catalog = False
+	source_catalog_name = None
+	source_dremio_spaces = []
 	container_filename = "___container.json"
 	dremio_conf_filename = "___dremio_cloner_conf.json"
 	# Options
@@ -131,12 +135,12 @@ class DremioClonerConfig():
 	reflection_id_include_list = []			# List of reflection ids to include. Empty list means include all reflections which is the default behaviour
 	reflection_refresh_mode = 'skip' 		# Flag to refresh reflections: refresh, skip
 	reflection_only_matching_vds = False 	# Flag to export only reflections which have a matching VDS. The old and standard behavior is exporting all reflections, regardless
-	wlm_queue_process_mode = 'process'		# Flag to process WLM Queues: process, skip
-	wlm_rule_process_mode = 'process'		# Flag to process WLM Rules: process, skip
+	wlm_queue_process_mode = 'skip'		# Flag to process WLM Queues: process, skip
+	wlm_rule_process_mode = 'skip'		# Flag to process WLM Rules: process, skip
 	wiki_process_mode = 'process'			# Flag to process Wikis: process, skip, create_only, update_only, create_overwrite
-	tag_process_mode ='process'				# Flag to process Tags: process, skip
+	tag_process_mode = 'process'				# Flag to process Tags: process, skip
 	home_process_mode = 'process'			# Flag to process Homes: process, skip
-	vote_process_mode = 'process'			# Flag to process Votes: process, skip
+	vote_process_mode = 'skip'			# Flag to process Votes: process, skip
 	acl_transformation = {}					# Contains all ACL transformation definitions
 	source_transformation = {}  			# Contains all source transformation definitions
 	# Delete VDS List
@@ -249,6 +253,12 @@ class DremioClonerConfig():
 				self.target_dremio_cloud_org_id = item['dremio_cloud_org_id']
 			elif 'dremio_cloud_project_id' in item:
 				self.target_dremio_cloud_project_id = item['dremio_cloud_project_id']
+			elif 'dremio_cloud_target_catalog_name' in item:
+				self.target_catalog_name = item['dremio_cloud_target_catalog_name']
+			elif 'dremio_cloud_spaces_to_catalog' in item:
+				self.spaces_to_catalog = self._bool(item, 'dremio_cloud_spaces_to_catalog')
+				if self.spaces_to_catalog and self.target_catalog_name is None:
+					raise Exception(f"'dremio_cloud_target_catalog_name' is required when migrating spaces to catalog")
 
 	def _process_source(self, json_conf):
 		for item in json_conf['source']:
@@ -278,6 +288,8 @@ class DremioClonerConfig():
 				self.source_dremio_cloud_org_id = item['dremio_cloud_org_id']
 			elif 'dremio_cloud_project_id' in item:
 				self.source_dremio_cloud_project_id = item['dremio_cloud_project_id']
+			elif 'dremio_cloud_source_catalog_name' in item:
+				self.source_catalog_name = item['dremio_cloud_source_catalog_name']
 
 	def _process_options(self, json_conf):
 		for item in json_conf['options']:
@@ -387,7 +399,11 @@ class DremioClonerConfig():
 				self._vds_filter_re = self._compile_pattern(self.vds_filter)
 			elif 'vds.filter.names' in item:
 				self.vds_filter_names = self._array(item, 'vds.filter.names')
+			elif 'tag.process_mode' in item:
+				self.tag_process_mode = self._str(item, 'tag.process_mode')
 			elif 'vds.filter.tag' in item:
+				if self.tag_process_mode != 'process' and item["vds.filter.tag"] != "":
+					raise Exception(f"Can not filter using 'vds.filter.tag' when 'tag.process_mode' is set to '{self.tag_process_mode}'")
 				self.vds_filter_tag = self._str(item, 'vds.filter.tag')
 			elif 'vds.exclude.filter' in item:
 				self.vds_exclude_filter = self._str(item, 'vds.exclude.filter')
@@ -423,8 +439,6 @@ class DremioClonerConfig():
 				self.wlm_rule_process_mode = self._str(item, 'wlm.rule.process_mode')
 			elif 'wiki.process_mode' in item:
 				self.wiki_process_mode = self._str(item, 'wiki.process_mode')
-			elif 'tag.process_mode' in item:
-				self.tag_process_mode = self._str(item, 'tag.process_mode')
 			elif 'home.process_mode' in item:
 				self.home_process_mode = self._str(item, 'home.process_mode')
 			elif 'vote.process_mode' in item:

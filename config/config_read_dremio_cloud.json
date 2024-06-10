@@ -9,7 +9,8 @@
 	{"graph_api_support": "True"},
 	{"is_dremio_cloud": "True"},
 	{"dremio_cloud_org_id": "<DREMIO-CLOUD-ORG-ID>"},
-	{"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"}]
+	{"dremio_cloud_project_id": "<DREMIO-CLOUD-PROJECT-ID>"},
+	{"dremio_cloud_source_catalog_name": "default-arctic-catalog"}]
   },
   {"target": [
 	{"filename":"<TARGET_JSON_FILE_NAME>"},
@@ -29,19 +30,16 @@
 	{"space.process_mode":"process"},
 	{"source.process_mode":"process"},
 	{"reflection.process_mode": "process"},
-	{"wlm.queue.process_mode": "process"},
-	{"wlm.rule.process_mode": "process"},
 	{"wiki.process_mode": "process"},
 	{"tag.process_mode": "process"},
 	{"home.process_mode": "process"},
-	{"vote.process_mode": "process"},
 	{"folder.process_mode": "process"},
 	{"vds.process_mode": "process"},
 	{"pds.process_mode": "process"},
 
 
 	{"space.filter": "*"},
-	{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},
+	{"space.filter.names": ["default-arctic-catalog"]},
 	{"space.exclude.filter": ""},
 	{"space.folder.filter":"*"},
 	{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},
