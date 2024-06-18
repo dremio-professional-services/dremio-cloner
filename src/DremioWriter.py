@@ -588,9 +588,9 @@ class DremioWriter:
 			entity.pop("accelerationActivePolicyType")
 		if 'accelerationRefreshPolicy' in entity:
 			if 'refreshSchedule' in entity['accelerationRefreshPolicy']:
-				entity.pop("refreshSchedule")
+				entity['accelerationRefreshPolicy'].pop("refreshSchedule")
 			if 'activePolicyType' in entity['accelerationRefreshPolicy']:
-				entity.pop("activePolicyType")
+				entity['accelerationRefreshPolicy'].pop("activePolicyType")
 		# Process ACL as needed
 		if not self._process_acl(entity, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 			# Skip this entity due to ACL processing errors
