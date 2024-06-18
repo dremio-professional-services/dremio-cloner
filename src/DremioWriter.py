@@ -582,10 +582,15 @@ class DremioWriter:
 			entity.pop("children")
 		if 'createdAt' in entity:
 			entity.pop("createdAt")
-		if 'refreshSchedule' in entity:
-			entity.pop("refreshSchedule")
-		if 'activePolicyType' in entity:
-			entity.pop("activePolicyType")
+		if 'accelerationRefreshSchedule' in entity:
+			entity.pop("accelerationRefreshSchedule")
+		if 'accelerationActivePolicyType' in entity:
+			entity.pop("accelerationActivePolicyType")
+		if 'accelerationRefreshPolicy' in entity:
+			if 'refreshSchedule' in entity['accelerationRefreshPolicy']:
+				entity.pop("refreshSchedule")
+			if 'activePolicyType' in entity['accelerationRefreshPolicy']:
+				entity.pop("activePolicyType")
 		# Process ACL as needed
 		if not self._process_acl(entity, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 			# Skip this entity due to ACL processing errors
