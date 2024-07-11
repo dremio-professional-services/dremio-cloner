@@ -1,21 +1,21 @@
 {"acl-transformation":
 [
-  { "source": {"group":"<GROUP_1>"},
+  { "source": {"role":"ROLE_1>"},
 	"target": {"user":"<USER_1>"},
-    "permission-mapping": [{"READ": "READ"}, {"WRITE": "WRITE"}]
+    "permission-mapping": [{"SELECT": "SELECT"}, {"ALTER": "ALTER"}]
   },
   { "source": {"user":"<USER_2>"},
-	"target": {"group":"<GROUP_2>"},
-    "permission-mapping": [{"READ": "WRITE"}, {"WRITE": "WRITE"}]
+	"target": {"role":"<ROLE_2>"},
+    "permission-mapping": [{"SELECT": "ALTER"}, {"ALTER": "ALTER"}]
   },
   { "source": {"user":"<USER_3>"},
 	"target": {"user":"<USER_3>"},
-    "permission-mapping": [{"READ": "READ"}, {"WRITE": "READ"}]
+    "permission-mapping": [{"SELECT": "SELECT"}, {"ALTER": "SELECT"}]
   },
-  { "source": {"group":"<GROUP_4>"},
-	"target": {"group":"<GROUP_4>"}
+  { "source": {"role":"<ROLE_4>"},
+	"target": {"role":"<ROLE_4>"}
   },
-  { "source": {"group":"<GROUP_5>"},
+  { "source": {"role":"<ROLE_5>"},
     "target": "REMOVE"
   }
 ]
