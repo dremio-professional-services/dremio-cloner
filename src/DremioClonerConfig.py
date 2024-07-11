@@ -89,6 +89,7 @@ class DremioClonerConfig():
 	space_folder_exclude_filter = None		# Exclusion Filter for Space Folder entity type
 	space_folder_exclude_filter_paths = []	# List of Space Folder paths (as regex) to exclude if not empty
 	space_process_mode = None				# Flag to process Space: process, skip, create_only, update_only, create_overwrite
+	use_fully_qualified_folder_path = False # Uses fully qualified folder paths (including space name) for filtering
 	space_ignore_missing_acl_user = False	# Flag to write a Space if an ACL user is missing in the target Dremio environment
 	space_ignore_missing_acl_group = False	# Flag to write a Space if an ACL group is missing in the target Dremio environment
 	source_filter = None					# Filter for Source entity type
@@ -319,6 +320,8 @@ class DremioClonerConfig():
 				self._space_folder_exclude_filter_re = self._compile_pattern(self.space_folder_exclude_filter)
 			elif 'space.folder.exclude.filter.paths' in item:
 				self.space_folder_exclude_filter_paths = self._array(item, 'space.folder.exclude.filter.paths')
+			elif 'space.folder.filter.use_fully_qualified_path' in item:
+				self.use_fully_qualified_folder_path = self._bool(item, 'space.folder.filter.use_fully_qualified_path')
 			elif 'space.ignore_missing_acl_user' in item:
 				self.space_ignore_missing_acl_user = self._bool(item, 'space.ignore_missing_acl_user')
 			elif 'space.ignore_missing_acl_group' in item:

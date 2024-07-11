@@ -63,7 +63,11 @@ class DremioClonerFilter():
 				if not folder_matched:
 					space_folder_filter_re = self._config._compile_pattern(space_folder_filter)
 					for i in range(len(path)):
-						if space_folder_filter_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+						if self._config.use_fully_qualified_folder_path:
+							normalized_folder_path = self._utils.normalize_path(path[:len(path) - i])
+						else:
+							normalized_folder_path = self._utils.normalize_path(path[1:len(path) - i])
+						if space_folder_filter_re.match(normalized_folder_path) is not None:
 							folder_matched = True
 							break
 			if not folder_matched:
@@ -80,7 +84,11 @@ class DremioClonerFilter():
 				if not folder_matched:
 					space_folder_filter_re = self._config._compile_pattern(space_folder_exclude_filter)
 					for i in range(len(path)):
-						if space_folder_filter_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+						if self._config.use_fully_qualified_folder_path:
+							normalized_folder_path = self._utils.normalize_path(path[:len(path) - i])
+						else:
+							normalized_folder_path = self._utils.normalize_path(path[1:len(path) - i])
+						if space_folder_filter_re.match(normalized_folder_path) is not None:
 							folder_matched = True
 							break
 			if not folder_matched:
@@ -239,7 +247,11 @@ class DremioClonerFilter():
 		else:
 			folder_matched = False
 			for i in range(len(hierarchy_path)):
-				if folder_re.match(self._utils.normalize_path(hierarchy_path[1:len(hierarchy_path) - i])) is not None:
+				if self._config.use_fully_qualified_folder_path:
+					normalized_folder_path = self._utils.normalize_path(hierarchy_path[:len(hierarchy_path) - i])
+				else:
+					normalized_folder_path = self._utils.normalize_path(hierarchy_path[1:len(hierarchy_path) - i])
+				if folder_re.match(normalized_folder_path) is not None:
 					folder_matched = True
 					break
 			if not folder_matched:
@@ -247,7 +259,11 @@ class DremioClonerFilter():
 			if folder_exclusion_re is not None:
 				folder_exclusion_matched = False
 				for i in range(len(hierarchy_path)):
-					if folder_exclusion_re.match(self._utils.normalize_path(hierarchy_path[1:len(hierarchy_path) - i])) is not None:
+					if self._config.use_fully_qualified_folder_path:
+						normalized_folder_path = self._utils.normalize_path(hierarchy_path[:len(hierarchy_path) - i])
+					else:
+						normalized_folder_path = self._utils.normalize_path(hierarchy_path[1:len(hierarchy_path) - i])
+					if folder_exclusion_re.match(normalized_folder_path) is not None:
 						folder_exclusion_matched = True
 						break
 				if folder_exclusion_matched:
@@ -303,7 +319,10 @@ class DremioClonerFilter():
 				if folder_re is not None:  # Avoids potential NoneType Error
 					folder_matched = False
 					for i in range(len(path)):
-						normalized_folder_path = self._utils.normalize_path(path[1:len(path) - i])
+						if self._config.use_fully_qualified_folder_path:
+							normalized_folder_path = self._utils.normalize_path(path[:len(path) - i])
+						else:
+							normalized_folder_path = self._utils.normalize_path(path[1:len(path) - i])
 						if folder_re.match(normalized_folder_path) is not None:
 							folder_matched = True
 							break
@@ -312,7 +331,11 @@ class DremioClonerFilter():
 				if folder_exclusion_re is not None:
 					folder_exclusion_matched = False
 					for i in range(len(path)):
-						if folder_exclusion_re.match(self._utils.normalize_path(path[1:len(path) - i])) is not None:
+						if self._config.use_fully_qualified_folder_path:
+							normalized_folder_path = self._utils.normalize_path(path[:len(path) - i])
+						else:
+							normalized_folder_path = self._utils.normalize_path(path[1:len(path) - i])
+						if folder_exclusion_re.match(normalized_folder_path) is not None:
 							folder_exclusion_matched = True
 							break
 					if folder_exclusion_matched:

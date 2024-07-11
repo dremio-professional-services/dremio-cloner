@@ -84,6 +84,7 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;space.folder.filter.paths&quot;
     - &quot;space.folder.exclude.filter&quot;
     - &quot;space.folder.exclude.filter.paths&quot;
+    - &quot;space.folder.filter.use_fully_qualified_path&quot;
   - scope of _Source_ processing 
     - &quot;source.process\_mode&quot;
     - &quot;source.filter&quot;
@@ -179,6 +180,7 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;space.folder.filter&quot;
     - &quot;space.folder.filter.paths&quot;
     - &quot;space.folder.exclude.filter&quot;
+    - &quot;space.folder.filter.use_fully_qualified_path&quot;
   - scope of _Source_ processing 
     - &quot;source.process\_mode&quot;
     - &quot;source.filter&quot;
@@ -280,6 +282,7 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | space.folder.filter.paths         | If specified, a list filter that defines what Space Folder paths will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"space.folder.filter.paths": []},`). Works in logical AND with other active _space.folder_ filters. Example: `{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},`                                                                                |
 | space.folder.exclude.filter       | A filter that defines what Space Folders will be **excluded** into processing. &quot;\*&quot; will exclude all Folders. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with other active _space.folder_ filters.                                                                                                                                                                             |
 | space.folder.exclude.filter.paths | If specified, a list filter that defines what Space Folder paths will be **excluded** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if the option is not specified or the list is empty (e.g. `{"space.folder.exclude.filter.paths": []},`). Works in logical AND with other active _space.folder_ filters. Example: `{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},`                                                |
+| space.folder.filter.use_fully_qualified_path | If set to `"True"`, fully qualified folder paths (including space name) will be used for folder filters during &quot;get&quot; or &quot;put&quot; command execution. This setting is ignored, if the option is not specified or the value is set to False (e.g. `{"space.folder.filter.use_fully_qualified_path": "False"},`)                                                |
 
 ### Scope of Dremio Source processing
 
