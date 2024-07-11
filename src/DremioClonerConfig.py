@@ -29,12 +29,11 @@ class DremioClonerConfig():
 	CMD_GET = 'get'
 	CMD_PUT = 'put'
 	CMD_CASCADE_ACL = 'cascade-acl'
-	CMD_REPORT_ACL = 'report-acl'
 	CMD_DELETE = 'delete-beta'
 
 	# Config json code
 	cloner_conf_json = None
-	# Command to execute: put, get, cp, report-acl, cascade-acl
+	# Command to execute: put, get, cp, cascade-acl
 	command = None
 	dry_run = True
 	# Source Dremio Environment definition
@@ -458,8 +457,6 @@ class DremioClonerConfig():
 			self._logger.fatal("Invalid configuration for command 'get'.")
 		elif self.command == self.CMD_PUT and ((self.source_filename is None and self.source_directory is None) or self.target_endpoint is None or self.target_username is None or self.target_password is None):
 			self._logger.fatal("Invalid configuration for command 'get'.")
-		elif self.command == self.CMD_REPORT_ACL and (self.source_endpoint is None or self.source_username is None or self.source_password is None or self.target_filename is None):
-			self._logger.fatal("Invalid configuration for command 'report-acl'.")
 
 		if (self.command == self.CMD_PUT and (self.space_process_mode is None or
 			     (self.space_process_mode != 'skip' and self.space_process_mode != 'update_only' and 

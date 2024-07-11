@@ -4,3 +4,4 @@ venv/
 /src/tests/
 /src/test_*.py
 /src/test-output.xml
+*.DS_Store

@@ -20,7 +20,6 @@ from DremioCloud import DremioCloud
 from DremioFile import DremioFile
 from DremioReader import DremioReader
 from DremioWriter import DremioWriter
-from DremioReportAcl import DremioReportAcl
 from DremioCascadeAcl import DremioCascadeAcl
 from DremioDelete import DremioDelete
 from DremioClonerConfig import DremioClonerConfig
@@ -87,17 +86,6 @@ def put_dremio_environment(config):
 	writer.write_dremio_environment()
 	logging.info("Command 'put' finished with " + str(writer.get_errors_count()) + " error(s).")
 	print("Done with " + str(writer.get_errors_count()) + " error(s). Please review log file for details.")
-
-
-def report_acl(config):
-	logging.info("Executing command 'report-acl'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
-	reader = DremioReader(dremio, config)
-	dremio_data = reader.read_dremio_environment()
-	dremio_report = DremioReportAcl(dremio, dremio_data, config)
-	dremio_report.save_dremio_report_acl()
-	logging.info("Command 'report-acl' finished with " + str(reader.get_errors_count()) + " error(s).")
-	print("Done with " + str(reader.get_errors_count()) + " error(s). Please review log file for details.")
 
 
 def cascade_acl(config):

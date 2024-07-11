@@ -1,13 +1,12 @@
 # Dremio Cloner
 
-Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get, put, cascade-acl, report-acl.
+Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get, put, cascade-acl.
 
 Dremio Cloner can be utilized for: 
 - Migrating entire Dremio environments, for example, from community edition to enterprise edition
 - CI/CD processes
 - Disaster Recovery scenarios
 - Partial backup/restore
-- Security Audit reporting
 
 Dremio Cloner is executed with the following command:
 
@@ -297,57 +296,6 @@ Note, if none of _space.cascade-acl-origin.override-object_, _space.folder.casca
     - To cascade ACLs for a specific named source, specify `{"source.filter": "sourcename"}` where `sourcename` should be replaced with the actual name of the source
 
 Please see a sample JSON configuration file in the config folder of this repository.
-
-
-
-## Command &quot;report-acl&quot;
-
-Command &quot;report-acl&quot; produces a selective security report on all objects with ACL in a Dremio environment.
-
-The command is configured with a JSON file with configuration attributes listed below. For detailed description of the configuration JSON attributes, see Reference section below in Appendix 1.
-
-- &quot;command&quot;:&quot;report-acl&quot;
-- &quot;source&quot;: defines Dremio Environment with
-  - &quot;endpoint&quot;
-  - &quot;username&quot;
-  - &quot;password&quot;
-  - &quot;verify\_ssl&quot;
-  - &quot;is\_rbac\_version&quot;
-- &quot;target&quot;: defines an output filename with
-  - &quot;filename&quot;
-- &quot;options&quot;:
-  - logging options 
-    - &quot;logging.level&quot;
-    - &quot;logging.format&quot;
-    - &quot;logging.filename
-    - &quot;logging.verbose&quot;
-  - miscellaneous options 
-    - &quot;max\_errors&quot;
-    - &quot;http\_timeout&quot;
-    - &quot;source.retry\_timedout&quot;
-  - report format
-    - &quot;report.csv.delimiter&quot;
-    - &quot;report.csv.newline&quot;
-  - scope of Space processing 
-    - &quot;space.filter&quot;
-    - &quot;space.exclude.filter&quot;
-    - &quot;space.folder.filter&quot;
-    - &quot;space.folder.exclude.filter&quot;
-  - scope of Source processing 
-    - &quot;source.filter&quot;
-    - &quot;source.exclude.filter&quot;
-    - &quot;source.folder.filter&quot;
-    - &quot;source.folder.exclude.filter&quot;
-  - scope of PDS processing 
-    - &quot;pds.filter&quot;
-    - &quot;pds.exclude.filter
-    - &quot;pds.list.useapi&quot;
-  - scope of VDS processing 
-    - &quot;vds.filter&quot;
-    - &quot;vds.exclude.filter&quot;
-
-Please see a sample JSON configuration file in the config folder of this repository.
-
 
 
 ## Configuration Options
