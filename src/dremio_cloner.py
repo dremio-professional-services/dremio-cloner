@@ -20,7 +20,6 @@ from DremioCloud import DremioCloud
 from DremioFile import DremioFile
 from DremioReader import DremioReader
 from DremioWriter import DremioWriter
-from DremioCascadeAcl import DremioCascadeAcl
 from DremioDelete import DremioDelete
 from DremioClonerConfig import DremioClonerConfig
 import logging
@@ -41,8 +40,6 @@ def main():
 			get_dremio_environment(config)
 		elif config.command == DremioClonerConfig.CMD_PUT:
 			put_dremio_environment(config)
-		elif config.command == DremioClonerConfig.CMD_CASCADE_ACL:
-			cascade_acl(config)
 		elif config.command == DremioClonerConfig.CMD_DELETE:
 			delete_objects(config)
 		else:
@@ -84,15 +81,6 @@ def put_dremio_environment(config):
 	writer.write_dremio_environment()
 	logging.info("Command 'put' finished with " + str(writer.get_errors_count()) + " error(s).")
 	print("Done with " + str(writer.get_errors_count()) + " error(s). Please review log file for details.")
-
-
-def cascade_acl(config):
-	logging.info("Executing command 'cascade-acl'.")
-	dremio = Dremio(config.target_endpoint, config.target_username, config.target_password, False, config.http_timeout, verify_ssl=config.target_verify_ssl)
-	cascader = DremioCascadeAcl(dremio, config)
-	cascader.cascade_acl()
-	logging.info("Command 'cascade-acl' finished with " + str(cascader.get_errors_count()) + " error(s).")
-	print("Done with " + str(cascader.get_errors_count()) + " error(s). Please review log file for details.")
 
 
 def delete_objects(config):

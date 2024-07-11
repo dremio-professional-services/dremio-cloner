@@ -1,6 +1,6 @@
 # Dremio Cloner
 
-Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get, put, cascade-acl.
+Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get and put.
 
 Dremio Cloner can be utilized for: 
 - Migrating entire Dremio environments, for example, from community edition to enterprise edition
@@ -40,25 +40,6 @@ If you are using Dremio Migration Tool, you additionally need to install `sqlpar
 
 ```
 $ pip install sqlparse
-```
-
-### Important note
-
-Older versions of Dremio Cloner used the Python package `moz-sql-parser`, which is now _deprecated_ and got replaced by `mo-sql-parsing`. 
-If you ran an older version of Dremio Cloner before, you need to uninstall these packages before installing `mo-sql-parsing`.
-
-```
-$ pip list
-...
-mo-dots            4.22.21108
-mo-future          3.147.20327
-mo-imports         3.149.20327
-mo-kwargs          4.22.21108
-mo-logs            4.23.21108
-moz-sql-parser     4.40.21126
-
-$ pip uninstall -y moz-sql-parser mo-dots mo-future mo-imports mo-kwargs mo-logs 
-$ pip install mo-sql-parsing requests
 ```
 
 ## Command &quot;get&quot;
@@ -240,63 +221,6 @@ The command is configured with a JSON file with configuration attributes listed 
 
 Please see a sample JSON configuration file in the config folder of this repository.
 
-## Command &quot;cascade-acl&quot;
-
-Command &quot;cascade-acl&quot; selectively propagates ACLs in an object hierarchy.
-
-The command is configured with a JSON file with configuration attributes listed below. For detailed description of the configuration JSON attributes, see Reference section below in Appendix 1.
-
-- &quot;command&quot;:&quot;cascade-acl&quot;
-- &quot;target&quot;: defines Dremio Environment to be processed with
-  - &quot;endpoint&quot;
-  - &quot;username&quot;
-  - &quot;password&quot;
-  - &quot;verify\_ssl&quot;
-- &quot;options&quot;:
-  - logging options
-    - &quot;logging.level&quot;
-    - &quot;logging.format&quot;
-    - &quot;logging.filename
-    - &quot;logging.verbose&quot;
-  - miscellaneous options
-    - &quot;max\_errors&quot;
-    - &quot;http\_timeout&quot;
-    - &quot;source.retry\_timedout&quot;
-    - &quot;dry\_run&quot;
-  - scope of _Space_ processing 
-    - &quot;space.filter&quot;
-    - &quot;space.exclude.filter&quot;
-    - &quot;space.cascade-acl-origin.override-object&quot;
-    - &quot;space.folder.filter&quot;
-    - &quot;space.folder.exclude.filter&quot;
-    - &quot;space.folder.cascade-acl-origin.filter&quot;
-  - scope of _Source_ processing
-    - &quot;source.filter&quot;
-    - &quot;source.exclude.filter&quot;
-    - &quot;source.cascade-acl-origin.override-object&quot;
-    - &quot;source.folder.filter&quot;
-    - &quot;source.folder.exclude.filter&quot;
-  - scope of _PDS_ processing 
-    - &quot;pds.filter&quot;
-    - &quot;pds.exclude.filter
-    - &quot;pds.list.useapi&quot;
-  - scope of _VDS_ processing 
-    - &quot;vds.filter&quot;
-    - &quot;vds.exclude.filter&quot;
-
-Note, if none of _space.cascade-acl-origin.override-object_, _space.folder.cascade-acl-origin.filter_, and _source.cascade-acl-origin.override-object_ specified:
-
-- each Space ACL will be propagated through its hierarchy and applied to Folders and VDSs as per filter configuration
-    - To cascade ACLs for all spaces, specify `{"space.filter": "*"}`
-    - To omit cascading any space ACLs, specify `{"space.filter": ""}`
-    - To cascade ACLs for a specific named space, specify `{"space.filter": "spacename"}` where `spacename` should be replaced with the actual name of the space
-- each Source ACL will be propagated through its hierarchy and applied to PDSs as per filter configuration
-    - To cascade ACLs for all sources, specify `{"source.filter": "*"}`
-    - To omit cascading any source ACLs, specify `{"source.filter": ""}`
-    - To cascade ACLs for a specific named source, specify `{"source.filter": "sourcename"}` where `sourcename` should be replaced with the actual name of the source
-
-Please see a sample JSON configuration file in the config folder of this repository.
-
 
 ## Configuration Options
 
@@ -406,14 +330,6 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | --- | --- |
 | space.process\_mode folder.process\_mode source.process\_mode pds.process\_mode vds.process\_mode reflection.process\_mode pds.reflection\_refresh\_mode wlm.queue.process\_mode wlm.rule.process\_mode wiki.process\_mode tag.process\_mode home.process\_mode | Defines whether Dremio Cloner will 1) insert new objects only or 2) update existing objects only or 3) do an upsert. These parameters can be set to: _skip_, _create_only_, _update_only_, _create_overwrite_, _process_. _process_ is only aplicable for &quot;get&quot; command.  _skip_ will prevent any changes to the target Dremio Environment for the specified object type.  Note, _pds.process_mode_ can only take _skip_ and _promote_ with _promote_ updating PDS ACL as required. |
 | vds.dependencies.process\_mode | Possible values: _ignore_, _get_. Default _ignore_. If set to _get_, Dremio Cloner  will collect information on all decencies throughout the object hierarchy (VDS and PDS) required for each VDS that satisfies VDS filter criteria. |
-
-### Cascade-acl specific parameters
-
-| **Configuration Option** | **Description** |
-| --- | --- |
-| space.cascade-acl-origin.override-object | If specified, overrides default behavior for Space hierarchy and an ACL of the object specified in this parameter will be used through **all Spaces all hierarchies** instead of the respective Spaces&#39; ACLs. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"},` which is interpreted as read the ACLs from the object called spacetest/spacetest_folder and apply those ACLs to each object under the space called spacetest.|
-| source.cascade-acl-origin.override-object | If specified, overrides default behavior for Source hierarchy and an ACL of the object specified in this parameter will be used through **all Source all hierarchies** instead of the respective Sources&#39; ACLs. |
-| space.folder.cascade-acl-origin.filter | If specified, overrides default behavior for Space hierarchy and an ACLs of the Folders selected by this will be used through **its Folder hierarchy** instead of the respective Source&#39;s ACL. A valid example is this: `{"space.filter": "spacetest"}, {"space.cascade-acl-origin.override-object": "spacetest/spacetest_folder"}, {"space.folder.cascade-acl-origin.filter": "another_folder"},` which can be interpreted as all objects under spacetest will get the ACLs that are defined in spacetest/spacetest_folder, EXCEPT for those in spacetest/another_folder. All objects beneath another_folder (whose full path is spacetest/another_folder in this example) will have their ACLs set to whatever the ACLs are on another_folder.|
 
 ### Transformation parameters
 

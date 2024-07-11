@@ -103,18 +103,6 @@ class DremioClonerFilter():
 			self._logger.debug("match_space_folder_filter: skipping SPACE FOLDER " + container['path'][0] if 'path' in container else container['name'] + " as per job configuration")
 		return False
 
-	def match_space_folder_cascade_acl_origin_filter(self, container):
-		if self._config.space_folder_cascade_acl_origin_filter is None:
-			return False
-		elif (  # Do not filter out folders in HOME hierarchies
-				(container['path'][0][:1] == '@') or
-				# Match both Folder filter and Space filter
-				((self._config._space_folder_cascade_acl_origin_filter_re.match(self._utils.normalize_path(container['path'][1:])) is not None) and
-				 self.match_space_filter(container)) ):
-			return True
-		else:
-			return False
-
 	def match_source_filter(self, container, loginfo = True):
 		# First filter by source types
 		if container['type'] != 'CONTAINER' and self._config.source_filter_types != [] and (container['entityType'] != 'source' or container['type'] not in self._config.source_filter_types):
