@@ -140,7 +140,6 @@ class DremioClonerConfig():
 	wiki_process_mode = 'process'			# Flag to process Wikis: process, skip, create_only, update_only, create_overwrite
 	tag_process_mode = 'process'				# Flag to process Tags: process, skip
 	home_process_mode = 'process'			# Flag to process Homes: process, skip
-	vote_process_mode = 'skip'			# Flag to process Votes: process, skip
 	acl_transformation = {}					# Contains all ACL transformation definitions
 	source_transformation = {}  			# Contains all source transformation definitions
 	# Delete VDS List
@@ -441,8 +440,6 @@ class DremioClonerConfig():
 				self.wiki_process_mode = self._str(item, 'wiki.process_mode')
 			elif 'home.process_mode' in item:
 				self.home_process_mode = self._str(item, 'home.process_mode')
-			elif 'vote.process_mode' in item:
-				self.vote_process_mode = self._str(item, 'vote.process_mode')
 			elif 'transformation' in item:
 				if 'acl' in item['transformation']:
 					acl_transformation_filename = self._str(item['transformation']['acl'], 'file')

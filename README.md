@@ -65,7 +65,7 @@ $ pip install mo-sql-parsing requests
 
 ## Command &quot;get&quot;
 
-Command &quot;get&quot; selectively saves definitions for objects such as Source, Space, Folder, PDS, VDS, ACLs, Reflections, Queues, Rules, Tags, Wikis, and Votes from a Dremio environment into a JSON file.
+Command &quot;get&quot; selectively saves definitions for objects such as Source, Space, Folder, PDS, VDS, ACLs, Reflections, Queues, Rules, Tags, and Wikis from a Dremio environment into a JSON file.
 
 The command is configured with a JSON file with configuration attributes listed below. For detailed description of the configuration JSON attributes, see Reference section below in Appendix 1.
 
@@ -140,7 +140,6 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;wiki.process\_mode&quot;
     - &quot;tag.process\_mode&quot;
     - &quot;home.process\_mode&quot;
-    - &quot;vote.process\_mode&quot;
 
 Please see a sample JSON configuration file in the config folder of this repository.
 
@@ -232,7 +231,6 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;wiki.process\_mode&quot;
     - &quot;tag.process\_mode&quot;
     - &quot;home.process\_mode&quot;
-    - &quot;vote.process\_mode&quot;
   - acl transformation processing 
     - &quot;transformation&quot;
       - &quot;acl&quot;
@@ -491,7 +489,7 @@ Note, that this command does not provide any option for Scope definition. Please
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| space.process\_mode folder.process\_mode source.process\_mode pds.process\_mode vds.process\_mode reflection.process\_mode pds.reflection\_refresh\_mode wlm.queue.process\_mode wlm.rule.process\_mode wiki.process\_mode tag.process\_mode home.process\_mode vote.process\_mode | Defines whether Dremio Cloner will 1) insert new objects only or 2) update existing objects only or 3) do an upsert. These parameters can be set to: _skip_, _create_only_, _update_only_, _create_overwrite_, _process_. _process_ is only aplicable for &quot;get&quot; command.  _skip_ will prevent any changes to the target Dremio Environment for the specified object type.  Note, _pds.process_mode_ can only take _skip_ and _promote_ with _promote_ updating PDS ACL as required. |
+| space.process\_mode folder.process\_mode source.process\_mode pds.process\_mode vds.process\_mode reflection.process\_mode pds.reflection\_refresh\_mode wlm.queue.process\_mode wlm.rule.process\_mode wiki.process\_mode tag.process\_mode home.process\_mode | Defines whether Dremio Cloner will 1) insert new objects only or 2) update existing objects only or 3) do an upsert. These parameters can be set to: _skip_, _create_only_, _update_only_, _create_overwrite_, _process_. _process_ is only aplicable for &quot;get&quot; command.  _skip_ will prevent any changes to the target Dremio Environment for the specified object type.  Note, _pds.process_mode_ can only take _skip_ and _promote_ with _promote_ updating PDS ACL as required. |
 | vds.dependencies.process\_mode | Possible values: _ignore_, _get_. Default _ignore_. If set to _get_, Dremio Cloner  will collect information on all decencies throughout the object hierarchy (VDS and PDS) required for each VDS that satisfies VDS filter criteria. |
 
 ### Cascade-acl specific parameters

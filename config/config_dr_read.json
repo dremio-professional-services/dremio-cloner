@@ -31,7 +31,6 @@
 	{"wiki.process_mode": "skip"},
 	{"tag.process_mode": "skip"},
 	{"home.process_mode": "skip"},
-	{"vote.process_mode": "skip"},
 
 	{"space.filter": "*"},
 	{"space.exclude.filter": ""},

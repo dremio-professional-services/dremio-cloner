@@ -29,7 +29,6 @@ class DremioData():
 	rules = []
 	tags = []
 	wikis = []
-	votes = []
 	referenced_users = []
 	referenced_groups = []
 	referenced_roles = []

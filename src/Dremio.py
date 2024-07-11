@@ -35,7 +35,6 @@ class Dremio:
 	_reflections_url = "api/v3/reflection/"
 	_wlm_queue_url = "api/v3/wlm/queue/"
 	_wlm_rule_url = "api/v3/wlm/rule"
-	_wlm_vote_url = "api/v3/vote"
 	_user_url = "api/v3/user/"
 	_user_by_name_url = "api/v3/user/by-name/"
 	_group_url = "api/v3/group/"
@@ -151,9 +150,6 @@ class Dremio:
 
 	def list_rules(self):
 		return self._api_get_json(self._wlm_rule_url, source="list_rules")
-
-	def list_votes(self):
-		return self._api_get_json(self._wlm_vote_url, source="list_votes")
 
 	# This method has to be refactored when DX-16597 is resolved
 	def list_pds(self, sources, source_folder_filter=None, source_folder_filter_paths=None,

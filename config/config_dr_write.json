@@ -33,7 +33,6 @@
 	{"wiki.process_mode": "skip"},
 	{"tag.process_mode": "skip"},
 	{"home.process_mode": "skip"},
-	{"vote.process_mode": "skip"},
 
 	{"space.ignore_missing_acl_user":"True"},
 	{"space.ignore_missing_acl_group":"True"},

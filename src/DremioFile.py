@@ -112,9 +112,6 @@ class DremioFile():
 		if self._config.wiki_process_mode == 'process':
 			f.write(',\n')
 			json.dump({'wikis':dremio_data.wikis}, f, indent=4, sort_keys=True)
-		if self._config.vote_process_mode == 'process':
-			f.write(',\n')
-			json.dump({'votes':dremio_data.votes}, f, indent=4, sort_keys=True)
 		if dremio_data.vds_parents:
 			f.write(',\n')
 			json.dump({'vds_parents':dremio_data.vds_parents}, f, indent=4, sort_keys=True)
@@ -161,8 +158,6 @@ class DremioFile():
 				dremio_data.tags = item['tags']
 			elif ('wikis' in item):
 				dremio_data.wikis = item['wikis']
-			elif ('votes' in item):
-				dremio_data.votes = item['votes']
 			elif ('vds_parents' in item):
 				dremio_data.vds_parents = item['vds_parents']
 			elif ('dremio_get_config' in item):
@@ -200,8 +195,6 @@ class DremioFile():
 				os.makedirs(os.path.join(target_directory, 'tags').encode(encoding='utf-8', errors='strict'))
 			if self._config.wiki_process_mode == 'process':
 				os.makedirs(os.path.join(target_directory, 'wikis').encode(encoding='utf-8', errors='strict'))
-			if self._config.vote_process_mode == 'process':
-				os.makedirs(os.path.join(target_directory, 'votes').encode(encoding='utf-8', errors='strict'))
 			if self._config.source_graph_support and self._config.vds_dependencies_process_mode == 'get':
 				os.makedirs(os.path.join(target_directory, 'vds_parents').encode(encoding='utf-8', errors='strict'))
 		except OSError as e:
@@ -270,9 +263,6 @@ class DremioFile():
 			if self._config.wiki_process_mode == 'process':
 				for wiki in dremio_data.wikis:
 					self._write_wiki_json_file(os.path.join(target_directory, "wikis"), wiki)
-			if self._config.vote_process_mode == 'process':
-				for vote in dremio_data.votes:
-					self._write_vote_json_file(os.path.join(target_directory, "votes"), vote)
 			for vds_parent in dremio_data.vds_parents:
 				self._write_object_json_file(os.path.join(target_directory, "vds_parents"), vds_parent)
 		except OSError as e:
@@ -352,13 +342,6 @@ class DremioFile():
 
 	def _write_object_json_file(self, root_dir, object):
 		filepath = os.path.join(root_dir, object['id'] + ".json").encode(encoding='utf-8', errors='strict')
-		f = open(filepath, "w", encoding="utf-8")
-		json.dump(object, f, indent=4, sort_keys=True)
-		f.close()
-
-
-	def _write_vote_json_file(self, root_dir, object):
-		filepath = os.path.join(root_dir, object['datasetId'] + ".json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
 		json.dump(object, f, indent=4, sort_keys=True)
 		f.close()

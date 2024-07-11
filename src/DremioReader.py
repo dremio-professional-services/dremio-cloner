@@ -57,7 +57,6 @@ class DremioReader:
 		self._read_reflections()
 		self._read_rules()
 		self._read_queues()
-		self._read_votes()
 		# Make sure that all VDS dependencies included as per configuration
 		self._process_vds_dependencies()
 		return self._d
@@ -520,17 +519,6 @@ class DremioReader:
 				self._d.rules = []
 		else:
 			self._logger.debug("read_rules: skipping as per job configuration")
-
-	def _read_votes(self):
-		self._logger.debug("read_votes: started")
-		if self._config.vote_process_mode == 'process' and not self._config.source_ce:
-			list_votes = self._dremio_env.list_votes()
-			if list_votes and 'data' in list_votes:
-				self._d.votes = list_votes['data']
-			else:
-				self._d.votes = []
-		else:
-			self._logger.debug("read_votes: skipping as per job configuration")
 
 	def get_errors_count(self):
 		return self._logger.errors_encountered
