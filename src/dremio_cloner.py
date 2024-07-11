@@ -53,8 +53,6 @@ def main():
 			cascade_acl(config)
 		elif config.command == DremioClonerConfig.CMD_DESCRIBE_JOB:
 			describe_job(config)
-		elif config.command == DremioClonerConfig.CMD_REPORT_REFLECTIONS:
-			report_reflections(config)
 		elif config.command == DremioClonerConfig.CMD_DELETE:
 			delete_objects(config)
 		else:
@@ -107,14 +105,6 @@ def report_acl(config):
 	dremio_report.save_dremio_report_acl()
 	logging.info("Command 'report-acl' finished with " + str(reader.get_errors_count()) + " error(s).")
 	print("Done with " + str(reader.get_errors_count()) + " error(s). Please review log file for details.")
-
-
-def report_reflections(config):
-	logging.info("Executing command 'report-reflections'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, config.source_retry_timedout, config.source_verify_ssl)
-	dremio_report = DremioReportReflections(dremio, config)
-	dremio_report.process_dremio_reflections()
-	print("Done. Please review log file for details.")
 
 
 def cascade_acl(config):

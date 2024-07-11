@@ -1,6 +1,6 @@
 # Dremio Cloner
 
-Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get, put, cascade-acl, report-acl, report-reflections.
+Dremio Cloner is a python-based utility for Dremio Enterprise. It supports the following commands: get, put, cascade-acl, report-acl.
 
 Dremio Cloner can be utilized for: 
 - Migrating entire Dremio environments, for example, from community edition to enterprise edition
@@ -8,7 +8,6 @@ Dremio Cloner can be utilized for:
 - Disaster Recovery scenarios
 - Partial backup/restore
 - Security Audit reporting
-- Reflection reporting
 
 Dremio Cloner is executed with the following command:
 
@@ -349,38 +348,6 @@ The command is configured with a JSON file with configuration attributes listed 
 
 Please see a sample JSON configuration file in the config folder of this repository.
 
-
-
-
-## Command &quot;report-reflections&quot;
-
-Command &quot;report-reflections&quot; produces a reflection report with reflection usage information and ranking on potentially duplicate reflections.
-
-The command is configured with a JSON file with configuration attributes listed below. For detailed description of the configuration JSON attributes, see Reference section below in Appendix 1.
-
-- &quot;command&quot;:&quot;report-acl&quot;
-- &quot;source&quot;: defines Dremio Environment with
-  - &quot;endpoint&quot;
-  - &quot;username&quot;
-  - &quot;password&quot;
-  - &quot;verify\_ssl&quot;
-- &quot;target&quot;: defines an output filename with
-  - &quot;filename&quot;
-- &quot;options&quot;:
-  - logging options 
-    - &quot;logging.level&quot;
-    - &quot;logging.format&quot;
-    - &quot;logging.filename
-    - &quot;logging.verbose&quot;
-  - miscellaneous options
-    - &quot;max\_errors&quot;
-    - &quot;http\_timeout&quot;
-    - &quot;source.retry\_timedout&quot;
-  - report format
-    - &quot;report.csv.delimiter&quot;
-    - &quot;report.csv.newline&quot;
-
-Note, that this command does not provide any option for Scope definition. Please see a sample JSON configuration file in the config folder of this repository.
 
 
 ## Configuration Options

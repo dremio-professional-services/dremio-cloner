@@ -31,7 +31,6 @@ class DremioClonerConfig():
 	CMD_CASCADE_ACL = 'cascade-acl'
 	CMD_DESCRIBE_JOB = 'describe-job'
 	CMD_REPORT_ACL = 'report-acl'
-	CMD_REPORT_REFLECTIONS = 'report-reflections'
 	CMD_DELETE = 'delete-beta'
 
 	# Config json code
