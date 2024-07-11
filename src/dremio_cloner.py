@@ -17,20 +17,15 @@
 
 from Dremio import Dremio
 from DremioCloud import DremioCloud
-from DremioData import DremioData
 from DremioFile import DremioFile
 from DremioReader import DremioReader
 from DremioWriter import DremioWriter
 from DremioReportAcl import DremioReportAcl
-from DremioReportReflections import DremioReportReflections
 from DremioCascadeAcl import DremioCascadeAcl
 from DremioDelete import DremioDelete
-from DremioDescribeJob import DremioDescribeJob
 from DremioClonerConfig import DremioClonerConfig
-from datetime import datetime
 import logging
 import sys
-import json
 import getpass
 
 
@@ -51,8 +46,6 @@ def main():
 			report_acl(config)
 		elif config.command == DremioClonerConfig.CMD_CASCADE_ACL:
 			cascade_acl(config)
-		elif config.command == DremioClonerConfig.CMD_DESCRIBE_JOB:
-			describe_job(config)
 		elif config.command == DremioClonerConfig.CMD_DELETE:
 			delete_objects(config)
 		else:
@@ -114,16 +107,6 @@ def cascade_acl(config):
 	cascader.cascade_acl()
 	logging.info("Command 'cascade-acl' finished with " + str(cascader.get_errors_count()) + " error(s).")
 	print("Done with " + str(cascader.get_errors_count()) + " error(s). Please review log file for details.")
-
-
-def describe_job(config):
-	logging.info("Executing command 'describe-job'.")
-	dremio = Dremio(config.source_endpoint, config.source_username, config.source_password, False, config.http_timeout, verify_ssl=config.source_verify_ssl)
-	describer = DremioDescribeJob(dremio, config)
-	if config.target_type == 'sql-dependencies':
-		dremio_data = describer.describe_job_sql_dependencies()
-	else:
-		print_usage()
 
 
 def delete_objects(config):

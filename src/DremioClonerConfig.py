@@ -29,7 +29,6 @@ class DremioClonerConfig():
 	CMD_GET = 'get'
 	CMD_PUT = 'put'
 	CMD_CASCADE_ACL = 'cascade-acl'
-	CMD_DESCRIBE_JOB = 'describe-job'
 	CMD_REPORT_ACL = 'report-acl'
 	CMD_DELETE = 'delete-beta'
 
@@ -64,7 +63,6 @@ class DremioClonerConfig():
 	target_directory = None
 	target_file_or_dir_overwrite = False
 	target_separate_sql_and_metadata_files = False
-	target_type = None
 	target_dremio_cloud = False
 	target_dremio_cloud_org_id = None
 	target_dremio_cloud_project_id = None
@@ -243,8 +241,6 @@ class DremioClonerConfig():
 				self.target_verify_ssl = self._bool(item, 'verify_ssl')
 			elif 'is_community_edition' in item:
 				self.target_ce = self._bool(item, 'is_community_edition')
-			elif 'target.type' in item:
-				self.target_type = self._str(item, 'target.type')
 			elif 'is_dremio_cloud' in item:
 				self.target_dremio_cloud = self._bool(item, 'is_dremio_cloud')
 			elif 'dremio_cloud_org_id' in item:
