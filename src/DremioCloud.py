@@ -126,14 +126,6 @@ class DremioCloud:
 		url = self._url_prefix + self._project_id + self._user_by_name_url + username
 		return self._api_get_json(url, source="get_user_by_name")
 
-	def get_group(self, group_id):
-		url = self._url_prefix + self._project_id + self._group_url + group_id
-		return self._api_get_json(url, source="get_group")
-
-	def get_group_by_name(self, groupname):
-		url = self._url_prefix + self._project_id + self._group_by_name_url + groupname
-		return self._api_get_json(url, source="get_group_by_name")
-
 	def get_role(self, role_id):
 		url = self._url_prefix + self._project_id + self._role_url + role_id
 		return self._api_get_json(url, source="get_role")

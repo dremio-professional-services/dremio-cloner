@@ -37,8 +37,6 @@ class Dremio:
 	_wlm_rule_url = "api/v3/wlm/rule"
 	_user_url = "api/v3/user/"
 	_user_by_name_url = "api/v3/user/by-name/"
-	_group_url = "api/v3/group/"
-	_group_by_name_url = "api/v3/group/by-name/"
 	_role_url = "api/v3/role/"
 	_role_by_name_url = "api/v3/role/by-name/"
 	_post_sql_url = "api/v3/sql"
@@ -120,12 +118,6 @@ class Dremio:
 
 	def get_user_by_name(self, username):
 		return self._api_get_json(self._user_by_name_url + username, source="get_user_by_name")
-
-	def get_group(self, group_id):
-		return self._api_get_json(self._group_url + group_id, source="get_group")
-
-	def get_group_by_name(self, groupname):
-		return self._api_get_json(self._group_by_name_url + groupname, source="get_group_by_name")
 
 	def get_role(self, role_id):
 		return self._api_get_json(self._role_url + role_id, source="get_role")

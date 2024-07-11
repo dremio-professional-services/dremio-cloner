@@ -386,16 +386,6 @@ class DremioReader:
 							user_entity.pop("tag")
 						if user_entity not in self._d.referenced_users:
 							self._d.referenced_users.append(user_entity)
-			if 'groups' in acl:
-				for group in acl['groups']:
-					group_entity = self._dremio_env.get_group(group['id'])
-					if group_entity is not None:
-						if "createdAt" in group_entity:
-							group_entity.pop("createdAt")
-						if "tag" in group_entity:
-							group_entity.pop("tag")
-						if group_entity not in self._d.referenced_groups:
-							self._d.referenced_groups.append(group_entity)
 
 			if 'roles' in acl:
 				for role in acl['roles']:
