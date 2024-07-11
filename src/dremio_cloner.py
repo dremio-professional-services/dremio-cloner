@@ -41,8 +41,6 @@ def main():
 			get_dremio_environment(config)
 		elif config.command == DremioClonerConfig.CMD_PUT:
 			put_dremio_environment(config)
-		elif config.command == DremioClonerConfig.CMD_REPORT_ACL:
-			report_acl(config)
 		elif config.command == DremioClonerConfig.CMD_CASCADE_ACL:
 			cascade_acl(config)
 		elif config.command == DremioClonerConfig.CMD_DELETE:

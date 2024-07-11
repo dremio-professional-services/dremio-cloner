@@ -479,12 +479,6 @@ class DremioClonerConfig():
 			self._logger.fatal("File " + str(self.target_filename) + " already exists. Cannot overwrite.")
 		if (self.command == self.CMD_GET and self.target_directory is not None and not self.target_file_or_dir_overwrite and os.path.isdir(self.target_directory)):
 			self._logger.fatal("Directory " + str(self.target_directory) + " already exists. Cannot overwrite.")
-		if (self.command == self.CMD_REPORT_ACL and os.path.isfile(self.target_filename)):
-			self._logger.fatal("File " + str(self.target_filename) + " already exists. Cannot overwrite.")
-		if self.command == self.CMD_REPORT_ACL:
-			# make sure sources and PDSs get processed
-			self.source_process_mode = "process"
-			self.pds_process_mode = "process"
 
 	def _bool(self, conf, param_name):
 		if (param_name in conf):
