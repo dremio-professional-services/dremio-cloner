@@ -37,30 +37,18 @@
 	{"vds.process_mode": "process"},
 	{"pds.process_mode": "process"},
 
+	{"include.filter.paths": [
+		".*",
+		"<space_name>/<folder_name>/view_name",
+		"<source_name>/<folder_name>/<table_name>"
+	]},
 
-	{"space.filter": "*"},
-	{"space.filter.names": ["default-arctic-catalog"]},
-	{"space.exclude.filter": ""},
-	{"space.folder.filter":"*"},
-	{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},
-	{"space.folder.exclude.filter":""},
-	{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
+	{"exclude.filter.paths": [
+		"<space_name>/<folder_name>/view_name",
+		"<source_name>/<folder_name>/<table_name>"
+	]},
 
-	{"source.filter":"*"},
-	{"source.filter.names": ["Source1", "Source2", "Source3"]},
-	{"source.filter.types": ["S3", "POSTGRES", "NAS"]},
-	{"source.exclude.filter":""},
-	{"source.folder.filter":"*"},
-	{"source.folder.exclude.filter":""},
-
-	{"pds.filter":"*"},
-	{"pds.exclude.filter":""},
-	{"pds.list.useapi":"False"},
-
-	{"vds.filter":"*"},
 	{"vds.filter.tag":""},
-	{"vds.exclude.filter":""},
-	{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	{"vds.dependencies.process_mode":"get"},
 
    	{"reflection.only_for_matching_vds":"True"}]

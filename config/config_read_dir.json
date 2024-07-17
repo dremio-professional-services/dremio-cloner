@@ -37,31 +37,18 @@
 	{"vds.process_mode": "process"},
 	{"pds.process_mode": "process"},
 
-	{"space.filter": "*"},
-	{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},
-	{"space.exclude.filter": ""},
-	{"space.folder.filter":"*"},
-	{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},
-	{"space.folder.exclude.filter":""},
-	{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
+	{"include.filter.paths": [
+		".*",
+		"<space_name>/<folder_name>/view_name",
+		"<source_name>/<folder_name>/<table_name>"
+	]},
 
-	{"source.filter":"*"},
-	{"source.filter.names": ["Source1", "Source2", "Source3"]},
-	{"source.filter.types": ["S3", "POSTGRES", "NAS"]},
-	{"source.exclude.filter":""},
-	{"source.folder.filter":"*"},
-	{"source.folder.filter.paths": ["folder1/folder2", "default"]},
-	{"source.folder.exclude.filter":""},
+	{"exclude.filter.paths": [
+		"<space_name>/<folder_name>/view_name",
+		"<source_name>/<folder_name>/<table_name>"
+	]},
+	{"vds.filter.tag":""},
 
-	{"pds.filter":"*"},
-	{"pds.filter.names": ["MyPDS1", "MyPDS2", "MyPDS3"]},
-	{"pds.exclude.filter":""},
-	{"pds.list.useapi":"False"},
-
-	{"vds.filter":"*"},
-	{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},
-	{"vds.exclude.filter":""},
-	{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	{"vds.dependencies.process_mode":"get"},
 
    	{"reflection.only_for_matching_vds":"True"}]

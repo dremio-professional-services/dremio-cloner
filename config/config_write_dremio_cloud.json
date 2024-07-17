@@ -52,30 +52,19 @@
 		{"vds.ignore_missing_acl_user":"True"},
 		{"vds.ignore_missing_acl_group":"True"},
 
-	  	{"space.filter": "*"},
-		{"space.filter.names": ["default-arctic-catalog"]},
-		{"space.exclude.filter": ""},
-		{"space.exclude.filter": ""},
-		{"space.folder.filter":"*"},
-		{"space.folder.filter.paths": []},
-		{"space.folder.exclude.filter":""},
-		{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
 
-		{"source.filter":"*"},
-		{"source.exclude.filter":""},
-		{"source.folder.filter":"*"},
-		{"source.folder.exclude.filter":""},
+		{"include.filter.paths": [
+			".*",
+			"<space_name>/<folder_name>/view_name",
+			"<source_name>/<folder_name>/<table_name>"
+		]},
+	
+		{"exclude.filter.paths": [
+			"<space_name>/<folder_name>/view_name",
+			"<source_name>/<folder_name>/<table_name>"
+		]},
+		{"vds.filter.tag":""},
 
-	  	{"reflection.filter_mode": "apply_vds_pds_filter"},
-
-		{"pds.filter":"*"},
-		{"pds.exclude.filter":""},
-	  	{"pds.list.useapi":"False"},
-
-		{"vds.filter":"*"},
-		{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},
-		{"vds.exclude.filter":""},
-		{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
 	  	{"vds.max_hierarchy_depth":"10"}]
 	}]
 }

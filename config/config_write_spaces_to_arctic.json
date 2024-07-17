@@ -52,27 +52,17 @@
 		{"vds.ignore_missing_acl_user":"True"},
 		{"vds.ignore_missing_acl_group":"True"},
 
-	  	{"space.filter": "*"},
-		{"space.exclude.filter": ""},
-		{"space.folder.filter":"*"},
-		{"space.folder.exclude.filter":""},
-		{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},
-
-		{"source.filter":"*"},
-		{"source.exclude.filter":""},
-		{"source.folder.filter":"*"},
-		{"source.folder.exclude.filter":""},
-
-	  	{"reflection.filter_mode": "apply_vds_pds_filter"},
-
-		{"pds.filter":"*"},
-		{"pds.exclude.filter":""},
-	  	{"pds.list.useapi":"False"},
-
-		{"vds.filter":"*"},
-		{"vds.filter.names": []},
-		{"vds.exclude.filter":""},
-		{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},
+		{"include.filter.paths": [
+			".*",
+			"<space_name>/<folder_name>/view_name",
+			"<source_name>/<folder_name>/<table_name>"
+		]},
+	
+		{"exclude.filter.paths": [
+			"<space_name>/<folder_name>/view_name",
+			"<source_name>/<folder_name>/<table_name>"
+		]},
+		{"vds.filter.tag":""},
 	  	{"vds.max_hierarchy_depth":"10"}]
 	}]
 }
