@@ -52,30 +52,12 @@ class DremioReader:
 	# Return DremioData
 	def read_dremio_environment(self):
 		self._read_catalog()
-		if not self._config.pds_list_useapi and self._filter.is_pds_in_scope():
-			self._read_all_pds()
 		self._read_reflections()
 		self._read_rules()
 		self._read_queues()
 		# Make sure that all VDS dependencies included as per configuration
 		self._process_vds_dependencies()
 		return self._d
-
-	def _read_all_pds(self):
-		if self._config.pds_list_useapi or not self._filter.is_pds_in_scope():
-			self._logger.info("_read_all_pds: skipping PDS reading as per pds.filter configuration.")
-		else:
-			pds_list = self._dremio_env.list_pds(self._d.sources, self._config.source_folder_filter,
-												self._config.source_folder_filter_paths,
-												self._config.source_folder_exclude_filter,
-												self._config.pds_filter, self._config.pds_exclude_filter,
-												pds_error_list=self._d.pds_error_list)
-			for pds in pds_list:
-				if self._filter.match_pds_filter(pds):
-					self._d.pds_list.append(pds)
-					self._read_acl(pds)
-					self._read_wiki(pds)
-					self._read_tags(pds)
 
 	# Read Dremio catalog from source environment recursively going to containers and their children objects 
 	def _read_catalog(self):
@@ -147,7 +129,7 @@ class DremioReader:
 
 	def _read_source(self, container):
 		self._logger.debug("_read_source: processing container: " + self._utils.get_entity_desc(container))
-		if self._config.source_process_mode == 'process' or (self._config.pds_process_mode == 'process' and self._config.pds_list_useapi):
+		if self._config.source_process_mode == 'process' or self._config.pds_process_mode == 'process':
 			self._top_level_hierarchy_context = "SOURCE"
 			if self._filter.match_source_filter(container):
 				self._d.containers.append(container)
@@ -163,9 +145,7 @@ class DremioReader:
 						self._d.sources.append(entity)
 						self._read_acl(entity)
 						self._read_wiki(entity)
-						# Depending on the useapi flag, PDSs can be collected via INFORMATION_SCHEMA. See also DX16597
-						if self._config.pds_list_useapi:
-							self._read_source_children(entity)
+						self._read_source_children(entity)
 				else:
 					self._logger.error("_read_source: error reading entity for container: " + self._utils.get_entity_desc(container))
 		else:

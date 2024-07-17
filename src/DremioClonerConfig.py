@@ -81,24 +81,11 @@ class DremioClonerConfig():
 	# Processing 
 	user_process_mode = None				# Flag to process User: process, skip
 	group_process_mode = None				# Flag to process Group: process, skip
-	space_filter = None						# Filter for Space entity type
-	space_filter_names = []					# List of Spaces to process if not empty
-	space_exclude_filter = None				# Exclusion Filter for Space entity type
-	space_folder_filter = None				# Filter for Space Folder entity type
-	space_folder_filter_paths = []  		# List of Space Folder paths (as regex) to process if not empty
-	space_folder_exclude_filter = None		# Exclusion Filter for Space Folder entity type
-	space_folder_exclude_filter_paths = []	# List of Space Folder paths (as regex) to exclude if not empty
+	include_filter_paths = []  				# List of Dremio paths (as regex) to process if not empty
+	exclude_filter_paths = []				# List of Dremio paths (as regex) to exclude if not empty
 	space_process_mode = None				# Flag to process Space: process, skip, create_only, update_only, create_overwrite
-	use_fully_qualified_folder_path = False # Uses fully qualified folder paths (including space name) for filtering
 	space_ignore_missing_acl_user = False	# Flag to write a Space if an ACL user is missing in the target Dremio environment
 	space_ignore_missing_acl_group = False	# Flag to write a Space if an ACL group is missing in the target Dremio environment
-	source_filter = None					# Filter for Source entity type
-	source_filter_names = []				# List of Sources to process if not empty
-	source_filter_types = []				# List of Source Types to process if not empty
-	source_exclude_filter = None			# Exclusion Filter for Source entity type
-	source_folder_filter = None				# Filter for Source Folder entity type
-	source_folder_filter_paths = []  		# List of Source Folder paths (as regex) to process if not empty
-	source_folder_exclude_filter = None		# Exclusion Filter for Source Folder entity type
 	source_process_mode = None				# Flag to process Sources: process, skip, create_only, update_only, create_overwrite
 	source_ignore_missing_acl_user = False	# Flag to write a Source if an ACL user is missing in the target Dremio environment
 	source_ignore_missing_acl_group = False	# Flag to write a Source if an ACL group is missing in the target Dremio environment
@@ -106,25 +93,16 @@ class DremioClonerConfig():
 	folder_process_mode = None				# Flag to process Folder: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
 	folder_ignore_missing_acl_user = False	# Flag to write a Folder if an ACL user is missing in the target Dremio environment
 	folder_ignore_missing_acl_group = False	# Flag to write a Folder if an ACL group is missing in the target Dremio environment
-	pds_list_useapi = False					# Using API for listing PDS may cause issues when the source is not available at the runtime
-	pds_filter = None						# Filter for PDS
-	pds_filter_names = []  					# List of PDSs to process if not empty
-	pds_exclude_filter = None				# Exclusion Filter for PDS
 	pds_process_mode = None					# Flag to process Source PDS: process, skip, promote
 	pds_ignore_missing_acl_user = False		# Flag to write a Source PDS if an ACL user is missing in the target Dremio environment
 	pds_ignore_missing_acl_group = False	# Flag to write a Source PDS if an ACL group is missing in the target Dremio environment
-	vds_filter = None						# Filter for VDS
-	vds_filter_names = []  					# List of VDSs to process if not empty
 	vds_filter_tag = None					# Filter for VDS
-	vds_exclude_filter = None				# Exclusion Filter for VDS
-	vds_exclude_filter_paths = []			# List of VDS paths (as regex) to exclude if not empty
 	vds_process_mode = None					# Flag to process VDS: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
 	vds_dependencies_process_mode = 'ignore' # Flag to process VDS dependencies (VDS and PDS): ignore, get
 	vds_ignore_missing_acl_user = False		# Flag to write a VDS if an ACL user is missing in the target Dremio environment
 	vds_ignore_missing_acl_group = False	# Flag to write a VDS if an ACL group is missing in the target Dremio environment
 	vds_max_hierarchy_depth = 100			# The max hierarchy depth to process
 	reflection_process_mode = None			# Flag to process reflection: process, skip, create_only, update_only, create_overwrite, create_overwrite_delete
-	reflection_filter_mode = None			# Flag to filter reflection: apply_vds_pds_filter
 	reflection_id_include_list = []			# List of reflection ids to include. Empty list means include all reflections which is the default behaviour
 	reflection_refresh_mode = 'skip' 		# Flag to refresh reflections: refresh, skip
 	reflection_only_matching_vds = False 	# Flag to export only reflections which have a matching VDS. The old and standard behavior is exporting all reflections, regardless
@@ -145,18 +123,8 @@ class DremioClonerConfig():
 	report_csv_newline = "\n"
 	# Misc options
 	# Compiled filters
-	_space_filter_re = None
-	_space_exclude_filter_re = None
-	_space_folder_filter_re = None
-	_space_folder_exclude_filter_re = None
-	_source_filter_re = None
-	_source_exclude_filter_re = None
-	_source_folder_filter_re = None
-	_source_folder_exclude_filter_re = None
-	_pds_filter_re = None
-	_pds_exclude_filter_re = None
-	_vds_filter_re = None
-	_vds_exclude_filter_re = None
+	_include_filter_paths_re = []
+	_exclude_filter_paths_re = []
 
 	def __init__(self, config_file_name):
 		# Read configuration file
@@ -302,50 +270,20 @@ class DremioClonerConfig():
 				self.group_process_mode = self._str(item, 'group.process_mode')
 			elif 'space.process_mode' in item:
 				self.space_process_mode = self._str(item, 'space.process_mode')
-			elif 'space.filter' in item:
-				self.space_filter = self._str(item, 'space.filter')
-				self._space_filter_re = self._compile_pattern(self.space_filter)
-			elif 'space.filter.names' in item:
-				self.space_filter_names = self._array(item, 'space.filter.names')
-			elif 'space.exclude.filter' in item:
-				self.space_exclude_filter = self._str(item, 'space.exclude.filter')
-				self._space_exclude_filter_re = self._compile_pattern(self.space_exclude_filter)
-			elif 'space.folder.filter' in item:
-				self.space_folder_filter = self._str(item, 'space.folder.filter')
-				self._space_folder_filter_re = self._compile_pattern(self.space_folder_filter)
-			elif 'space.folder.filter.paths' in item:
-				self.space_folder_filter_paths = self._array(item, 'space.folder.filter.paths')
-			elif 'space.folder.exclude.filter' in item:
-				self.space_folder_exclude_filter = self._str(item, 'space.folder.exclude.filter')
-				self._space_folder_exclude_filter_re = self._compile_pattern(self.space_folder_exclude_filter)
-			elif 'space.folder.exclude.filter.paths' in item:
-				self.space_folder_exclude_filter_paths = self._array(item, 'space.folder.exclude.filter.paths')
-			elif 'space.folder.filter.use_fully_qualified_path' in item:
-				self.use_fully_qualified_folder_path = self._bool(item, 'space.folder.filter.use_fully_qualified_path')
+			elif 'include.filter.paths' in item:
+				self.include_filter_paths = self._array(item, 'include.filter.paths')
+				for i in self.include_filter_paths:
+					self._include_filter_paths_re.append(self._compile_pattern(i))
+			elif 'exclude.filter.paths' in item:
+				self.exclude_filter_paths = self._array(item, 'exclude.filter.paths')
+				for e in self.exclude_filter_paths:
+					self._exclude_filter_paths_re.append(self._compile_pattern(e))
 			elif 'space.ignore_missing_acl_user' in item:
 				self.space_ignore_missing_acl_user = self._bool(item, 'space.ignore_missing_acl_user')
 			elif 'space.ignore_missing_acl_group' in item:
 				self.space_ignore_missing_acl_group = self._bool(item, 'space.ignore_missing_acl_group')
 			elif 'source.process_mode' in item:
 				self.source_process_mode = self._str(item, 'source.process_mode')
-			elif 'source.filter.names' in item:
-				self.source_filter_names = self._array(item, 'source.filter.names')
-			elif 'source.filter.types' in item:
-				self.source_filter_types = self._array(item, 'source.filter.types')
-			elif 'source.filter' in item:
-				self.source_filter = self._str(item, 'source.filter')
-				self._source_filter_re = self._compile_pattern(self.source_filter)
-			elif 'source.exclude.filter' in item:
-				self.source_exclude_filter = self._str(item, 'source.exclude.filter')
-				self._source_exclude_filter_re = self._compile_pattern(self.source_exclude_filter)
-			elif 'source.folder.filter' in item:
-				self.source_folder_filter = self._str(item, 'source.folder.filter')
-				self._source_folder_filter_re = self._compile_pattern(self.source_folder_filter)
-			elif 'source.folder.filter.paths' in item:
-				self.source_folder_filter_paths = self._array(item, 'source.folder.filter.paths')
-			elif 'source.folder.exclude.filter' in item:
-				self.source_folder_exclude_filter = self._str(item, 'source.folder.exclude.filter')
-				self._source_folder_exclude_filter_re = self._compile_pattern(self.source_folder_exclude_filter)
 			elif 'source.ignore_missing_acl_user' in item:
 				self.source_ignore_missing_acl_user = self._bool(item, 'source.ignore_missing_acl_user')
 			elif 'source.ignore_missing_acl_group' in item:
@@ -360,16 +298,6 @@ class DremioClonerConfig():
 				self.folder_ignore_missing_acl_group = self._bool(item, 'folder.ignore_missing_acl_group')
 			elif 'pds.process_mode' in item:
 				self.pds_process_mode = self._str(item, 'pds.process_mode')
-			elif 'pds.list.useapi' in item:
-				self.pds_list_useapi = self._bool(item, 'pds.list.useapi')
-			elif 'pds.filter' in item:
-				self.pds_filter = self._str(item, 'pds.filter')
-				self._pds_filter_re = self._compile_pattern(self.pds_filter)
-			elif 'pds.filter.names' in item:
-				self.pds_filter_names = self._array(item, 'pds.filter.names')
-			elif 'pds.exclude.filter' in item:
-				self.pds_exclude_filter = self._str(item, 'pds.exclude.filter')
-				self._pds_exclude_filter_re = self._compile_pattern(self.pds_exclude_filter)
 			elif 'pds.ignore_missing_acl_user' in item:
 				self.pds_ignore_missing_acl_user = self._bool(item, 'pds.ignore_missing_acl_user')
 			elif 'pds.ignore_missing_acl_group' in item:
@@ -378,22 +306,12 @@ class DremioClonerConfig():
 				self.vds_process_mode = self._str(item, 'vds.process_mode')
 			elif 'vds.dependencies.process_mode' in item:
 				self.vds_dependencies_process_mode = self._str(item, 'vds.dependencies.process_mode')
-			elif 'vds.filter' in item:
-				self.vds_filter = self._str(item, 'vds.filter')
-				self._vds_filter_re = self._compile_pattern(self.vds_filter)
-			elif 'vds.filter.names' in item:
-				self.vds_filter_names = self._array(item, 'vds.filter.names')
 			elif 'tag.process_mode' in item:
 				self.tag_process_mode = self._str(item, 'tag.process_mode')
 			elif 'vds.filter.tag' in item:
 				if self.tag_process_mode != 'process' and item["vds.filter.tag"] != "":
 					raise Exception(f"Can not filter using 'vds.filter.tag' when 'tag.process_mode' is set to '{self.tag_process_mode}'")
 				self.vds_filter_tag = self._str(item, 'vds.filter.tag')
-			elif 'vds.exclude.filter' in item:
-				self.vds_exclude_filter = self._str(item, 'vds.exclude.filter')
-				self._vds_exclude_filter_re = self._compile_pattern(self.vds_exclude_filter)
-			elif 'vds.exclude.filter.paths' in item:
-				self.vds_exclude_filter_paths = self._array(item, 'vds.exclude.filter.paths')
 			elif 'vds.ignore_missing_acl_user' in item:
 				self.vds_ignore_missing_acl_user = self._bool(item, 'vds.ignore_missing_acl_user')
 			elif 'vds.ignore_missing_acl_group' in item:
@@ -403,8 +321,6 @@ class DremioClonerConfig():
 			# Reflection options
 			elif 'reflection.process_mode' in item:
 				self.reflection_process_mode = self._str(item, 'reflection.process_mode')
-			elif 'reflection.filter_mode' in item:
-				self.reflection_filter_mode = self._str(item, 'reflection.filter_mode')
 			elif 'pds.reflection_refresh_mode' in item:
 				self.reflection_refresh_mode = self._str(item, 'pds.reflection_refresh_mode')
 			elif 'reflection.id_include_list' in item:
