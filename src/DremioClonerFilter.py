@@ -36,9 +36,9 @@ class DremioClonerFilter():
 		normalized_path = self._utils.normalize_path(path)
 
 		for f in filters:
-			if re.match('^' + f + '/', normalized_path):
+			if re.match('^' + f, normalized_path):
 				return True
-			if re.match('^' + normalized_path + '/', f):
+			if re.match('^' + normalized_path, f):
 				return True
 		return False
 
