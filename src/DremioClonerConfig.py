@@ -105,11 +105,11 @@ class DremioClonerConfig():
 	reflection_id_include_list = []			# List of reflection ids to include. Empty list means include all reflections which is the default behaviour
 	reflection_refresh_mode = 'skip' 		# Flag to refresh reflections: refresh, skip
 	reflection_only_matching_vds = False 	# Flag to export only reflections which have a matching VDS. The old and standard behavior is exporting all reflections, regardless
-	wlm_queue_process_mode = 'skip'		# Flag to process WLM Queues: process, skip
-	wlm_rule_process_mode = 'skip'		# Flag to process WLM Rules: process, skip
-	wiki_process_mode = 'process'			# Flag to process Wikis: process, skip, create_only, update_only, create_overwrite
-	tag_process_mode = 'process'				# Flag to process Tags: process, skip
-	home_process_mode = 'process'			# Flag to process Homes: process, skip
+	wlm_queue_process_mode = 'skip'			# Flag to process WLM Queues: process, skip
+	wlm_rule_process_mode = 'skip'			# Flag to process WLM Rules: process, skip
+	wiki_process_mode = 'skip'				# Flag to process Wikis: process, skip, create_only, update_only, create_overwrite
+	tag_process_mode = 'skip'				# Flag to process Tags: process, skip
+	home_process_mode = 'skip'				# Flag to process Homes: process, skip
 	acl_transformation = {}					# Contains all ACL transformation definitions
 	source_transformation = {}  			# Contains all source transformation definitions
 	# Delete VDS List

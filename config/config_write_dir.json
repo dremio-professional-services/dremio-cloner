@@ -32,7 +32,7 @@
 	    {"pds.reflection_refresh_mode": "refresh"},
 	    {"wiki.process_mode": "create_overwrite"},
 		{"tag.process_mode": "process"},
-		{"home.process_mode": "process"},
+		{"home.process_mode": "skip"},
 		{"wlm.queue.process_mode": "process"},
 		{"wlm.rule.process_mode": "process"},
 
