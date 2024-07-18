@@ -74,52 +74,28 @@ The command is configured with a JSON file with configuration attributes listed 
   - miscellaneous options 
     - &quot;max\_errors&quot;
     - &quot;http\_timeout&quot;
-  - scope of _Space_ processing 
+  - scope of _Dremio Catalog_ processing 
     - &quot;space.process\_mode&quot;
     - &quot;folder.process\_mode&quot;
-    - &quot;space.filter&quot;
-	- &quot;space.filter.names&quot;
-    - &quot;space.exclude.filter&quot;
-    - &quot;space.folder.filter&quot;
-    - &quot;space.folder.filter.paths&quot;
-    - &quot;space.folder.exclude.filter&quot;
-    - &quot;space.folder.exclude.filter.paths&quot;
-    - &quot;space.folder.filter.use_fully_qualified_path&quot;
-  - scope of _Source_ processing 
-    - &quot;source.process\_mode&quot;
-    - &quot;source.filter&quot;
-    - &quot;source.filter.names&quot;
-	- &quot;source.filter.types&quot;
-    - &quot;source.exclude.filter&quot;
-    - &quot;source.folder.filter&quot;
-    - &quot;source.folder.filter.paths&quot;
-    - &quot;source.folder.exclude.filter&quot;
-  - scope of _PDS_ processing 
-    - &quot;pds.process\_mode&quot;
-    - &quot;pds.filter&quot;
-    - &quot;pds.filter.names&quot;
-    - &quot;pds.exclude.filter
-    - &quot;pds.list.useapi&quot;
-  - scope of _VDS_ processing 
     - &quot;vds.process\_mode&quot;
-    - &quot;vds.filter&quot;
-    - &quot;vds.filter.names&quot;
-    - &quot;vds.exclude.filter&quot;
-    - &quot;vds.exclude.filter.paths&quot;
-    - &quot;vds.dependencies.process\_mode&quot;
-  - scope of _Reflection_ processing 
     - &quot;reflection.process\_mode&quot;
-	- &quot;reflection.id\_include\_list&quot;
-	- &quot;reflection.only\_for\_matching\_vds&quot
-  - scope of _Workload Management_ processing
-    - &quot;wlm.queue.process\_mode&quot;
-    - &quot;wlm.rule.process\_mode&quot;
+    - &quot;source.process\_mode&quot;
+    - &quot;pds.process\_mode&quot;
+  - filters for _Dremio Catalog_ processing 
+    - &quot;include.filter.paths&quot;
+    - &quot;exclude.filter.paths&quot;
+    - &quot;vds.dependencies.process\_mode&quot;
+    - &quot;vds.filter.tag&quot;
+  	- &quot;reflection.id\_include\_list&quot;
+  	- &quot;reflection.only\_for\_matching\_vds&quot;
   - scope of processing other objects
     - &quot;user.process\_mode&quot;
     - &quot;group.process\_mode&quot;
     - &quot;wiki.process\_mode&quot;
     - &quot;tag.process\_mode&quot;
     - &quot;home.process\_mode&quot;
+    - &quot;wlm.queue.process\_mode&quot;
+    - &quot;wlm.rule.process\_mode&quot;
 
 Please see a sample JSON configuration file in the config folder of this repository.
 
@@ -171,41 +147,20 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;pds.ignore\_missing\_acl\_group&quot;
     - &quot;vds.ignore\_missing\_acl\_user&quot;
     - &quot;vds.ignore\_missing\_acl\_group&quot;
-  - scope of _Space_ processing 
+  - scope of _Dremio Catalog_ processing 
     - &quot;space.process\_mode&quot;
-    - &quot;space.filter&quot;
-	- &quot;space.filter.names&quot;
-    - &quot;space.exclude.filter&quot;
     - &quot;folder.process\_mode&quot;
-    - &quot;space.folder.filter&quot;
-    - &quot;space.folder.filter.paths&quot;
-    - &quot;space.folder.exclude.filter&quot;
-    - &quot;space.folder.filter.use_fully_qualified_path&quot;
-  - scope of _Source_ processing 
-    - &quot;source.process\_mode&quot;
-    - &quot;source.filter&quot;
-	- &quot;source.filter.names&quot;
-	- &quot;source.filter.types&quot;
-    - &quot;source.exclude.filter&quot;
-    - &quot;source.folder.filter&quot;
-    - &quot;source.folder.filter.paths&quot;
-    - &quot;source.folder.exclude.filter&quot;
-  - scope of _PDS_ processing 
-    - &quot;pds.process\_mode&quot;
-    - &quot;pds.filter&quot;
-    - &quot;pds.filter.names&quot;
-    - &quot;pds.exclude.filter
-    - &quot;pds.list.useapi&quot;
-  - scope of _VDS_ processing 
     - &quot;vds.process\_mode&quot;
-    - &quot;vds.filter&quot;
-    - &quot;vds.filter.names&quot;
-    - &quot;vds.exclude.filter&quot;
-    - &quot;vds.max\_hierarchy\_depth&quot;
-  - scope of _Reflection_ processing 
     - &quot;reflection.process\_mode&quot;
+    - &quot;source.process\_mode&quot;
+    - &quot;pds.process\_mode&quot;
+  - filters for _Dremio Catalog_ processing 
+    - &quot;include.filter.paths&quot;
+    - &quot;exclude.filter.paths&quot;
+    - &quot;vds.filter.tag&quot;
+  	- &quot;reflection.id\_include\_list&quot;
+    - &quot;vds.max\_hierarchy\_depth&quot;
     - &quot;pds.reflection\_refresh\_mode&quot;
-    - &quot;reflection.id\_include\_list&quot;
   - scope of processing other objects
     - &quot;user.process\_mode&quot;
     - &quot;group.process\_mode&quot;
@@ -236,7 +191,6 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | verify\_ssl | If set to False, Dremio Cloner will not validate SSL certificate of the Dremio Environment. Default is True. |
 | is\_community\_edition | Set to True if reading Dremio CE. Writing to Dremio CE is not supported. |
 | graph\_api\_support | Dremio Graph API is only available in EE starting version 4.0.0. Default value is False. |
-| is\_rbac\_version | Set to True if the version of Dremio EE supports the RBAC privileges model. Default value is False. |
 | is\_dremio\_cloud | Set to True if reading from or writing to Dremio Cloud. Default value is False. |
 | dremio\_cloud\_org\_id | Dremio Cloud Organization ID to connect to. |
 | dremio\_cloud\_project\_id | Dremio Cloud Project ID to connect to. |
@@ -271,53 +225,12 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | dry\_run | Defines a Dremio Cloner execution that will not update a target Dremio environment. In conjunction with logging.level set to WARN allows to execute Dremio Cloner without an impact on the target environment and check the log file for all activities that would have been submitted to the target Dremio Environment. Respective log entries will include _dry_run_ keyword. |
 | vds.\_max\_hierarchy\_depth | Defines maximum level of VDS hierarchy supported by Dremio Cloner. It&#39;s a guard rail with default value of 100. |
 
-### Scope of Dremio Space processing
-
-| **Configuration Option**          | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| space.filter                      | A filter that defines what Spaces will be **included** into processing. &quot;\*&quot; will include all Spaces. Empty field will exclude all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _space.exclude.filter_.                                                                                                                                                                                                  |
-| space.filter.names                | If specified, a list filter that defines what Spaces will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty (e.g. `{"space.filter.names": []},`) then the &quot;get&quot; or &quot;put&quot; command will include all spaces specified by _space.filter_, which is the default behavior. Works in logical AND with _space.exclude.filter_. Example: `{"space.filter.names": ["MySpace1", "MySpace2", "MySpace3"]},`  |
-| space.exclude.filter              | A filter that defines what Spaces will be **excluded** into processing. &quot;\*&quot; will exclude all Spaces. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _space.filter_.                                                                                                                                                                                                          |
-| space.folder.filter               | A filter that defines what Space Folders will be **included** into processing. &quot;\*&quot; will include all Folders. Empty field will exclude all Folders. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with other active _space.folder_ filters.                                                                                                                                                                            |
-| space.folder.filter.paths         | If specified, a list filter that defines what Space Folder paths will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"space.folder.filter.paths": []},`). Works in logical AND with other active _space.folder_ filters. Example: `{"space.folder.filter.paths": ["folder1/folder2", "Staging"]},`                                                                                |
-| space.folder.exclude.filter       | A filter that defines what Space Folders will be **excluded** into processing. &quot;\*&quot; will exclude all Folders. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with other active _space.folder_ filters.                                                                                                                                                                             |
-| space.folder.exclude.filter.paths | If specified, a list filter that defines what Space Folder paths will be **excluded** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if the option is not specified or the list is empty (e.g. `{"space.folder.exclude.filter.paths": []},`). Works in logical AND with other active _space.folder_ filters. Example: `{"space.folder.exclude.filter.paths": ["ignorefolder1/folder2", "dontProcessfolder2"]},`                                                |
-| space.folder.filter.use_fully_qualified_path | If set to `"True"`, fully qualified folder paths (including space name) will be used for folder filters during &quot;get&quot; or &quot;put&quot; command execution. This setting is ignored, if the option is not specified or the value is set to False (e.g. `{"space.folder.filter.use_fully_qualified_path": "False"},`)                                                |
-
-### Scope of Dremio Source processing
+### Scope of Dremio Catalog processing
 
 | **Configuration Option** | **Description** |
 | --- | --- |
-| source.filter | A filter that defines what Sources will be **included** into processing. &quot;\*&quot; will include all Sources. Empty field will exclude all Sources. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.exclude.filter_. |
-| source.filter.names | If specified, a list filter that defines what Sources will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty (e.g. `{"source.filter.names": []},`) then the &quot;get&quot; or &quot;put&quot; command will include all sources specified by _source.filter_, which is the default behavior. Works in logical AND with _source.exclude.filter_. Example: `{"source.filter.names": ["MySource1", "MySource2", "MySource3"]},` |
-| source.filter.types | If specified, a list filter that defines what Source Types will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all possible source types present based on the other source filters, which is the default behavior. Works in logical AND with the other source filters. Example: `{"source.filter.types": ["S3", "POSTGRES", "NAS"]},` |
-| source.exclude.filter | A filter that defines what Spaces will be **excluded** into processing. &quot;\*&quot; will exclude all Spaces. Empty field will include all Sources. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.filter_. |
-| source.folder.filter | A filter that defines what Source Folders will be **included** into processing. &quot;\*&quot; will include all Folders. Empty field will exclude all Folders. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.exclude.filter_. |
-| source.folder.filter.paths | If specified, a list filter that defines what Source Folder paths will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty (e.g. `{"source.folder.filter.paths": []},`) then the &quot;get&quot; or &quot;put&quot; command will include all source folders specified by _source.folder.filter_, which is the default behavior. Works in logical AND with _source.folder.exclude.filter_. Example: `{"source.folder.filter.paths": ["folder1/folder2", "default"]},` |
-| source.folder.exclude.filter | A filter that defines what Source Folders will be **excluded** into processing. &quot;\*&quot; will exclude all Folders. Empty field will include all Spaces. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _source.filter_. |
-
-### Scope of Dremio PDS processing
-
-| **Configuration Option** | **Description** |
-| --- | --- |
-| pds.filter | A filter that defines what PDSs will be **included** into processing. &quot;\*&quot; will include all PDSs. Empty field will exclude all PDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _pds.exclude.filter_. |
-| pds.filter.names | If specified, a list filter that defines what PDSs will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty (e.g. `{"pds.filter.names": []},`) then the &quot;get&quot; or &quot;put&quot; command will include all PDSs specified by _pds.filter_, which is the default behavior. Works in logical AND with _pds.exclude.filter_. Example: `{"pds.filter.names": ["MyPDS1", "MyPDS2", "MyPDS3"]},` |
-| pds.exclude.filter | A filter that defines what PDSs will be **excluded** into processing. &quot;\*&quot; will exclude all PDSs. Empty field will include all PDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _pds.filter_. |
-| pds.list.useapi | Forces to use API for collecting list of PDSs if set to True. Default value is False which means that INFOMRATION\_SCHEMA will be utilized instead of API. False is a recommended value. |
-
-### Scope of Dremio VDS processing
-
-| **Configuration Option** | **Description**                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-|--------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| vds.filter               | A filter that defines what VDSs will be **included** into processing. &quot;\*&quot; will include all VDSs. Empty field will exclude all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.exclude.filter_.                                                                                                                                                      |
-| vds.filter.names         | If specified, a list filter that defines what VDS **names** will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"vds.filter.names": []},`). Works in logical AND with other active _vds_ filters. Example: `{"vds.filter.names": ["MyVDS1", "MyVDS2", "MyVDS3"]},`                                                            |
-| vds.exclude.filter       | A filter that defines what VDSs will be **excluded** into processing. &quot;\*&quot; will exclude all VDSs. Empty field will include all VDSs. Star may be used multiple times in the filter to define a pattern. Folders must be separated with backslash. Works in logical AND with _vds.filter_.                                                                                                                                                              |
-| vds.exclude.filter.paths | If specified, a list filter that defines what VDSs **(incl. paths and wildcards)** will be **excluded** into processing during &quot;get&quot; or &quot;put&quot; command execution. This filter is ignored, if this option is not specified or the list is empty (e.g. `{"vds.exclude.filter.paths": []},`). Works in logical AND with other active _vds_ filters. Example: `{"vds.exclude.filter.paths": ["folder/ignoreVDSxyz", "*/ignoreVDSwithWildcard"]},` |
-
-### Scope of Dremio Reflection processing
-
-| **Configuration Option** | **Description** |
-| --- | --- |
+| include.filter.paths | A list of filters that defines what fully qualified paths will be included into processing during "get" or "put" command execution. By default, this option is set to `[".*"]`, which is the wildcard Regex character to include all objects. If the list is empty `[]`, no objects are included. Works in logical AND NOT with all filters specified in `exclude.filter.paths`. Example: `{"include.filter.paths": ["<space_name>/<folder_name>/view_name",	"<source_name>/<folder_name>/<table_name>"]}` |
+| exclude.filter.paths | A list of filters that defines what fully qualified paths will be excluded from processing during "get" or "put" command execution. By default, this option is set to `[]`, which means no objects are excluded. Works in logical AND NOT with all filters specified in `include.filter.paths`. Example: `{"exclude.filter.paths": ["<space_name>/<folder_name>/view_name",	"<source_name>/<folder_name>/<table_name>"]}` |
 | reflection.id\_include\_list | If specified, a list filter that defines what reflection ids will be **included** into processing during &quot;get&quot; or &quot;put&quot; command execution. If this option is not specified or the list is empty then the &quot;get&quot; or &quot;put&quot; command will include all reflections, which is the default behavior. During &quot;get&quot; command execution this list refers to ids of reflections in the source Dremio environment, which are visible in `sys.reflections`. During &quot;put&quot; command execution this list refers to ids of reflections that were previously exported out of a source Dremio environment and present in the source file(s) being fed into the &quot;put&quot; command. Example: `{"reflection.id_include_list": ["dc86ab2e-8ebf-4d69-9302-911875a79e74", "ad3444df-7da5-4ea5-9624-b7705f351914"]}` |
 
 ### Scope of User and Group processing
@@ -339,10 +252,3 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | **Configuration Option** | **Description** |
 | --- | --- |
 | transformation | If specified, allows for transformation during &quot;put&quot; command execution. Supported transformations are ACL and Source transformation. Transformation rules are specified in a separate json file and the file is referenced in the main comnfiguration file. For example: `{"transformation": {"acl": {"file": "acl_transformation.json"}}}` for ACL transformations and `{"transformation": {"source": {"file": "source_transformation.json"}}}` for Source transformations |
-
-### Report format parameters
-
-| **Configuration Option** | **Description** |
-| --- | --- |
-| report.csv.delimiter | A field delimiter used to generate a report. |
-| report.csv.newline | A new line delimiter used to generate a report. |

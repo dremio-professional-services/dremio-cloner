@@ -44,7 +44,6 @@ class DremioClonerConfig():
 	source_directory = None
 	source_ce = False
 	source_graph_support = False
-	source_rbac = False
 	source_dremio_cloud = False
 	source_dremio_cloud_org_id = None
 	source_dremio_cloud_project_id = None
@@ -81,7 +80,7 @@ class DremioClonerConfig():
 	# Processing 
 	user_process_mode = None				# Flag to process User: process, skip
 	group_process_mode = None				# Flag to process Group: process, skip
-	include_filter_paths = []  				# List of Dremio paths (as regex) to process if not empty
+	include_filter_paths = [".*"]  			# List of Dremio paths (as regex) to process if not empty
 	exclude_filter_paths = []				# List of Dremio paths (as regex) to exclude if not empty
 	space_process_mode = None				# Flag to process Space: process, skip, create_only, update_only, create_overwrite
 	space_ignore_missing_acl_user = False	# Flag to write a Space if an ACL user is missing in the target Dremio environment
@@ -117,10 +116,6 @@ class DremioClonerConfig():
 	delete_vds = []							# List of VDS to delete from the target environment
 	delete_folders = []						# List of Folders to delete from the target environment
 
-
-	# Report options
-	report_csv_delimiter = "\t"
-	report_csv_newline = "\n"
 	# Misc options
 	# Compiled filters
 	_include_filter_paths_re = []
@@ -237,8 +232,6 @@ class DremioClonerConfig():
 				self.source_graph_support = self._bool(item, 'graph_api_support')
 			elif 'job-sql' in item:
 				self.job_sql = self._str(item, 'job-sql')
-			elif 'is_rbac_version' in item:
-				self.source_rbac = self._bool(item, 'is_rbac_version')
 			elif 'is_dremio_cloud' in item:
 				self.source_dremio_cloud = self._bool(item, 'is_dremio_cloud')
 			elif 'dremio_cloud_org_id' in item:
@@ -327,11 +320,6 @@ class DremioClonerConfig():
 				self.reflection_id_include_list = self._array(item, 'reflection.id_include_list')
 			elif 'reflection.only_for_matching_vds' in item:
 				self.reflection_only_matching_vds = self._bool(item, 'reflection.only_for_matching_vds')
-			# Report Options
-			elif 'report.csv.delimiter' in item:
-				self.report_csv_delimiter = self._str(item, 'report.csv.delimiter')
-			elif 'report.csv.newline' in item:
-				self.report_csv_newline = self._str(item, 'report.csv.newline')
 			# Misc options
 			elif 'wlm.queue.process_mode' in item:
 				self.wlm_queue_process_mode = self._str(item, 'wlm.queue.process_mode')
