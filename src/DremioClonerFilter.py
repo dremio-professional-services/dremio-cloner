@@ -29,25 +29,38 @@ class DremioClonerFilter():
 		self._logger = DremioClonerLogger(self._config.max_errors, self._config.logging_verbose)
 		self._utils = DremioClonerUtils(config)
 
-	def _match_filters(self, filters, container):
+	def _match_include_filters(self, container):
 		if 'path' not in container:
+			self._logger.debug("_match_include_filters: 'path' property not found in container. Skipping object.")
 			return False
 		path = container['path']
 		normalized_path = self._utils.normalize_path(path)
 
-		for f in filters:
+		for f in self._config.include_filter_paths:
 			if re.match('^' + f, normalized_path):
 				return True
 			if re.match('^' + normalized_path, f):
 				return True
 		return False
 
+	def _match_exclude_filters(self, container):
+		if 'path' not in container:
+			self._logger.debug("_match_exclude_filters: 'path' property not found in container. Skipping object.")
+			return False
+		path = container['path']
+		normalized_path = self._utils.normalize_path(path)
+
+		for f in self._config.exclude_filter_paths:
+			if re.match('^' + f, normalized_path):
+				return True
+		return False
+
 	def _match_path(self, container):
 
 		# Exclude overrides include filter
-		if self._match_filters(self._config.exclude_filter_paths, container):
+		if self._match_exclude_filters(container):
 			return False
-		if self._match_filters(self._config.include_filter_paths, container):
+		if self._match_include_filters(container):
 			return True
 		return False
 
