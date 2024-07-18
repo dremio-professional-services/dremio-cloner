@@ -111,17 +111,18 @@ class DremioReader:
 		self._logger.debug("_read_space: processing container: " + self._utils.get_entity_desc(container))
 		self._top_level_hierarchy_context = "SPACE"
 		if self._filter.match_space_filter(container):
-			self._d.containers.append(container)
 			entity = self._get_entity_definition_by_id(container)
 			if entity is not None:
-				self._logger.debug("_read_space: " + self._utils.get_entity_desc(container))
-				if "createdAt" in entity:
-					entity.pop("createdAt")
-				if "tag" in entity:
-					entity.pop("tag")
-				self._d.spaces.append(entity)
-				self._read_acl(entity)
-				self._read_wiki(entity)
+				if self._config.space_process_mode == 'process':
+					self._d.containers.append(container)
+					self._logger.debug("_read_space: " + self._utils.get_entity_desc(container))
+					if "createdAt" in entity:
+						entity.pop("createdAt")
+					if "tag" in entity:
+						entity.pop("tag")
+					self._d.spaces.append(entity)
+					self._read_acl(entity)
+					self._read_wiki(entity)
 				self._read_space_children(entity)
 			else:
 				self._logger.error("_read_space: error reading entity for container: " + self._utils.get_entity_desc(container))
