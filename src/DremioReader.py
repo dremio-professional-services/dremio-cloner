@@ -179,7 +179,7 @@ class DremioReader:
 				if not folderSaved:
 					parent_entity = self._get_entity_definition_by_path(folder_path[0:i+1])
 					self._d.folders.append(parent_entity)
-		self._read_space_children(entity)
+			self._read_space_children(entity)
 
 	def _read_space_children(self, parent_entity):
 		self._logger.debug("_read_space_children: processing parent_entity: " + self._utils.get_entity_desc(parent_entity))

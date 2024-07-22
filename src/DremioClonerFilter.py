@@ -29,7 +29,7 @@ class DremioClonerFilter():
 		self._logger = DremioClonerLogger(self._config.max_errors, self._config.logging_verbose)
 		self._utils = DremioClonerUtils(config)
 
-	def _match_include_filters(self, container):
+	def _match_include_filters(self, container, is_space, is_dataset):
 		if 'path' not in container:
 			self._logger.debug("_match_include_filters: 'path' property not found in container. Skipping object.")
 			return False
@@ -37,13 +37,23 @@ class DremioClonerFilter():
 		normalized_path = self._utils.normalize_path(path)
 
 		for f in self._config.include_filter_paths:
-			if re.match('^' + f, normalized_path):
+			# Object is along a valid subfolder path
+			if re.match('^' + f + '/.*', normalized_path):
 				return True
-			if re.match('^' + normalized_path, f):
+			# Special case for spaces
+			if is_space and re.match('^' + f, normalized_path):
 				return True
+			# Datasets must match the regex filter exactly
+			if is_dataset and re.match('^' + f + '$', normalized_path):
+					return True
+			if not is_dataset and re.match('^' + normalized_path + '/.*', f):
+				return True
+			if not is_dataset and re.match('^' + normalized_path + '$', f):
+				return True
+
 		return False
 
-	def _match_exclude_filters(self, container):
+	def _match_exclude_filters(self, container, is_space, is_dataset):
 		if 'path' not in container:
 			self._logger.debug("_match_exclude_filters: 'path' property not found in container. Skipping object.")
 			return False
@@ -51,22 +61,31 @@ class DremioClonerFilter():
 		normalized_path = self._utils.normalize_path(path)
 
 		for f in self._config.exclude_filter_paths:
-			if re.match('^' + f, normalized_path):
+			# Object is along a valid subfolder path
+			if re.match('^' + f + '/.*', normalized_path):
+				return True
+			# Special case for spaces
+			if is_space and re.match('^' + f, normalized_path):
+				return True
+			# Datasets must match the regex filter exactly
+			if is_dataset and re.match('^' + f + '$', normalized_path):
+				return True
+			if not is_dataset and re.match('^' + normalized_path + '$', f):
 				return True
 		return False
 
-	def _match_path(self, container):
+	def _match_path(self, container, is_space=False, is_dataset=False):
 
 		# Exclude overrides include filter
-		if self._match_exclude_filters(container):
+		if self._match_exclude_filters(container, is_space, is_dataset):
 			return False
-		if self._match_include_filters(container):
+		if self._match_include_filters(container, is_space, is_dataset):
 			return True
 		return False
 
 
 	def match_space_filter(self, container, loginfo = True):
-		if self._match_path(container):
+		if self._match_path(container, is_space=True):
 			return True
 		if loginfo:
 			self._logger.info("match_space_filter: skipping SPACE " + container['path'][0] if 'path' in container else container['name'] + " as per job configuration")
@@ -81,7 +100,7 @@ class DremioClonerFilter():
 		return False
 
 	def match_source_filter(self, container, loginfo = True):
-		if self._match_path(container):
+		if self._match_path(container, is_space=True):
 			return True
 		if loginfo:
 			self._logger.debug("match_source_filter: skipping SOURCE " + container['path'][0] if 'path' in container else container['name'] + " as per job configuration")
@@ -95,14 +114,14 @@ class DremioClonerFilter():
 		return False
 
 	def match_pds_filter(self, pds, loginfo = True):
-		if self._match_path(pds):
+		if self._match_path(pds, is_dataset=True):
 			return True
 		if loginfo:
 			self._logger.debug("match_pds_filter: skipping PDS " + pds['path'][-1] if 'path' in pds else pds['name'] + " as per job configuration")
 		return False
 
 	def match_vds_filter(self, vds, tags=None, loginfo = True):
-		if self._match_path(vds):			
+		if self._match_path(vds, is_dataset=True):
 			if self._config.vds_filter_tag is None or self._config.vds_filter_tag == "*":
 				return True
 			elif tags is not None and self._match_tag(tags):
