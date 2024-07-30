@@ -41,11 +41,11 @@ class DremioClonerFilter():
 			if re.match('^' + f + '/.*', normalized_path):
 				return True
 			# Special case for spaces
-			if is_space and re.match('^' + f, normalized_path):
+			if is_space and re.match('^' + f + '$', normalized_path) and '/' not in f:
 				return True
 			# Datasets must match the regex filter exactly
 			if is_dataset and re.match('^' + f + '$', normalized_path):
-					return True
+				return True
 			if not is_dataset and re.match('^' + normalized_path + '/.*', f):
 				return True
 			if not is_dataset and re.match('^' + normalized_path + '$', f):
@@ -65,7 +65,7 @@ class DremioClonerFilter():
 			if re.match('^' + f + '/.*', normalized_path):
 				return True
 			# Special case for spaces
-			if is_space and re.match('^' + f, normalized_path):
+			if is_space and re.match('^' + f + '$', normalized_path) and '/' not in f:
 				return True
 			# Datasets must match the regex filter exactly
 			if is_dataset and re.match('^' + f + '$', normalized_path):
