@@ -287,6 +287,7 @@ class DremioFile():
 
 	def _collect_directory(self, directory, container_list, folder_list, object_list):
 		for (dirpath, dirnames, filenames) in os.walk(directory):
+			filenames.sort()  # Ensure that JSON files get processed before SQL files
 			for filename in filenames:
 				if filename.endswith('.json'):
 					f = open(os.path.join(dirpath, filename), "r", encoding="utf-8")
