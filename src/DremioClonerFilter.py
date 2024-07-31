@@ -30,9 +30,7 @@ class DremioClonerFilter():
 		self._utils = DremioClonerUtils(config)
 
 	def _match_include_filters(self, container, is_space, is_dataset):
-		if is_space:
-			if 'name' not in container:
-				self._logger.debug("_match_include_filters: 'name' property not found in space container. Skipping object.")
+		if is_space and 'name' in container:
 			normalized_path = container['name']
 		else:
 			if 'path' not in container:
