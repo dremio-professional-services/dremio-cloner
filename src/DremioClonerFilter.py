@@ -57,11 +57,14 @@ class DremioClonerFilter():
 		return False
 
 	def _match_exclude_filters(self, container, is_space, is_dataset):
-		if 'path' not in container:
-			self._logger.debug("_match_exclude_filters: 'path' property not found in container. Skipping object.")
-			return False
-		path = container['path']
-		normalized_path = self._utils.normalize_path(path)
+		if is_space and 'name' in container:
+			normalized_path = container['name']
+		else:
+			if 'path' not in container:
+				self._logger.debug("_match_exclude_filters: 'path' property not found in container. Skipping object.")
+				return False
+			path = container['path']
+			normalized_path = self._utils.normalize_path(path)
 
 		for f in self._config.exclude_filter_paths:
 			# Object is along a valid subfolder path

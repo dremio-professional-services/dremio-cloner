@@ -422,7 +422,7 @@ class DremioReader:
 		self._logger.debug("_populate_dependencies_graph: processing vds: " + self._utils.get_entity_desc(vds))
 		# For some broken VDSs,
 		vds_parent_list = self._get_vds_dependency_paths(vds)
-		vds_parent_json = {'id':vds['id'], 'path':vds['path'], 'parents':vds_parent_list }
+		vds_parent_json = {'id': vds['id'], 'path': vds['path'], 'parents': vds_parent_list}
 		if not self._config.source_ce and self._config.source_graph_support:
 			self._d.vds_parents.append(vds_parent_json)
 
