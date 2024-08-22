@@ -99,7 +99,8 @@ class DremioReader:
 				if "tag" in entity:
 					entity.pop("tag")
 				self._d.homes.append(entity)
-				self._read_acl(entity)
+				if not self._config.skip_acl:
+					self._read_acl(entity)
 				self._read_wiki(entity)
 				self._read_space_children(entity)
 			else:
@@ -121,7 +122,8 @@ class DremioReader:
 					if "tag" in entity:
 						entity.pop("tag")
 					self._d.spaces.append(entity)
-					self._read_acl(entity)
+					if not self._config.skip_acl:
+						self._read_acl(entity)
 					self._read_wiki(entity)
 				self._read_space_children(entity)
 			else:
@@ -144,7 +146,8 @@ class DremioReader:
 					if self._filter.match_source_filter(entity):
 						self._logger.debug("_read_source: " + self._utils.get_entity_desc(entity))
 						self._d.sources.append(entity)
-						self._read_acl(entity)
+						if not self._config.skip_acl:
+							self._read_acl(entity)
 						self._read_wiki(entity)
 						self._read_source_children(entity)
 				else:
@@ -167,7 +170,8 @@ class DremioReader:
 		if self._top_level_hierarchy_context == "HOME" or self._filter.match_space_folder_filter(folder):
 			self._logger.debug("_read_space_folder: " + self._utils.get_entity_desc(folder))
 			self._d.folders.append(entity)
-			self._read_acl(entity)
+			if not self._config.skip_acl:
+				self._read_acl(entity)
 			self._read_wiki(entity)
 			# Validate all parent folders in the path have been saved already
 			folder_path = entity['path']
@@ -256,7 +260,8 @@ class DremioReader:
 					self._d.vds_list.append(entity)
 			else:
 				self._logger.error("_read_dataset: Unexpected dataset type " + dataset['datasetType'] + " for " + self._utils.get_entity_desc(dataset) + ".")
-			self._read_acl(entity)
+			if not self._config.skip_acl:
+				self._read_acl(entity)
 			self._read_wiki(entity)
 			self._read_tags(entity)
 

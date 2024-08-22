@@ -110,6 +110,7 @@ class DremioClonerConfig():
 	wiki_process_mode = 'skip'				# Flag to process Wikis: process, skip, create_only, update_only, create_overwrite
 	tag_process_mode = 'skip'				# Flag to process Tags: process, skip
 	home_process_mode = 'skip'				# Flag to process Homes: process, skip
+	skip_acl = False						# Flag to remove ACL (privileges) during read
 	acl_transformation = {}					# Contains all ACL transformation definitions
 	source_transformation = {}  			# Contains all source transformation definitions
 	# Delete VDS List
@@ -329,6 +330,8 @@ class DremioClonerConfig():
 				self.wiki_process_mode = self._str(item, 'wiki.process_mode')
 			elif 'home.process_mode' in item:
 				self.home_process_mode = self._str(item, 'home.process_mode')
+			elif 'skip_acl' in item:
+				self.skip_acl = self._bool(item, 'skip_acl')
 			elif 'transformation' in item:
 				if 'acl' in item['transformation']:
 					acl_transformation_filename = self._str(item['transformation']['acl'], 'file')

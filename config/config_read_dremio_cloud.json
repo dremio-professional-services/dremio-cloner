@@ -27,6 +27,7 @@
 
 	{"user.process_mode":"process"},
 	{"group.process_mode":"process"},
+	{"skip_acl": "False"},
 	{"space.process_mode":"process"},
 	{"source.process_mode":"process"},
 	{"reflection.process_mode": "process"},
