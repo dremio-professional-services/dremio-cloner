@@ -1065,7 +1065,7 @@ class DremioWriter:
 	def _get_vds_dependency_paths(self, vds):
 		if self._is_source_ce() or not self._d.vds_parents:
 			# CE does not support graph
-			return parse_sql.tables_in_query(vds['sql'])
+			return parse_sql.tables_in_query(vds.get('sql', ''))
 		else:
 			for vds_entry in self._d.vds_parents:
 				if vds_entry['path'] == vds['path']:
