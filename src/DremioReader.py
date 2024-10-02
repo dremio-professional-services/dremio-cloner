@@ -83,6 +83,8 @@ class DremioReader:
 			self._read_space(container)
 		elif container['containerType'] == "SOURCE":
 			self._read_source(container)
+		elif container['containerType'] == "FUNCTION":
+			self._read_function(container)
 		else:
 			self._logger.fatal("_process_container: unexpected entity type " + self._utils.get_entity_desc(container))
 
