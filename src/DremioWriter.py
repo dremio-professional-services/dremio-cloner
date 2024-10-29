@@ -159,7 +159,7 @@ class DremioWriter:
 						continue
 				self._write_reflection(reflection, self._config.reflection_process_mode)
 		if self._config.reflection_refresh_mode != 'refresh':
-			self._logger.info("write_dremio_environment: Skipping reflection refresh due to configuration reflection.refresh_mode=skip.")
+			self._logger.info("write_dremio_environment: Skipping reflection refresh due to configuration pds.reflection_refresh_mode=skip.")
 		else:
 			for pds in self._d.pds_list:
 				self._dremio_env.refresh_reflections_by_pds_path(self._utils.normalize_path(pds['path']), self._config.dry_run)
@@ -548,7 +548,7 @@ class DremioWriter:
 			for vds in self._unresolved_vds:
 				self._logger.error("Failed VDS: " + str(vds['path']))
 		else:
-			self._logger.warn("_write_remainder_vds: Finished processing VDSs that failed ordering. All VDSs have been successfuly processed.")
+			self._logger.info("_write_remainder_vds: Finished processing VDSs that failed ordering. All VDSs have been successfuly processed.")
 
 
 	def _write_user(self):
