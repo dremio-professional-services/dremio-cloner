@@ -234,7 +234,6 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | verify\_ssl | If set to False, Dremio Cloner will not validate SSL certificate of the Dremio Environment. Default is True. |
 | is\_community\_edition | Set to True if reading Dremio CE. Writing to Dremio CE is not supported. |
 | graph\_api\_support | Dremio Graph API is only available in EE starting version 4.0.0. Default value is False. |
-| is\_rbac\_version | Set to True if the version of Dremio EE supports the RBAC privileges model. Default value is False. |
 | is\_dremio\_cloud | Set to True if reading from or writing to Dremio Cloud. Default value is False. |
 | dremio\_cloud\_org\_id | Dremio Cloud Organization ID to connect to. |
 | dremio\_cloud\_project\_id | Dremio Cloud Project ID to connect to. |

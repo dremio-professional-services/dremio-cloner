@@ -44,7 +44,6 @@ class DremioClonerConfig():
 	source_directory = None
 	source_ce = False
 	source_graph_support = False
-	source_rbac = False
 	source_dremio_cloud = False
 	source_dremio_cloud_org_id = None
 	source_dremio_cloud_project_id = None
@@ -268,8 +267,6 @@ class DremioClonerConfig():
 				self.source_graph_support = self._bool(item, 'graph_api_support')
 			elif 'job-sql' in item:
 				self.job_sql = self._str(item, 'job-sql')
-			elif 'is_rbac_version' in item:
-				self.source_rbac = self._bool(item, 'is_rbac_version')
 			elif 'is_dremio_cloud' in item:
 				self.source_dremio_cloud = self._bool(item, 'is_dremio_cloud')
 			elif 'dremio_cloud_org_id' in item:
