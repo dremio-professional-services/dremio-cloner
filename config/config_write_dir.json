@@ -36,6 +36,7 @@
 		{"wlm.queue.process_mode": "process"},
 		{"wlm.rule.process_mode": "process"},
 
+		{"acl.ignore_source_acl": "False"},
 		{"transformation": {"acl": {"file": "acl_transformation.json"}}},
 		{"transformation": {"source": {"file": "source_transformation.json"}}},
 

@@ -211,6 +211,7 @@ The command is configured with a JSON file with configuration attributes listed 
     - &quot;tag.process\_mode&quot;
     - &quot;home.process\_mode&quot;
   - acl transformation processing 
+    - &quot;acl.ignore_source_acl&quot;
     - &quot;transformation&quot;
       - &quot;acl&quot;
         - &quot;file&quot;
@@ -322,6 +323,7 @@ Please see a sample JSON configuration file in the config folder of this reposit
 | --- | --- |
 | user.process\_mode group.process\_mode | Determines if users will be created in the target Dremio Environment if they are referenced in the source JSON file but not in the target environment. Applicable for &quot;put&quot; command only. However, user creation is not possible with the current Dremio API. This parameter can only have a single value _skip_. |
 | space.ignore\_missing\_acl\_user space.ignore\_missing\_acl\_group folder.ignore\_missing\_acl\_user folder.ignore\_missing\_acl\_group source.ignore\_missing\_acl\_user source.ignore\_missing\_acl\_group pds.ignore\_missing\_acl\_user pds.ignore\_missing\_acl\_group vds.ignore\_missing\_acl\_user vds.ignore\_missing\_acl\_group | These configuration parameters define if Dremio Cloner ignores a situation when a user or a group is defined in an ACL in the source JSON file but is not present in the target Dremio Environment. This situation is a potential security risk as an ACL may be created with no limitations in the target environment when all referenced users and groups cannot be found. Default value is False. |
+ | acl.ignore_source_acl | Ignores Access Control List (Privileges) from source environment and preserves ACLs from target environment |
 
 ### Scope of object-level processing
 

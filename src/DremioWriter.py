@@ -585,7 +585,10 @@ class DremioWriter:
 				return True
 			# Reset version for proper concurrency
 			if 'accessControlList' in entity:
-				entity['accessControlList']['version'] = "0"
+				if self._config.ignore_source_acl:
+					entity.pop('accessControlList')
+				else:
+					entity['accessControlList']['version'] = "0"
 			if self._config.dry_run:
 				self._logger.warn("_write_entity: Dry Run, NOT Creating entity: " + self._utils.get_entity_desc(entity))
 				# For dry run, keep it in a seperate collection to suppress errors
@@ -617,8 +620,10 @@ class DremioWriter:
 				if not self._config.target_ce:
 					if 'accessControlList' not in entity:
 						entity['accessControlList'] = {"version": "0"}
+					if self._config.ignore_source_acl:
+						entity['accessControlList'] = existing_entity.get('accessControlList', {})
 					# API changed behavior around version 4 and may not return version attribute for ACL.
-					if 'accessControlList' in existing_entity and 'version' in existing_entity['accessControlList']:
+					elif 'accessControlList' in existing_entity and 'version' in existing_entity['accessControlList']:
 						entity['accessControlList']['version'] = existing_entity['accessControlList']['version']
 			entity['createdAt'] = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 			if self._config.dry_run:
