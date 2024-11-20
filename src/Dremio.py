@@ -102,7 +102,11 @@ class Dremio:
 			path = path[1:]
 		if '#' in path:
 			path = path.replace("#", "%23")
-		return self._api_get_json(self._catalog_url_by_path + path, source="get_catalog_entity_by_path", report_error=report_error)
+		try:
+			return self._api_get_json(self._catalog_url_by_path + path, source="get_catalog_entity_by_path", report_error=report_error)
+		except RuntimeError as e:
+			logging.error("get_catalog_entity_by_path: unable to retrieve " + path + " - " + str(e))
+			return None
 
 	def get_catalog_entity_by_id(self, entity_id):
 		if entity_id[:7] == 'dremio:':
