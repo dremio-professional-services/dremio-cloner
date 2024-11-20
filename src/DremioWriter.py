@@ -673,6 +673,12 @@ class DremioWriter:
 		if 'format' in entity:
 			if 'ignoreOtherFileFormats' in entity['format']:
 				entity['format'].pop("ignoreOtherFileFormats")
+			if 'parquetDataFormat' in entity['format']:
+				if 'ignoreOtherFileFormats' in entity['format']['parquetDataFormat']:
+					entity['format']['parquetDataFormat'].pop("ignoreOtherFileFormats")
+		if 'accelerationRefreshPolicy' in entity:
+			if 'sourceRefreshOnDataChanges' in entity['accelerationRefreshPolicy']:
+				entity['accelerationRefreshPolicy'].pop("sourceRefreshOnDataChanges")
 		# Process ACL as needed
 		if not self._process_acl(entity, ignore_missing_acl_user_flag, ignore_missing_acl_group_flag):
 			# Skip this entity due to ACL processing errors
