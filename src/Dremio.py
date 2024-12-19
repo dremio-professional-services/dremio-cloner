@@ -34,6 +34,7 @@ class Dremio:
 	_eula_url = 'apiv2/eula/accept'
 	_reflections_url = "api/v3/reflection/"
 	_wlm_queue_url = "api/v3/wlm/queue/"
+	_wlm_queue_by_name_url = "api/v3/wlm/queue/by-name/"
 	_wlm_rule_url = "api/v3/wlm/rule"
 	_user_url = "api/v3/user/"
 	_user_by_name_url = "api/v3/user/by-name/"
@@ -140,8 +141,29 @@ class Dremio:
 	def list_queues(self):
 		return self._api_get_json(self._wlm_queue_url, source="list_queues")
 
+	def get_queue_by_name(self, queue_name):
+		return self._api_get_json(self._wlm_queue_by_name_url + queue_name, source="get_queue_by_name")
+
+	def create_queue(self, queue, dry_run=True):
+		if dry_run:
+			logging.warning("create_queue: Dry Run. Not submitting changes to API.")
+			return
+		return self._api_post_json(self._wlm_queue_url, queue, source="create_queue")
+
+	def update_queue(self, queue_id, queue, dry_run=True):
+		if dry_run:
+			logging.warning("update_queue: Dry Run. Not submitting changes to API.")
+			return
+		return self._api_put_json(self._wlm_queue_url + queue_id, queue, source="update_queue")
+
 	def list_rules(self):
 		return self._api_get_json(self._wlm_rule_url, source="list_rules")
+
+	def update_rules(self, rules, dry_run=True):
+		if dry_run:
+			logging.warning("update_rules: Dry Run. Not submitting changes to API.")
+			return
+		return self._api_put_json(self._wlm_rule_url, rules, source="update_rules")
 
 	# This method has to be refactored when DX-16597 is resolved
 	def list_pds(self, sources, source_folder_filter=None, source_folder_filter_paths=None,

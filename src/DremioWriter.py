@@ -173,6 +173,15 @@ class DremioWriter:
 		else:
 			for tags in self._d.tags:
 				self._write_tags(tags, self._config.tag_process_mode)
+		if self._config.wlm_queue_process_mode == 'skip':
+			self._logger.info("write_dremio_environment: Skipping wlm queue processing due to configuration wlm.queue.process_mode=skip.")
+		else:
+			for queue in self._d.queues:
+				self._write_wlm_queue(queue, self._config.wlm_queue_process_mode)
+		if self._config.wlm_rule_process_mode == 'skip':
+			self._logger.info("write_dremio_environment: Skipping wlm rule processing due to configuration wlm.rule.process_mode=skip.")
+		else:
+			self._write_wlm_rules(self._d.rules, self._config.wlm_queue_process_mode)
 
 	def _find_deletable_folders(self):
 		# Find unmatched reflections in target system
@@ -1212,4 +1221,85 @@ class DremioWriter:
 			if updated_tags is None:
 				self._logger.error("_write_tags: Error updating " + str(tags))
 				return False
+		return True
+
+	def _write_wlm_queue(self, queue, process_mode):
+		self._logger.debug("_write_queue: processing queue: " + str(queue))
+		queue_name = queue['name']
+		# Check if the queue already exists
+		existing_queue = self._dremio_env.get_queue_by_name(queue_name)
+		if existing_queue is None:  # Need to create new entity
+			if process_mode == 'update_only':
+				self._logger.info("_write_wlm_queue: Skipping queue creation due to configuration wlm.queue.process_mode=update_only: " + str(queue_name))
+				return None
+			if self._config.dry_run:
+				self._logger.warn("_write_wlm_queue: Dry Run, NOT Creating queue: " + str(queue_name))
+				return None
+			new_queue = queue
+			new_queue.pop("id")
+			new_queue.pop("tag")
+			new_queue = self._dremio_env.create_queue(new_queue, self._config.dry_run)
+			if new_queue is None:
+				self._logger.error("_write_wlm_queue: could not create queue " + str(queue_name))
+				return None
+		else:  # queue already exists in the target environment
+			if process_mode == 'create_only':
+				self._logger.info("_write_wlm_queue: Found existing queue and wlm.queue.process_mode is set to create_only. Skipping " + str(queue_name))
+				return None
+			if self._config.dry_run:
+				self._logger.warn("_write_wlm_queue: Dry Run, NOT Updating queue: " + str(queue_name))
+				return False
+			self._logger.debug("_write_wlm_queue: Overwriting " + str(queue_name))
+			updated_queue = queue
+			updated_queue.pop("id")
+			updated_queue["tag"] = existing_queue["tag"]
+			updated_queue = self._dremio_env.update_queue(existing_queue['id'], updated_queue, self._config.dry_run)
+			if updated_queue is None:
+				self._logger.error("_write_wlm_queue: Error updating queue " + str(queue_name))
+				return False
+		return True
+
+	def _write_wlm_rules(self, rules, process_mode):
+		self._logger.debug("_write_wlm_rules: processing rules: " + str(rules))
+		existing_rules = self._dremio_env.list_rules()
+		# Regardless of whether the process_mode is create_only, update_only or create_overwrite we only have the option to bulk-load the rules
+		if self._config.dry_run:
+			self._logger.warn("_write_wlm_rules: Dry Run, NOT Updating rules")
+			return False
+		self._logger.debug("_write_wlm_rules: Overwriting rules")
+		import_rules = []
+		for new_rule in rules:
+			new_rule.pop('id')
+			rule_name_found_in_existing_rules = False
+			for existing_rule in existing_rules['rules']:
+				# Check if a there is an existing rule with the same name as the one being imported
+				if new_rule['name'] == existing_rule['name']:
+					rule_name_found_in_existing_rules = True
+					# check if the new rule has the same target queue as the existing rule of the same name
+					if 'acceptName' in new_rule:
+						if 'acceptName' in existing_rule and existing_rule['acceptName'] == new_rule['acceptName']:
+							#if it does then be sure to use the existing acceptId in the target server
+							if new_rule['acceptId'] != existing_rule['acceptId']:
+								new_rule['acceptId'] = existing_rule['acceptId']
+						else: # there is a queue defined in the new rule and need to check if a queue with that name already exists
+							existing_queue = self._dremio_env.get_queue_by_name(new_rule['acceptName'])
+							if existing_queue is not None:
+								new_rule['acceptId'] = existing_queue['id']
+							else:
+								new_rule.pop('acceptId')
+					break
+			if rule_name_found_in_existing_rules == False:
+				if 'acceptName' in new_rule:
+					existing_queue = self._dremio_env.get_queue_by_name(new_rule['acceptName'])
+					if existing_queue is not None:
+						new_rule['acceptId'] = existing_queue['id']
+					else:
+						new_rule.pop('acceptId')
+			import_rules.append(new_rule)
+		# swap out existing ruleset for the ones coming from disk
+		existing_rules['rules'] = import_rules
+		updated_rules = self._dremio_env.update_rules(existing_rules, self._config.dry_run)
+		if updated_rules is None:
+			self._logger.error("_write_wlm_rules: Error updating rules")
+			return False
 		return True

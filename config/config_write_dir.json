@@ -33,8 +33,8 @@
 	    {"wiki.process_mode": "create_overwrite"},
 		{"tag.process_mode": "process"},
 		{"home.process_mode": "process"},
-		{"wlm.queue.process_mode": "process"},
-		{"wlm.rule.process_mode": "process"},
+		{"wlm.queue.process_mode": "create_overwrite"},
+		{"wlm.rule.process_mode": "create_overwrite"},
 
 		{"transformation": {"acl": {"file": "acl_transformation.json"}}},
 		{"transformation": {"source": {"file": "source_transformation.json"}}},
