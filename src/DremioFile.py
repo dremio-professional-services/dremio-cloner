@@ -248,8 +248,7 @@ class DremioFile():
 				for queue in dremio_data.queues:
 					self._write_object_json_file(os.path.join(target_directory, "queues"), queue)
 			if self._config.wlm_rule_process_mode == 'process':
-				for rule in dremio_data.rules:
-					self._write_object_json_file(os.path.join(target_directory, "rules"), rule)
+				self._write_rules_json_file(os.path.join(target_directory, "rules"), dremio_data.rules)
 			if self._config.tag_process_mode == 'process':
 				for tag in dremio_data.tags:
 					self._write_tag_json_file(os.path.join(target_directory, "tags"), tag)
@@ -269,6 +268,7 @@ class DremioFile():
 			f = open(os.path.join(source_directory, self._config.dremio_conf_filename), "r", encoding="utf-8")
 			dremio_data.dremio_get_config = json.load(f)
 			f.close()
+			rules = []
 			self._collect_directory(os.path.join(source_directory, 'homes'), dremio_data.homes, dremio_data.folders, dremio_data.homes)
 			self._collect_directory(os.path.join(source_directory, 'spaces'), dremio_data.spaces, dremio_data.folders, dremio_data.vds_list)
 			self._collect_directory(os.path.join(source_directory, 'sources'), dremio_data.sources, None, dremio_data.pds_list)
@@ -276,7 +276,8 @@ class DremioFile():
 			self._collect_directory(os.path.join(source_directory, 'referenced_users'), None, None, dremio_data.referenced_users)
 			self._collect_directory(os.path.join(source_directory, 'referenced_roles'), None, None, dremio_data.referenced_roles)
 			self._collect_directory(os.path.join(source_directory, 'queues'), None, None, dremio_data.queues)
-			self._collect_directory(os.path.join(source_directory, 'rules'), None, None, dremio_data.rules)
+			self._collect_directory(os.path.join(source_directory, 'rules'), None, None, rules)
+			dremio_data.rules = rules[0]
 			self._collect_directory(os.path.join(source_directory, 'tags'), None, None, dremio_data.tags)
 			self._collect_directory(os.path.join(source_directory, 'wikis'), None, None, dremio_data.wikis)
 			self._collect_directory(os.path.join(source_directory, 'vds_parents'), None, None, dremio_data.vds_parents)
@@ -327,6 +328,12 @@ class DremioFile():
 
 	def _write_tag_json_file(self, root_dir, wiki):
 		filepath = os.path.join(root_dir, wiki['entity_id'] + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
+		json.dump(wiki, f, indent=4, sort_keys=True)
+		f.close()
+
+	def _write_rules_json_file(self, root_dir, wiki):
+		filepath = os.path.join(root_dir, "rules.json").encode(encoding='utf-8', errors='strict')
 		f = open(filepath, "w", encoding="utf-8")
 		json.dump(wiki, f, indent=4, sort_keys=True)
 		f.close()

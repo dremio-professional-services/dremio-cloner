@@ -380,7 +380,11 @@ class DremioReader:
 			acl = entity['accessControlList']
 			if 'users' in acl:
 				for user in acl['users']:
-					user_entity = self._dremio_env.get_user(user['id'])
+					try:
+						user_entity = self._dremio_env.get_user(user['id'])
+					except RuntimeError as e:
+						self._logger.error("_read_acl: error retrieving user id " + user['id'] + ": " + str(e))
+						user_entity = None
 					if user_entity is not None:
 						if "createdAt" in user_entity:
 							user_entity.pop("createdAt")
