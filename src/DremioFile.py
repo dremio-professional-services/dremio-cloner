@@ -113,6 +113,9 @@ class DremioFile():
 		if self._config.udf_process_mode == 'process':
 			f.write(',\n')
 			json.dump({'udf':dremio_data.udfs}, f, indent=4, sort_keys=True)
+		if self._config.script_process_mode == 'process':
+			f.write(',\n')
+			json.dump({'scripts':dremio_data.scripts}, f, indent=4, sort_keys=True)
 		if dremio_data.vds_parents:
 			f.write(',\n')
 			json.dump({'vds_parents':dremio_data.vds_parents}, f, indent=4, sort_keys=True)
@@ -159,6 +162,8 @@ class DremioFile():
 				dremio_data.wikis = item['wikis']
 			elif ('udf' in item):
 				dremio_data.udfs = item['udf']
+			elif ('scripts' in item):
+				dremio_data.scripts = item['scripts']
 			elif ('vds_parents' in item):
 				dremio_data.vds_parents = item['vds_parents']
 			elif ('dremio_get_config' in item):
@@ -197,6 +202,8 @@ class DremioFile():
 				os.makedirs(os.path.join(target_directory, 'wikis').encode(encoding='utf-8', errors='strict'))
 			if self._config.udf_process_mode == 'process':
 				os.makedirs(os.path.join(target_directory, 'udf').encode(encoding='utf-8', errors='strict'))
+			if self._config.script_process_mode == 'process':
+				os.makedirs(os.path.join(target_directory, 'scripts').encode(encoding='utf-8', errors='strict'))
 			if self._config.source_graph_support and self._config.vds_dependencies_process_mode == 'get':
 				os.makedirs(os.path.join(target_directory, 'vds_parents').encode(encoding='utf-8', errors='strict'))
 		except OSError as e:
@@ -265,6 +272,9 @@ class DremioFile():
 			if self._config.udf_process_mode == 'process':
 				for udf in dremio_data.udfs:
 					self._write_wiki_json_file(os.path.join(target_directory, "udf"), udf)
+			if self._config.script_process_mode == 'process':
+				for script in dremio_data.scripts:
+					self._write_script_json_file(os.path.join(target_directory, "scripts"), script)
 			for vds_parent in dremio_data.vds_parents:
 				self._write_object_json_file(os.path.join(target_directory, "vds_parents"), vds_parent)
 		except OSError as e:
@@ -292,6 +302,7 @@ class DremioFile():
 			self._collect_directory(os.path.join(source_directory, 'tags'), None, None, dremio_data.tags)
 			self._collect_directory(os.path.join(source_directory, 'wikis'), None, None, dremio_data.wikis)
 			self._collect_directory(os.path.join(source_directory, 'udf'), None, None, dremio_data.udfs)
+			self._collect_directory(os.path.join(source_directory, 'scripts'), None, None, dremio_data.scripts)
 			self._collect_directory(os.path.join(source_directory, 'vds_parents'), None, None, dremio_data.vds_parents)
 		except OSError as e:
 			raise Exception("Error reading file. OS Error: " + e.strerror)
@@ -354,6 +365,11 @@ class DremioFile():
 		json.dump(rules, f, indent=4, sort_keys=True)
 		f.close()
 
+	def _write_script_json_file(self, root_dir, script):
+		filepath = os.path.join(root_dir, script['data']['id'] + ".json").encode(encoding='utf-8', errors='strict')
+		f = open(filepath, "w", encoding="utf-8")
+		json.dump(script, f, indent=4, sort_keys=True)
+		f.close()
 
 	def _write_object_json_file(self, root_dir, object):
 		if object['id'].startswith('{'):

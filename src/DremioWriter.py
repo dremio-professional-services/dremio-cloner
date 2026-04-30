@@ -184,6 +184,11 @@ class DremioWriter:
 		else:
 			for udf in self._d.udfs:
 				self._write_udf(udf, self._config.udf_process_mode)
+		if self._config.script_process_mode == 'skip':
+			self._logger.info("write_dremio_environment: Skipping script processing due to configuration script.process_mode=skip.")
+		else:
+			for script in self._d.scripts:
+				self._write_script(script, self._config.script_process_mode)
 		if self._config.wlm_queue_process_mode == 'skip':
 			self._logger.info("write_dremio_environment: Skipping wlm queue processing due to configuration wlm.queue.process_mode=skip.")
 		else:
@@ -1016,6 +1021,18 @@ class DremioWriter:
 						return {"role": target_role['id'], "permissions": new_permissions}
 		return None
 
+	def _get_source_referenced_user_by_id(self, user_id):
+		for user in self._d.referenced_users:
+			if user['id'] == user_id:
+				return user
+		return None
+
+	def _get_source_referenced_role_by_id(self, role_id):
+		for role in self._d.referenced_roles:
+			if role['id'] == role_id:
+				return role
+		return None
+
 	def _read_entity_definition(self, entity, target_catalog_name=None):
 		self._logger.debug("_read_entity_definition: processing entity: " + self._utils.get_entity_desc(entity))
 		if 'path' in entity:
@@ -1290,6 +1307,76 @@ class DremioWriter:
 				return False
 		return True
 
+	def _write_script(self, script, process_mode):
+		script_data = script['data']
+		script_grants = script['grants']
+		existing_script_entity = None
+		target_script_id = None
+		self._logger.debug("_write_script: processing script: " + self._utils.get_entity_desc(script_data))
+		# clean up the object
+		if 'createdAt' in script_data:
+			script_data.pop("createdAt")
+		if 'createdBy' in script_data:
+			script_data.pop("createdBy")
+		if 'modifiedAt' in script_data:
+			script_data.pop("modifiedAt")
+		if 'modifiedBy' in script_data:
+			script_data.pop("modifiedBy")
+
+		# TODO Check if the script already exists - not implementing updates yet
+		# Need to get all scripts from the target environment, store in existing_scripts, match the names to the ones in our list, get the id for matches and update based on id
+		#existing_scripts = self._get_existing_scripts()
+		#existing_script_entity = self._find_existing_script(script_data['name'], existing_scripts)
+		if existing_script_entity is None:  # Need to create new entity
+			if process_mode == 'update_only':
+				self._logger.info("_write_script: Skipping script creation due to configuration script_process_mode. " + self._utils.get_entity_desc(script_data))
+				return None
+			if self._config.dry_run:
+				self._logger.warn("_write_script: Dry Run, NOT Creating script: " + self._utils.get_entity_desc(script_data))
+				return None
+			self._logger.debug("_write_script: Creating " + self._utils.get_entity_desc(script_data))
+			script_data.pop("id")
+			# Get updated owner info from target environment
+			target_script_owner = self.get_target_script_owner(script_data['owner'])
+			if target_script_owner:
+				script_data['owner'] = target_script_owner['id']
+			else:
+				script_data.pop("owner")
+			new_script = self._dremio_env.create_script(script_data, self._config.dry_run)
+			if new_script is None:
+				self._logger.error("_write_script: could not create script")
+				return None
+			target_script_id = new_script["id"]
+		else:  # udf already exists in the target environment
+			self._logger.warn("_write_script: WARNING! Update of Scripts not yet implemented!")
+			#target_script_id = existing_script_entity["id"]
+
+		# Update grants for the scripts
+		if 'users' in script_grants and script_grants['users'] is not None:
+			for user in script_grants['users']:
+				source_user = self._get_source_referenced_user_by_id(user['granteeId'])
+				target_user = self._dremio_env.get_user_by_name(source_user['name'])
+				if target_user is not None:
+					user['granteeId'] = target_user['id']
+				else:
+					self._logger.error("_write_script: Unable to resolve user in target Dremio environment: " + str(source_user['name']))
+		if 'roles' in script_grants and script_grants['roles'] is not None:
+			for role in script_grants['roles']:
+				source_role = self._get_source_referenced_role_by_id(role['granteeId'])
+				target_role = self._dremio_env.get_role_by_name(source_role['name'])
+				if target_role is not None:
+					role['granteeId'] = target_role['id']
+				else:
+					self._logger.error("_write_script: Unable to resolve role in target Dremio environment: " + str(role['name']))
+		if target_script_id:
+			self._dremio_env.update_script_grants(target_script_id, script_grants, self._config.dry_run)
+		return True
+
+	def get_target_script_owner(self, source_owner_id):
+		source_user = self._get_source_referenced_user_by_id(source_owner_id)
+		if source_user:
+			return self._dremio_env.get_user_by_name(source_user['name'])
+		return None
 
 	def _write_wlm_queue(self, queue, process_mode):
 		self._logger.debug("_write_queue: processing queue: " + str(queue))

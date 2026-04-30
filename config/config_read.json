@@ -37,6 +37,7 @@
 	{"folder.process_mode": "process"},
 	{"vds.process_mode": "process"},
 	{"pds.process_mode": "process"},
+	{"script.process_mode": "process"},
 
 	{"space.filter": "*"},
 	{"space.filter.names": ["MySpace1", "MySpace2", "NewSpace"]},

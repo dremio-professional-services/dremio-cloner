@@ -41,6 +41,7 @@ class DremioCloud:
 	_role_by_name_url = "/role/by-name/"
 	_post_sql_url = "/sql"
 	_get_job_url = "/job/"
+	_scripts_url = "api/v3/scripts"
 	_graph_url_postfix = "graph"
 	_refresh_reflections_postfix = "/refresh"
 	_endpoint = ""
@@ -154,6 +155,37 @@ class DremioCloud:
 	def list_queues(self):
 		url = self._url_prefix + self._project_id + self._wlm_queue_url
 		return self._api_get_json(url, source="list_queues")
+
+	def list_scripts(self):
+		url = self._url_prefix + self._project_id + self._scripts_url
+		scripts_list = []
+		scripts = self._api_get_json(url, source="list_scripts")
+		if scripts and 'total' in scripts:
+			num_rows = int(scripts['total'])
+			if num_rows == 0:
+				logging.warning("list_scripts: no scripts found.")
+				return scripts_list
+			# Page through the scripts, 100 rows per page
+			limit = 25
+			for i in range(0, int(num_rows / limit) + 1):
+				logging.info("list_scripts: processing batch " + str(i + 1))
+				script_result = self.get_script_set(url, limit * i, limit)
+				if script_result != None and 'data' in script_result:
+					for row in script_result['data']:
+						script_name = row['name']
+						# Get the name of the script, if it starts with __DREMIO_TMP we can skip it
+						if not script_name.startswith('__DREMIO_TMP'):
+							grants = self.get_script_grants(row['id'])
+							scripts_list.append({"data": row, "grants": grants})
+				else:
+					logging.error("list_scripts: no results for script batch " + str(i + 1))
+			return scripts_list
+
+	def get_script_set(self, url, offset=0, limit=25):
+		return self._api_get_json(url + '/offset=' + str(offset) + '&limit=' + str(limit), source="get_script_set")
+
+	def get_script_grants(self, script_id):
+		return self._api_get_json(self._scripts_url + '/' + script_id + '/grants', source="get_script_grants")
 
 	def list_rules(self):
 		url = self._url_prefix + self._project_id + self._wlm_rule_url
@@ -312,6 +344,20 @@ class DremioCloud:
 			return
 		url = self._url_prefix + self._project_id + self._catalog_url + self._encode_http_param(catalog_id) + "/collaboration/tag"
 		return self._api_post_json(url, tag, source="update_tag")
+
+	def create_script(self, script, dry_run=True):
+		if dry_run:
+			logging.warning("create_script: Dry Run. Not submitting changes to API.")
+			return
+		url = self._url_prefix + self._project_id + self._scripts_url
+		return self._api_post_json(url, script, source="create_script")
+
+	def update_script_grants(self, script_id, script_grants, dry_run=True):
+		if dry_run:
+			logging.warning("update_script_grants: Dry Run. Not submitting changes to API.")
+			return
+		url = self._url_prefix + self._project_id + self._scripts_url + '/' + script_id + '/grants'
+		return self._api_put_json(url, script_grants, source="update_script_grants")
 
 	def promote_pds(self, pds_entity, dry_run=True):
 		if dry_run:

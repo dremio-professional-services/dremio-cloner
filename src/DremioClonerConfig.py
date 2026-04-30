@@ -134,6 +134,7 @@ class DremioClonerConfig():
 	tag_process_mode = 'process'				# Flag to process Tags: process, skip
 	home_process_mode = 'process'			# Flag to process Homes: process, skip
 	udf_process_mode = 'process'  			# Flag to process User Defined Functions: process, skip, create_only, update_only, create_overwrite
+	script_process_mode = 'process'  		# Flag to process Scripts: process, skip, create_only, update_only, create_overwrite
 	acl_transformation = {}					# Contains all ACL transformation definitions
 	source_transformation = {}  			# Contains all source transformation definitions
 	# Delete VDS List
@@ -428,6 +429,8 @@ class DremioClonerConfig():
 				self.home_process_mode = self._str(item, 'home.process_mode')
 			elif 'udf.process_mode' in item:
 				self.udf_process_mode = self._str(item, 'udf.process_mode')
+			elif 'script.process_mode' in item:
+				self.script_process_mode = self._str(item, 'script.process_mode')
 			elif 'transformation' in item:
 				if 'acl' in item['transformation']:
 					acl_transformation_filename = self._str(item['transformation']['acl'], 'file')

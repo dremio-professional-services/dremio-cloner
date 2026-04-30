@@ -57,6 +57,7 @@ class DremioReader:
 		self._read_reflections()
 		self._read_rules()
 		self._read_queues()
+		self._read_scripts()
 		# Make sure that all VDS dependencies included as per configuration
 		self._process_vds_dependencies()
 		return self._d
@@ -511,6 +512,40 @@ class DremioReader:
 				self._d.queues = []
 		else:
 			self._logger.debug("_read_queues: skipping as per job configuration")
+
+	def _read_scripts(self):
+		self._logger.debug("read_scripts: started")
+		if self._config.script_process_mode == 'process' and not self._config.source_ce:
+			list_scripts = self._dremio_env.list_scripts()
+			if list_scripts:
+				self._d.scripts = list_scripts
+				for script in list_scripts:
+					if 'grants' in script and script['grants'] is not None:
+						grants = script['grants']
+						if 'users' in grants:
+							for user in grants['users']:
+								user_entity = self._dremio_env.get_user(user['granteeId'])
+								if user_entity is not None:
+									if "createdAt" in user_entity:
+										user_entity.pop("createdAt")
+									if "tag" in user_entity:
+										user_entity.pop("tag")
+									if user_entity not in self._d.referenced_users:
+										self._d.referenced_users.append(user_entity)
+						if 'roles' in grants:
+							for role in grants['roles']:
+								role_entity = self._dremio_env.get_role(role['granteeId'])
+								if role_entity is not None:
+									if "createdAt" in role_entity:
+										role_entity.pop("createdAt")
+									if "tag" in role_entity:
+										role_entity.pop("tag")
+									if role_entity not in self._d.referenced_roles:
+										self._d.referenced_roles.append(role_entity)
+			else:
+				self._d.scripts = []
+		else:
+			self._logger.debug("_read_scripts: skipping as per job configuration")
 
 	def _read_rules(self):
 		self._logger.debug("read_rules: started")

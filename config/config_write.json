@@ -36,6 +36,7 @@
 		{"udf.process_mode": "create_overwrite"},
 		{"wlm.queue.process_mode": "create_overwrite"},
 		{"wlm.rule.process_mode": "create_overwrite"},
+		{"script.process_mode": "create_overwrite"},
 
 	  	{"transformation": {"acl": {"file": "acl_transformation.json"}}},
 		{"transformation": {"source": {"file": "source_transformation.json"}}},
